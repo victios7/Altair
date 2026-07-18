@@ -2,38 +2,78 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta property="og:site_name" content="Altair Lang">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Altair Lang — Lenguaje de programación compilado</title>
-<meta name="description" content="Altair (Altair Lang) es un lenguaje de programación compilado a C nativo, con servidor HTTP, jobs, sesiones y storage tiers integrados en la sintaxis. Descarga el instalador para Windows.">
-<meta name=keywords" content="altair, altair lang, altair language, altairc, lenguaje de programación altair, altair programming language">
+<title>Altair Lang — Lenguaje de programación compilado a C nativo</title>
+<meta name="description" content="Altair (Altair Lang) es un lenguaje de programación compilado a C nativo. Declara servidores HTTP, gestión de RAM/disco/caché, sesiones y tareas programadas directamente en la sintaxis. Compilador altairc e instalador gratis para Windows.">
+<meta name="keywords" content="altair, altair lang, altair language, altairc, lenguaje de programación altair, altair programming language, lenguaje compilado a C, lenguaje con servidor HTTP integrado, storage tiers lenguaje de programación, crear lenguaje de programación propio, altair vs altair basic">
 <meta name="author" content="Altair Language">
-<link rel="canonical" href="https://victios7.github.io/altair/">
+<link rel="canonical" href="https://victios7.github.io/Altair/">
 <link rel="icon" href="ALTAIR_LOGO.ico">
 <link rel="apple-touch-icon" href="ALTAIR_LOGO.ico">
 
-
+<!-- Open Graph / social preview -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="Altair Lang — Lenguaje de programación compilado">
-<meta property="og:description" content="Lenguaje compilado a C nativo con servidor HTTP, jobs y sesiones integrados en la sintaxis.">
-<meta property="og:url" content="https://victios7.github.io/altair/">
-<meta property="og:image" content="https://victios7.github.io/altair/ALTAIR_LOGO.ico">
+<meta property="og:site_name" content="Altair Lang">
+<meta property="og:title" content="Altair Lang — Lenguaje de programación compilado a C nativo">
+<meta property="og:description" content="Lenguaje compilado a C nativo con servidor HTTP, gestión de RAM/disco/caché, jobs y sesiones integrados en la sintaxis.">
+<meta property="og:url" content="https://victios7.github.io/Altair/">
+<meta property="og:image" content="https://victios7.github.io/Altair/ALTAIR_LOGO.ico">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Altair Lang">
-<meta name="twitter:description" content="Lenguaje de programación compilado a C nativo, con servidor HTTP integrado en la sintaxis.">
+<meta name="twitter:description" content="Lenguaje de programación compilado a C nativo, con servidor HTTP y gestión de datos integrados en la sintaxis.">
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Altair Lang",
-  "alternateName": "Altair",
+  "alternateName": ["Altair", "Altair Language", "Altair Programming Language"],
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Windows",
-  "description": "Lenguaje de programación compilado a C nativo con servidor HTTP, jobs, sesiones y storage tiers integrados en la sintaxis.",
+  "description": "Lenguaje de programación compilado a C nativo con servidor HTTP, gestión declarativa de RAM/disco/caché, jobs, sesiones y storage tiers integrados en la sintaxis.",
   "softwareVersion": "1.7",
-  "license": "https://victios7.github.io/altair/LICENSE",
-  "url": "https://victios7.github.io/altair/"
+  "license": "https://victios7.github.io/Altair/LICENSE",
+  "url": "https://victios7.github.io/Altair/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Qué es Altair Lang?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Altair (Altair Lang) es un lenguaje de programación compilado que transpila a C y genera un binario nativo. Permite declarar servidores HTTP, niveles de almacenamiento (RAM, disco, caché), sesiones y tareas programadas directamente en la sintaxis del lenguaje."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Altair Lang es lo mismo que Altair BASIC?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Altair BASIC fue el intérprete BASIC creado por Microsoft en 1975 para el ordenador Altair 8800. Altair Lang es un lenguaje distinto y moderno, sin relación con aquel proyecto, centrado en la gestión declarativa de datos y servidores."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo se compila un programa en Altair?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Con el compilador altairc: por ejemplo, 'altairc programa.at -o programa' genera un ejecutable nativo para Windows sin dependencias externas."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Altair es gratis y de código abierto?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí, Altair se distribuye bajo licencia MIT y el instalador para Windows es gratuito, disponible en la sección de Releases de su repositorio en GitHub."
+      }
+    }
+  ]
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -249,8 +289,9 @@
     <div class="navlinks">
       <a href="#instalar">Instalar</a>
       <a href="#caracteristicas">Características</a>
+      <a href="#faq">FAQ</a>
       <a href="guia.html">Guía del lenguaje</a>
-      <a href="https://github.com/victios7/altair" target="_blank">GitHub</a>
+      <a href="https://github.com/victios7/Altair" target="_blank">GitHub</a>
     </div>
   </nav>
 
@@ -260,7 +301,7 @@
       <h1>Un lenguaje con <span class="accent">servidor HTTP</span> incorporado en la sintaxis.</h1>
       <p class="lede">Altair es un lenguaje compilado y expresivo: declaras rutas, jobs, sesiones y variables con nivel de almacenamiento propio, y <code style="font-family:var(--font-mono); color:var(--gold);">altairc</code> lo transpila a C y compila un binario nativo sin dependencias.</p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="https://github.com/victios7/altair/releases/latest" >⬇ Descargar Altair-Setup.exe</a>
+        <a class="btn btn-primary" href="https://github.com/victios7/Altair/releases/latest" >⬇ Descargar Altair-Setup.exe</a>
         <a class="btn btn-ghost" href="#instalar">Ver instalación</a>
       </div>
       <div class="meta-line">Windows 64-bit · instalador NSIS · MIT License · sin dependencias externas</div>
@@ -296,7 +337,7 @@
         <div class="step-num"></div>
         <div>
           <h3>Descarga el instalador</h3>
-          <p>Baja <code>Altair-Setup.exe</code> desde la sección de <a href="https://github.com/victios7/altair/releases/latest" style="color:var(--gold); text-decoration:none;">Releases en GitHub</a>. No necesitas instalar nada más: el compilador incluye su propio toolchain (mingw64).</p>
+          <p>Baja <code>Altair-Setup.exe</code> desde la sección de <a href="https://github.com/victios7/Altair/releases/latest" style="color:var(--gold); text-decoration:none;">Releases en GitHub</a>. No necesitas instalar nada más: el compilador incluye su propio toolchain (mingw64).</p>
         </div>
       </div>
       <div class="step">
@@ -381,7 +422,7 @@
         <h2>Instala Altair ahora</h2>
         <p>El instalador incluye el compilador, la terminal de Altair, el toolchain mingw64 y programas de ejemplo. Todo en un solo .exe.</p>
         <div class="cta-row" style="margin-top:22px;">
-          <a class="btn btn-primary" href="https://github.com/victios7/altair/releases/latest">⬇ Descargar para Windows</a>
+          <a class="btn btn-primary" href="https://github.com/victios7/Altair/releases/latest">⬇ Descargar para Windows</a>
         </div>
       </div>
       <div class="file-info">
@@ -393,9 +434,46 @@
     </div>
   </section>
 
+  <section id="faq">
+    <div class="section-head">
+      <div class="eyebrow">Preguntas frecuentes</div>
+      <h2>Sobre Altair Lang</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num" style="counter-increment:none;">Q</div>
+        <div>
+          <h3>¿Qué es Altair Lang?</h3>
+          <p>Altair (también llamado Altair Lang o Altair Language) es un lenguaje de programación compilado que transpila a C y genera un binario nativo. Permite declarar servidores HTTP, niveles de almacenamiento (RAM, disco, caché), sesiones y tareas programadas directamente en la sintaxis del lenguaje, sin depender de librerías externas.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="counter-increment:none;">Q</div>
+        <div>
+          <h3>¿Altair Lang es lo mismo que Altair BASIC?</h3>
+          <p>No. Altair BASIC fue el intérprete creado por Microsoft en 1975 para el ordenador Altair 8800. Altair Lang es un lenguaje distinto y moderno, sin relación con aquel proyecto histórico, enfocado en la gestión declarativa de datos y servidores.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="counter-increment:none;">Q</div>
+        <div>
+          <h3>¿Cómo se compila un programa en Altair?</h3>
+          <p>Con el compilador <code>altairc</code>: por ejemplo <code>altairc programa.at -o programa</code> genera un ejecutable nativo para Windows sin dependencias externas. Consulta la <a href="guia.html" style="color:var(--gold); text-decoration:none;">guía completa del lenguaje</a> para la referencia de sintaxis.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="counter-increment:none;">Q</div>
+        <div>
+          <h3>¿Altair es gratis y de código abierto?</h3>
+          <p>Sí, se distribuye bajo licencia MIT. El instalador para Windows y el código fuente son gratuitos y están disponibles en el <a href="https://github.com/victios7/Altair" style="color:var(--gold); text-decoration:none;">repositorio de GitHub</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer>
     <div>Altair Language · MIT License</div>
-    <div><a href="https://github.com/victios7/altair">Código fuente en GitHub</a></div>
+    <div><a href="https://github.com/victios7/Altair">Código fuente en GitHub</a></div>
   </footer>
 </div>
 
