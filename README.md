@@ -9,7 +9,7 @@ jobs, sesiones y storage tiers integrados directamente en la sintaxis.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-e8b34d.svg)](LICENSE)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows%2010%2F11-blue.svg)](#instalación)
-[![Version](https://img.shields.io/badge/version-1.7-ff6a3d.svg)](ALTAIR_GUIDE.md)
+[![Version](https://img.shields.io/badge/version-1.6.5vB-ff6a3d.svg)](ALTAIR_GUIDE.md)
 
 [**Descargar Altair**](https://github.com/TU-USUARIO/altair/releases/latest) ·
 [Sitio web](https://TU-USUARIO.github.io/altair/) ·
