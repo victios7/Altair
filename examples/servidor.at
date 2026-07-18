@@ -1,0 +1,51 @@
+altair.doc;
+name = TodoAPI
+version = 1.7.0
+author = "Altair Team"
+create altair.doc
+
+/ Configuración
+config;
+    env("PORT") default "8080"
+    env("API_SECRET") required
+break
+
+/ Lista de tareas en memoria
+define list todos disk = []
+
+/ Middleware de autenticación
+middleware auth;
+    define text key = header("X-API-Key")
+    define text secret = API_SECRET
+    if key != secret;
+        respond.status(401)
+        respond.json("{\"error\":\"unauthorized\"}")
+        stop
+    break
+break
+
+/ Healthcheck
+health "/health";
+    check "storage" -> 1
+break
+
+/ Métricas
+metrics "/metrics";
+
+/ Rutas
+listen PORT;
+    route "GET" "/todos";
+        respond.json(todos)
+    break
+
+    route "POST" "/todos" rate_limit 60 per_minute;
+        define text title = body()
+        if title == "";
+            respond.status(400)
+            respond.json("{\"error\":\"title required\"}")
+        break
+        todos.append(title)
+        respond.status(201)
+        respond.json("{\"created\":true}")
+    break
+break
