@@ -31,7 +31,7 @@ tiempo de ejecución.
 .at source → lexer → parser → sema → codegen → .c → gcc → binario
 ```
 
-A partir de la versión 1.7, Altair incluye una capa completa de servidor
+A partir de la versión 1.6.5vB, Altair incluye una capa completa de servidor
 HTTP, scheduler de tareas, gestión de sesiones y configuración por variables
 de entorno, todo declarado con la sintaxis propia del lenguaje — sin
 frameworks externos.
