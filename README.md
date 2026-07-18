@@ -12,7 +12,7 @@ jobs, sesiones y storage tiers integrados directamente en la sintaxis.**
 [![Version](https://img.shields.io/badge/version-1.6.5vB-ff6a3d.svg)](ALTAIR_GUIDE.md)
 
 [**Descargar Altair**](https://github.com/TU-USUARIO/altair/releases/latest) ·
-[Sitio web](https://victios7.github.io/altair/) ·
+[Sitio web](https://victios7.github.io/Altair/) ·
 [Guía del lenguaje](ALTAIR_GUIDE.md) ·
 [Ejemplos](examples)
 
