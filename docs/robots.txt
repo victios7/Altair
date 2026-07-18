@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://TU-USUARIO.github.io/altair/sitemap.xml
+Sitemap: https://victios7.github.io/altair/sitemap.xml
