@@ -9,7 +9,7 @@ jobs, sesiones y storage tiers integrados directamente en la sintaxis.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-e8b34d.svg)](LICENSE)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows%2010%2F11-blue.svg)](#instalación)
-[![Version](https://img.shields.io/badge/version-1.6.5vB-ff6a3d.svg)](ALTAIR_GUIDE.md)
+[![Version](https://img.shields.io/badge/version-1.6.5vC-ff6a3d.svg)](ALTAIR_GUIDE.md)
 
 [**Descargar Altair**](https://github.com/TU-USUARIO/altair/releases/latest) ·
 [Sitio web](https://victios7.github.io/Altair/) ·
@@ -31,7 +31,7 @@ tiempo de ejecución.
 .at source → lexer → parser → sema → codegen → .c → gcc → binario
 ```
 
-A partir de la versión 1.6.5vB, Altair incluye una capa completa de servidor
+A partir de la versión 1.6.5vC, Altair incluye una capa completa de servidor
 HTTP, scheduler de tareas, gestión de sesiones y configuración por variables
 de entorno, todo declarado con la sintaxis propia del lenguaje — sin
 frameworks externos.
