@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/ALTAIR_LOGO.ico" width="72" alt="Altair logo">
+<img src="docs/ALTAIR_LOGO.png" width="72" alt="Altair logo">
 
 # Altair Lang
 
@@ -11,7 +11,7 @@ jobs, sesiones y storage tiers integrados directamente en la sintaxis.**
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows%2010%2F11-blue.svg)](#instalación)
 [![Version](https://img.shields.io/badge/version-1.6.5vC-ff6a3d.svg)](ALTAIR_GUIDE.md)
 
-[**Descargar Altair**](https://github.com/TU-USUARIO/altair/releases/latest) ·
+[**Descargar Altair**](https://github.com/victios7/altair/releases/latest) ·
 [Sitio web](https://victios7.github.io/Altair/) ·
 [Guía del lenguaje](ALTAIR_GUIDE.md) ·
 [Ejemplos](examples)
