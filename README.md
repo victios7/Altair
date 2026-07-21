@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/ALTAIR_LOGO.png" width="72" alt="Altair logo">
+<img src="docs/altair logo.png" width="72" alt="Altair logo">
 
 # Altair Lang
 
