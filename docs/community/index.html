@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foro — Altair Community</title>
+<meta name="description" content="Foro de la comunidad de Altair Lang: preguntas, discusiones y ayuda entre desarrolladores.">
+<link rel="canonical" href="https://victios7.github.io/Altair/community/">
+<link rel="icon" type="image/png" href="../altair logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="community.css">
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="../index.html"><img src="../altair logo.png" alt=""> Altair</a>
+    <div class="navlinks">
+      <a href="../index.html">Inicio</a>
+      <a href="../guia.html">Guía del lenguaje</a>
+      <a href="https://github.com/victios7/Altair" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="subnav">
+    <a href="index.html" class="active">Foro</a>
+    <a href="showcase.html">Showcase</a>
+    <a href="news.html">Noticias</a>
+  </div>
+
+  <div class="page-head">
+    <div class="eyebrow">Comunidad Altair</div>
+    <h1>Foro</h1>
+    <p>Pregunta, comparte dudas o discute sobre el lenguaje con otros desarrolladores.</p>
+  </div>
+
+  <div class="panel">
+    <h3>Crear post</h3>
+    <div id="post-msg"></div>
+    <div class="field-row">
+      <div class="field">
+        <label>Tu nombre</label>
+        <input type="text" id="post-author" placeholder="ej. victios7">
+      </div>
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="post-title" placeholder="¿De qué trata tu post?">
+      </div>
+    </div>
+    <div class="field">
+      <label>Contenido</label>
+      <textarea id="post-content" rows="4" placeholder="Escribe aquí..."></textarea>
+    </div>
+    <button class="btn" id="post-submit">Publicar</button>
+  </div>
+
+  <div id="posts-list">
+    <div class="empty-state">Cargando posts…</div>
+  </div>
+
+  <footer>
+    <span>Altair Community</span>
+    <a href="https://github.com/victios7/Altair" target="_blank">github.com/victios7/Altair</a>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const postsList = document.getElementById("posts-list");
+const postMsg = document.getElementById("post-msg");
+const authorInput = document.getElementById("post-author");
+authorInput.value = getAuthorName();
+
+async function loadPosts(){
+  const { data, error } = await supabaseClient
+    .from("posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    postsList.innerHTML = `<div class="state-msg error">Error al cargar posts: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  if (!data.length) {
+    postsList.innerHTML = `<div class="empty-state">Todavía no hay posts. ¡Sé el primero en escribir algo!</div>`;
+    return;
+  }
+
+  postsList.innerHTML = data.map(post => `
+    <div class="card" data-post-id="${post.id}">
+      <div class="card-head">
+        <h3>${escapeHtml(post.title)}</h3>
+        <span class="card-meta"><span class="author">${escapeHtml(post.author)}</span> · ${timeAgo(post.created_at)}</span>
+      </div>
+      <p>${escapeHtml(post.content)}</p>
+      <button class="comments-toggle" data-toggle="${post.id}">💬 Ver comentarios</button>
+      <div class="comments-box" id="comments-${post.id}">
+        <div class="comments-inner">Cargando comentarios…</div>
+        <div class="comment-form">
+          <input type="text" class="comment-author" placeholder="Tu nombre" style="max-width:140px;">
+          <input type="text" class="comment-content" placeholder="Escribe un comentario…">
+          <button class="btn cbtn" data-comment-submit="${post.id}">Enviar</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  // Rellenar nombre en cada mini-form de comentario
+  document.querySelectorAll(".comment-author").forEach(el => el.value = getAuthorName());
+
+  // Toggle comentarios
+  document.querySelectorAll("[data-toggle]").forEach(btn => {
+    btn.addEventListener("click", () => toggleComments(btn.dataset.toggle, btn));
+  });
+
+  // Enviar comentario
+  document.querySelectorAll("[data-comment-submit]").forEach(btn => {
+    btn.addEventListener("click", () => submitComment(btn.dataset.commentSubmit));
+  });
+}
+
+async function toggleComments(postId, btn){
+  const box = document.getElementById(`comments-${postId}`);
+  const isOpen = box.classList.contains("open");
+  if (isOpen) {
+    box.classList.remove("open");
+    btn.textContent = "💬 Ver comentarios";
+    return;
+  }
+  box.classList.add("open");
+  btn.textContent = "💬 Ocultar comentarios";
+  await loadComments(postId);
+}
+
+async function loadComments(postId){
+  const box = document.querySelector(`#comments-${postId} .comments-inner`);
+  const { data, error } = await supabaseClient
+    .from("comments")
+    .select("*")
+    .eq("post_id", postId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    box.innerHTML = `<div class="state-msg error">Error al cargar comentarios.</div>`;
+    return;
+  }
+  if (!data.length) {
+    box.innerHTML = `<div class="state-msg">Sin comentarios todavía.</div>`;
+    return;
+  }
+  box.innerHTML = data.map(c => `
+    <div class="comment">
+      <div class="comment-head">
+        <span class="author">${escapeHtml(c.author)}</span>
+        <span class="when">${timeAgo(c.created_at)}</span>
+      </div>
+      <p>${escapeHtml(c.content)}</p>
+    </div>
+  `).join("");
+}
+
+async function submitComment(postId){
+  const box = document.getElementById(`comments-${postId}`);
+  const authorEl = box.querySelector(".comment-author");
+  const contentEl = box.querySelector(".comment-content");
+  const author = authorEl.value.trim() || "Anónimo";
+  const content = contentEl.value.trim();
+  if (!content) return;
+
+  setAuthorName(author);
+  const { error } = await supabaseClient.from("comments").insert({ post_id: postId, author, content });
+  if (error) {
+    alert("Error al enviar el comentario: " + error.message);
+    return;
+  }
+  contentEl.value = "";
+  await loadComments(postId);
+}
+
+document.getElementById("post-submit").addEventListener("click", async () => {
+  const author = authorInput.value.trim() || "Anónimo";
+  const title = document.getElementById("post-title").value.trim();
+  const content = document.getElementById("post-content").value.trim();
+
+  if (!title || !content) {
+    postMsg.innerHTML = `<div class="state-msg error">Escribe un título y un contenido antes de publicar.</div>`;
+    return;
+  }
+
+  setAuthorName(author);
+  const btn = document.getElementById("post-submit");
+  btn.disabled = true; btn.textContent = "Publicando…";
+
+  const { error } = await supabaseClient.from("posts").insert({ author, title, content });
+
+  btn.disabled = false; btn.textContent = "Publicar";
+
+  if (error) {
+    postMsg.innerHTML = `<div class="state-msg error">Error: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  postMsg.innerHTML = `<div class="state-msg ok">¡Post publicado!</div>`;
+  document.getElementById("post-title").value = "";
+  document.getElementById("post-content").value = "";
+  loadPosts();
+});
+
+loadPosts();
+</script>
+</body>
+</html>
