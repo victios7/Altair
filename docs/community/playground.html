@@ -19,6 +19,11 @@
     font-family:var(--font-mono); font-size:.78rem; color:var(--text-dim);
   }
   #monaco-editor{width:100%; height:460px; min-height:460px;}
+  #monaco-loading{
+    width:100%; height:460px; min-height:460px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg-panel); color:var(--text-dim); font-family:var(--font-mono);
+  }
   #console{
     flex:1; min-height:460px; background:var(--bg); color:#c7ceda; font-family:var(--font-mono);
     font-size:.85rem; padding:18px; overflow-y:auto; white-space:pre-wrap; line-height:1.7;
@@ -62,7 +67,7 @@
   <div class="page-head">
     <div class="eyebrow">Comunidad Altair</div>
     <h1>Playground</h1>
-    <p>Prueba código Altair directamente aquí, sin instalar nada. Todo programa debe empezar con la cabecera <code>altair.doc;</code> — igual que exige el compilador real. Corre con un intérprete propio en JavaScript (no es <code>altairc</code>), así que algunas funciones no están disponibles (ver nota abajo).</p>
+    <p>Prueba código Altair directamente aquí, sin instalar nada. Todo programa debe empezar con la cabecera <code>altair.doc;</code> — igual que exige el compilador real.</p>
   </div>
 
   <div class="toolbar">
@@ -81,7 +86,8 @@
   <div class="pg-wrap">
     <div class="pg-panel">
       <div class="pg-panel-head"><span>editor.at</span></div>
-      <div id="monaco-editor"></div>
+      <div id="monaco-loading">Cargando editor...</div>
+      <div id="monaco-editor" style="display:none;"></div>
     </div>
     <div class="pg-panel">
       <div class="pg-panel-head"><span>output</span></div>
@@ -90,9 +96,9 @@
   </div>
 
   <div class="unsupported">
-    <strong>Qué cubre este playground:</strong> cabecera <code>altair.doc</code>, variables (<code>numeric</code>, <code>text</code>, <code>bool</code>, <code>list</code>), storage tiers <code>ram</code>/<code>disk</code>/<code>cache</code>/<code>temp</code> (simulados con <code>localStorage</code> del navegador), operadores, <code>if/elif/else</code>, <code>while</code>, <code>repeat</code>, <code>forever</code>, <code>foreach</code>, <code>exit</code>, funciones (<code>fun</code>/<code>return</code>, con recursión), <code>try/catch</code>, listas y <code>log</code>.
+    <strong>Qué cubre este playground:</strong> cabecera <code>altair.doc</code>, variables (<code>numeric</code>, <code>text</code>, <code>bool</code>, <code>list</code>), storage tiers, operadores, <code>if/elif/else</code>, bucles, funciones, <code>try/catch</code>, listas y <code>log</code>.
     <br><br>
-    <strong>Qué NO cubre:</strong> <code>class</code>/<code>object</code>, <code>token</code>, <code>snapshot</code>, <code>choose</code>, y toda la capa de servidor (<code>listen</code>, <code>route</code>, <code>config</code>, <code>health</code>, sesiones, jobs, base de datos) — eso requiere el compilador real <code>altairc</code> + <code>gcc</code> corriendo en un servidor, algo que un navegador no puede hacer. Para eso, <a href="https://github.com/victios7/Altair/releases/latest" target="_blank">descarga Altair</a> e instálalo localmente.
+    <strong>Qué NO cubre:</strong> <code>class</code>/<code>object</code>, <code>token</code>, <code>snapshot</code>, y toda la capa de servidor.
   </div>
 
   <footer>
@@ -101,14 +107,12 @@
   </footer>
 </div>
 
-<!-- Cargar Monaco Editor -->
-<script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
-<script>
-  require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@latest/min/vs' } });
-</script>
+<!-- Cargar Monaco desde Cloudflare CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+<script>require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });</script>
 
+<!-- Código del intérprete de Altair (mismo que antes) -->
 <script>
-// ---------- INTERPRETER (igual que antes) ----------
 class AltairError extends Error {
   constructor(code, message, line) {
     super(message);
@@ -120,9 +124,9 @@ class AltairError extends Error {
 const KEYWORDS = new Set([
   "define","numeric","text","bool","list","object","token","const",
   "ram","disk","cache","temp","auto","release",
-  "log","if","elif","else\",\"while\",\"repeat\",\"times\",\"forever\",\"foreach\",\"in",
-  "break\",\"exit\",\"fun\",\"return\",\"try\",\"catch\",\"as\",\"wait",
-  "true\",\"false\",\"and\",\"or"
+  "log","if","elif","else","while","repeat","times","forever","foreach","in",
+  "break","exit","fun","return","try","catch","as","wait",
+  "true","false","and","or"
 ]);
 
 function lex(src) {
@@ -190,72 +194,54 @@ class Parser {
   parseHeader(){
     this.skipNL();
     if (!(this.cur().t === "IDENT" && this.cur().v === "altair")) {
-      throw new AltairError("ALT_HEADER", "Todo programa Altair debe empezar con la cabecera 'altair.doc;' (falta al inicio del archivo)");
+      throw new AltairError("ALT_HEADER", "Todo programa Altair debe empezar con la cabecera 'altair.doc;'");
     }
-    this.next();
-    this.expect(".");
+    this.next(); this.expect(".");
     if (!(this.cur().t === "IDENT" && this.cur().v === "doc")) throw new AltairError("ALT_HEADER", "Se esperaba 'doc' tras 'altair.'");
-    this.next();
-    this.expect(";");
+    this.next(); this.expect(";");
     const header = {name:null, version:null, author:null};
     this.skipNL();
     while (!(this.cur().t === "IDENT" && this.cur().v === "create")) {
-      if (this.cur().t === "EOF") throw new AltairError("ALT_HEADER", "Falta 'create altair.doc' para cerrar la cabecera");
+      if (this.cur().t === "EOF") throw new AltairError("ALT_HEADER", "Falta 'create altair.doc'");
       const field = this.expect("IDENT").v;
-      this.expect("=");
-      const val = this.parseExpr();
+      this.expect("="); const val = this.parseExpr();
       if (["name","version","author"].includes(field)) header[field] = val;
       this.skipNL();
     }
     this.next();
-    if (!(this.cur().t === "IDENT" && this.cur().v === "altair")) throw new AltairError("ALT_HEADER", "Se esperaba 'altair.doc' tras 'create'");
-    this.next();
-    this.expect(".");
-    if (!(this.cur().t === "IDENT" && this.cur().v === "doc")) throw new AltairError("ALT_HEADER", "Se esperaba 'doc' tras 'create altair.'");
-    this.next();
-    this.header = header;
-    return header;
+    if (!(this.cur().t === "IDENT" && this.cur().v === "altair")) throw new AltairError("ALT_HEADER", "Se esperaba 'altair'");
+    this.next(); this.expect(".");
+    if (!(this.cur().t === "IDENT" && this.cur().v === "doc")) throw new AltairError("ALT_HEADER", "Se esperaba 'doc'");
+    this.next(); this.header = header; return header;
   }
 
   parseProgram(){
-    this.parseHeader();
-    const stmts = [];
-    this.skipNL();
-    while (this.cur().t !== "EOF") {
-      stmts.push(this.parseStatement());
-      this.skipNL();
-    }
+    this.parseHeader(); const stmts = []; this.skipNL();
+    while (this.cur().t !== "EOF") { stmts.push(this.parseStatement()); this.skipNL(); }
     return stmts;
   }
 
   parseBlock(){
-    const stmts = [];
-    this.skipNL();
-    while (this.cur().t !== "BREAK" && this.cur().t !== "EOF") {
-      stmts.push(this.parseStatement());
-      this.skipNL();
-    }
-    this.expect("BREAK");
-    return stmts;
+    const stmts = []; this.skipNL();
+    while (this.cur().t !== "BREAK" && this.cur().t !== "EOF") { stmts.push(this.parseStatement()); this.skipNL(); }
+    this.expect("BREAK"); return stmts;
   }
 
   parseStatement(){
-    this.skipNL();
-    const tok = this.cur();
+    this.skipNL(); const tok = this.cur();
     switch (tok.t) {
       case "DEFINE": return this.parseDefine();
-      case "LOG": { this.next(); const e = this.parseExpr(); return {k:"log", e, line:tok.line}; }
+      case "LOG": { this.next(); return {k:"log", e:this.parseExpr(), line:tok.line}; }
       case "IF": return this.parseIf();
       case "WHILE": return this.parseWhile();
       case "REPEAT": return this.parseRepeat();
       case "FOREVER": return this.parseForever();
       case "FOREACH": return this.parseForeach();
       case "EXIT": { this.next(); return {k:"exit", line:tok.line}; }
-      case "RELEASE": { this.next(); const name = this.expect("IDENT").v; return {k:"release", name, line:tok.line}; }
+      case "RELEASE": { this.next(); return {k:"release", name:this.expect("IDENT").v, line:tok.line}; }
       case "FUN": return this.parseFun();
       case "RETURN": {
-        this.next();
-        let e = null;
+        this.next(); let e = null;
         if (this.cur().t !== "NL" && this.cur().t !== "BREAK" && this.cur().t !== "EOF") e = this.parseExpr();
         return {k:"return", e, line:tok.line};
       }
@@ -266,801 +252,147 @@ class Parser {
   }
 
   parseDefine(){
-    const line = this.cur().line;
-    this.expect("DEFINE");
-
+    const line = this.cur().line; this.expect("DEFINE");
     let isConst = false;
-    if (this.cur().t === "CONST") {
-      isConst = true;
-      this.next();
-    }
-
-    const type = this.next().v;
-    const name = this.expect("IDENT").v;
-
+    if (this.cur().t === "CONST") { isConst = true; this.next(); }
+    const type = this.next().v; const name = this.expect("IDENT").v;
     let storage = "ram";
     while (["RAM","DISK","CACHE","TEMP","AUTO"].includes(this.cur().t)) {
-      const q = this.next();
-      storage = q.v;
-      if (this.cur().t === "IDENT" && this.peek(1).t === "=") {
-        this.next();
-        if (this.cur().t === "=") this.next();
-        if (this.cur().t !== "NL" && this.cur().t !== "BREAK" && this.cur().t !== "EOF") this.next();
-      }
+      const q = this.next(); storage = q.v;
+      if (this.cur().t === "IDENT" && this.peek(1).t === "=") { this.next(); if (this.cur().t === "=") this.next(); if (this.cur().t !== "NL") this.next(); }
     }
-
-    let init = null;
-    if (this.cur().t === "=") { this.next(); init = this.parseExpr(); }
+    let init = null; if (this.cur().t === "=") { this.next(); init = this.parseExpr(); }
     return {k:"define", type, name, storage, isConst, init, line};
   }
 
   parseExprOrAssign(){
-    const line = this.cur().line;
-    const expr = this.parseExpr();
+    const line = this.cur().line; const expr = this.parseExpr();
     const compound = ["=","+=","-=","*=","/=","%="];
-    if (compound.includes(this.cur().t)) {
-      const op = this.next().t;
-      const rhs = this.parseExpr();
-      return {k:"assign", target: expr, op, rhs, line};
-    }
-    return {k:"exprstmt", e: expr, line};
+    if (compound.includes(this.cur().t)) { const op = this.next().t; const rhs = this.parseExpr(); return {k:"assign", target:expr, op, rhs, line}; }
+    return {k:"exprstmt", e:expr, line};
   }
 
   parseIf(){
-    const line = this.cur().line;
-    this.expect("IF");
-    const cond = this.parseExpr();
-    this.expect(";");
-    const body = this.parseBlock();
-    const clause = {cond, body};
-    const clauses = [clause];
-    this.skipNL();
-    while (this.cur().t === "ELIF") {
-      this.next();
-      const c2 = this.parseExpr();
-      this.expect(";");
-      const b2 = this.parseBlock();
-      clauses.push({cond:c2, body:b2});
-      this.skipNL();
-    }
-    let elseBody = null;
-    if (this.cur().t === "ELSE") {
-      this.next();
-      this.expect(";");
-      elseBody = this.parseBlock();
-    }
+    const line = this.cur().line; this.expect("IF");
+    const cond = this.parseExpr(); this.expect(";");
+    const body = this.parseBlock(); const clauses = [{cond, body}]; this.skipNL();
+    while (this.cur().t === "ELIF") { this.next(); clauses.push({cond:this.parseExpr(), body:this.parseBlock()}); this.skipNL(); }
+    let elseBody = null; if (this.cur().t === "ELSE") { this.next(); this.expect(";"); elseBody = this.parseBlock(); }
     return {k:"if", clauses, elseBody, line};
   }
 
-  parseWhile(){
-    const line = this.cur().line;
-    this.expect("WHILE");
-    const cond = this.parseExpr();
-    this.expect(";");
-    const body = this.parseBlock();
-    return {k:"while", cond, body, line};
-  }
-
-  parseRepeat(){
-    const line = this.cur().line;
-    this.expect("REPEAT");
-    const count = this.parseExpr();
-    if (this.cur().t === "TIMES") this.next();
-    this.expect(";");
-    const body = this.parseBlock();
-    return {k:"repeat", count, body, line};
-  }
-
-  parseForever(){
-    const line = this.cur().line;
-    this.expect("FOREVER");
-    this.expect(";");
-    const body = this.parseBlock();
-    return {k:"forever", body, line};
-  }
-
-  parseForeach(){
-    const line = this.cur().line;
-    this.expect("FOREACH");
-    const varName = this.expect("IDENT").v;
-    this.expect("IN");
-    const listExpr = this.parseExpr();
-    this.expect(";");
-    const body = this.parseBlock();
-    return {k:"foreach", varName, listExpr, body, line};
-  }
+  parseWhile(){ const line = this.cur().line; this.expect("WHILE"); return {k:"while", cond:this.parseExpr(), body:this.parseBlock(), line}; }
+  parseRepeat(){ const line = this.cur().line; this.expect("REPEAT"); const count = this.parseExpr(); if (this.cur().t === "TIMES") this.next(); this.expect(";"); return {k:"repeat", count, body:this.parseBlock(), line}; }
+  parseForever(){ const line = this.cur().line; this.expect("FOREVER"); this.expect(";"); return {k:"forever", body:this.parseBlock(), line}; }
+  parseForeach(){ const line = this.cur().line; this.expect("FOREACH"); const varName = this.expect("IDENT").v; this.expect("IN"); const listExpr = this.parseExpr(); this.expect(";"); return {k:"foreach", varName, listExpr, body:this.parseBlock(), line}; }
 
   parseFun(){
-    const line = this.cur().line;
-    this.expect("FUN");
-    const name = this.expect("IDENT").v;
-    let retType = "auto";
-    const TYPES = ["NUMERIC","TEXT","BOOL","LIST","OBJECT"];
-    if (TYPES.includes(this.cur().t) && this.peek(1).t === "IDENT") {
-      retType = this.next().v;
-    }
-    const params = [];
-    while (this.cur().t !== ";") {
-      const pname = this.expect("IDENT").v;
-      let ptype = "numeric";
-      if (["NUMERIC","TEXT","BOOL","LIST","OBJECT"].includes(this.cur().t)) ptype = this.next().v;
-      params.push({name:pname, type:ptype});
-      if (this.cur().t === ",") this.next(); else break;
-    }
-    this.expect(";");
-    const body = this.parseBlock();
-    return {k:"fun", name, params, retType, body, line};
+    const line = this.cur().line; this.expect("FUN"); const name = this.expect("IDENT").v;
+    let retType = "auto"; const TYPES = ["NUMERIC","TEXT","BOOL","LIST","OBJECT"];
+    if (TYPES.includes(this.cur().t) && this.peek(1).t === "IDENT") retType = this.next().v;
+    const params = []; while (this.cur().t !== ";") { const pname = this.expect("IDENT").v; let ptype = "numeric"; if (TYPES.includes(this.cur().t)) ptype = this.next().v; params.push({name:pname, type:ptype}); if (this.cur().t === ",") this.next(); else break; }
+    this.expect(";"); return {k:"fun", name, params, retType, body:this.parseBlock(), line};
   }
 
   parseTry(){
-    const line = this.cur().line;
-    this.expect("TRY");
-    this.expect(";");
-    const body = this.parseBlock();
-    this.skipNL();
-    let errName = "err", catchBody = [];
-    if (this.cur().t === "CATCH") {
-      this.next();
-      if (this.cur().t === "AS") { this.next(); errName = this.expect("IDENT").v; }
-      this.expect(";");
-      catchBody = this.parseBlock();
-    }
+    const line = this.cur().line; this.expect("TRY"); this.expect(";"); const body = this.parseBlock(); this.skipNL();
+    let errName = "err", catchBody = []; if (this.cur().t === "CATCH") { this.next(); if (this.cur().t === "AS") { this.next(); errName = this.expect("IDENT").v; } this.expect(";"); catchBody = this.parseBlock(); }
     return {k:"try", body, errName, catchBody, line};
   }
 
   parseExpr(){ return this.parseOr(); }
-  parseOr(){
-    let l = this.parseAnd();
-    while (this.cur().t === "OR") { this.next(); const r = this.parseAnd(); l = {k:"logic", op:"or", l, r}; }
-    return l;
-  }
-  parseAnd(){
-    let l = this.parseEquality();
-    while (this.cur().t === "AND") { this.next(); const r = this.parseEquality(); l = {k:"logic", op:"and", l, r}; }
-    return l;
-  }
-  parseEquality(){
-    let l = this.parseCompare();
-    while (["==","!="].includes(this.cur().t)) { const op = this.next().t; const r = this.parseCompare(); l = {k:"bin", op, l, r}; }
-    return l;
-  }
-  parseCompare(){
-    let l = this.parseAdd();
-    while (["<",">","<=",">="].includes(this.cur().t)) { const op = this.next().t; const r = this.parseAdd(); l = {k:"bin", op, l, r}; }
-    return l;
-  }
-  parseAdd(){
-    let l = this.parseMul();
-    while (["+","-"].includes(this.cur().t)) { const op = this.next().t; const r = this.parseMul(); l = {k:"bin", op, l, r}; }
-    return l;
-  }
-  parseMul(){
-    let l = this.parseUnary();
-    while (["*","/","%"].includes(this.cur().t)) { const op = this.next().t; const r = this.parseUnary(); l = {k:"bin", op, l, r}; }
-    return l;
-  }
-  parseUnary(){
-    if (this.cur().t === "!") { this.next(); const e = this.parseUnary(); return {k:"not", e}; }
-    if (this.cur().t === "-") { this.next(); const e = this.parseUnary(); return {k:"neg", e}; }
-    return this.parsePostfix();
-  }
+  parseOr(){ let l = this.parseAnd(); while (this.cur().t === "OR") { this.next(); l = {k:"logic", op:"or", l, r:this.parseAnd()}; } return l; }
+  parseAnd(){ let l = this.parseEquality(); while (this.cur().t === "AND") { this.next(); l = {k:"logic", op:"and", l, r:this.parseEquality()}; } return l; }
+  parseEquality(){ let l = this.parseCompare(); while (["==","!="].includes(this.cur().t)) { const op = this.next().t; l = {k:"bin", op, l, r:this.parseCompare()}; } return l; }
+  parseCompare(){ let l = this.parseAdd(); while (["<",">","<=",">="].includes(this.cur().t)) { const op = this.next().t; l = {k:"bin", op, l, r:this.parseAdd()}; } return l; }
+  parseAdd(){ let l = this.parseMul(); while (["+","-"].includes(this.cur().t)) { const op = this.next().t; l = {k:"bin", op, l, r:this.parseMul()}; } return l; }
+  parseMul(){ let l = this.parseUnary(); while (["*","/","%"].includes(this.cur().t)) { const op = this.next().t; l = {k:"bin", op, l, r:this.parseUnary()}; } return l; }
+  parseUnary(){ if (this.cur().t === "!") { this.next(); return {k:"not", e:this.parseUnary()}; } if (this.cur().t === "-") { this.next(); return {k:"neg", e:this.parseUnary()}; } return this.parsePostfix(); }
   parsePostfix(){
-    let e = this.parsePrimary();
-    for(;;){
-      if (this.cur().t === "[") {
-        this.next(); const idx = this.parseExpr(); this.expect("]");
-        e = {k:"index", obj:e, idx};
-      } else if (this.cur().t === ".") {
-        this.next(); const name = this.expect("IDENT").v;
-        if (this.cur().t === "(") {
-          this.next(); const args = this.parseArgs(); this.expect(")");
-          e = {k:"methodcall", obj:e, name, args};
-        } else {
-          e = {k:"field", obj:e, name};
-        }
-      } else if (this.cur().t === "(" && e.k === "ident") {
-        this.next(); const args = this.parseArgs(); this.expect(")");
-        e = {k:"call", name:e.name, args};
-      } else break;
-    }
-    return e;
+    let e = this.parsePrimary(); for(;;){
+      if (this.cur().t === "[") { this.next(); e = {k:"index", obj:e, idx:this.parseExpr()}; this.expect("]"); }
+      else if (this.cur().t === ".") { this.next(); const name = this.expect("IDENT").v; if (this.cur().t === "(") { this.next(); e = {k:"methodcall", obj:e, name, args:this.parseArgs()}; this.expect(")"); } else { e = {k:"field", obj:e, name}; } }
+      else if (this.cur().t === "(" && e.k === "ident") { this.next(); e = {k:"call", name:e.name, args:this.parseArgs()}; this.expect(")"); }
+      else break;
+    } return e;
   }
-  parseArgs(){
-    const args = [];
-    if (this.cur().t === ")") return args;
-    args.push(this.parseExpr());
-    while (this.cur().t === ",") { this.next(); args.push(this.parseExpr()); }
-    return args;
-  }
+  parseArgs(){ const args = []; if (this.cur().t === ")") return args; args.push(this.parseExpr()); while (this.cur().t === ",") { this.next(); args.push(this.parseExpr()); } return args; }
   parsePrimary(){
-    const tok = this.cur();
-    if (tok.t === "NUM") { this.next(); return {k:"num", v:tok.v}; }
+    const tok = this.cur(); if (tok.t === "NUM") { this.next(); return {k:"num", v:tok.v}; }
     if (tok.t === "STR") { this.next(); return {k:"str", v:tok.v}; }
     if (tok.t === "TRUE") { this.next(); return {k:"bool", v:true}; }
     if (tok.t === "FALSE") { this.next(); return {k:"bool", v:false}; }
     if (tok.t === "IDENT") { this.next(); return {k:"ident", name:tok.v}; }
     if (tok.t === "(") { this.next(); const e = this.parseExpr(); this.expect(")"); return e; }
-    if (tok.t === "[") {
-      this.next();
-      const items = [];
-      if (this.cur().t !== "]") {
-        items.push(this.parseExpr());
-        while (this.cur().t === ",") { this.next(); items.push(this.parseExpr()); }
-      }
-      this.expect("]");
-      return {k:"list", items};
-    }
+    if (tok.t === "[") { this.next(); const items = []; if (this.cur().t !== "]") { items.push(this.parseExpr()); while (this.cur().t === ",") { this.next(); items.push(this.parseExpr()); } } this.expect("]"); return {k:"list", items}; }
     throw new AltairError("ALT_PARSE", `Expresión inesperada '${tok.t}' en la línea ${tok.line}`, tok.line);
   }
 }
 
-// ---------- INTERPRETER ----------
 class ExitLoop {}
 class ExitProgram {}
 class ReturnSignal { constructor(v){ this.value = v; } }
 
 class Scope {
   constructor(parent){ this.vars = new Map(); this.parent = parent; }
-  get(name){
-    if (this.vars.has(name)) return this.vars.get(name);
-    if (this.parent) return this.parent.get(name);
-    throw new AltairError("ALT0001", `Variable no definida: ${name}`);
-  }
-  set(name, val){
-    let s = this;
-    while (s) { if (s.vars.has(name)) { s.vars.set(name, val); return; } s = s.parent; }
-    this.vars.set(name, val);
-  }
+  get(name){ if (this.vars.has(name)) return this.vars.get(name); if (this.parent) return this.parent.get(name); throw new AltairError("ALT0001", `Variable no definida: ${name}`); }
+  set(name, val){ let s = this; while (s) { if (s.vars.has(name)) { s.vars.set(name, val); return; } s = s.parent; } this.vars.set(name, val); }
   define(name, val){ this.vars.set(name, val); }
-  has(name){
-    let s = this;
-    while (s) { if (s.vars.has(name)) return true; s = s.parent; }
-    return false;
-  }
+  has(name){ let s = this; while (s) { if (s.vars.has(name)) return true; s = s.parent; } return false; }
 }
 
 class Interpreter {
-  constructor(onLog){
-    this.onLog = onLog || (()=>{});
-    this.functions = new Map();
-    this.global = new Scope(null);
-    this.storagePrefix = "altair_playground:";
-    this.stepCount = 0;
-    this.maxSteps = 2_000_000;
-  }
+  constructor(onLog){ this.onLog = onLog || (()=>{}); this.functions = new Map(); this.global = new Scope(null); this.storagePrefix = "altair_playground:"; this.stepCount = 0; this.maxSteps = 2000000; }
 
-  run(src){
-    const tokens = lex(src);
-    const parser = new Parser(tokens);
-    const program = parser.parseProgram();
-    for (const stmt of program) if (stmt.k === "fun") this.functions.set(stmt.name, stmt);
-    try {
-      for (const stmt of program) this.exec(stmt, this.global);
-    } catch (e) {
-      if (e instanceof ExitProgram || e instanceof ExitLoop) return;
-      throw e;
-    }
-  }
+  run(src){ const tokens = lex(src); const parser = new Parser(tokens); const program = parser.parseProgram(); for (const stmt of program) if (stmt.k === "fun") this.functions.set(stmt.name, stmt); try { for (const stmt of program) this.exec(stmt, this.global); } catch (e) { if (e instanceof ExitProgram || e instanceof ExitLoop) return; throw e; } }
 
-  tick(){
-    this.stepCount++;
-    if (this.stepCount > this.maxSteps) throw new AltairError("ALT_LIMIT", "Se alcanzó el límite de pasos de ejecución (¿bucle infinito?)");
-  }
+  tick(){ this.stepCount++; if (this.stepCount > this.maxSteps) throw new AltairError("ALT_LIMIT", "Límite de pasos alcanzado"); }
 
-  storageGet(tier, name){
-    if (tier === "ram" || tier === "temp" || tier === "auto") return undefined;
-    try {
-      const raw = localStorage.getItem(this.storagePrefix + tier + ":" + name);
-      return raw != null ? JSON.parse(raw) : undefined;
-    } catch { return undefined; }
-  }
-  storageSet(tier, name, val){
-    if (tier === "ram" || tier === "temp" || tier === "auto") return;
-    try { localStorage.setItem(this.storagePrefix + tier + ":" + name, JSON.stringify(val)); } catch {}
-  }
+  storageGet(tier, name){ if (tier === "ram" || tier === "temp" || tier === "auto") return undefined; try { const raw = localStorage.getItem(this.storagePrefix + tier + ":" + name); return raw != null ? JSON.parse(raw) : undefined; } catch { return undefined; } }
+  storageSet(tier, name, val){ if (tier === "ram" || tier === "temp" || tier === "auto") return; try { localStorage.setItem(this.storagePrefix + tier + ":" + name, JSON.stringify(val)); } catch {} }
 
   exec(stmt, scope){
     this.tick();
     switch (stmt.k) {
-      case "define": {
-        let val = stmt.init ? this.eval(stmt.init, scope) : this.defaultFor(stmt.type);
-        if (stmt.storage === "disk" || stmt.storage === "cache") {
-          const existing = this.storageGet(stmt.storage, stmt.name);
-          if (existing !== undefined && !stmt.init) val = existing;
-          this.storageSet(stmt.storage, stmt.name, val);
-        }
-        scope.define(stmt.name, {value: val, type: stmt.type, storage: stmt.storage, isConst: stmt.isConst});
-        return;
-      }
-      case "assign": {
-        let rhs = this.eval(stmt.rhs, scope);
-        if (stmt.op !== "=") {
-          const cur = this.readLValue(stmt.target, scope);
-          rhs = this.applyOp(stmt.op.slice(0,1), cur, rhs);
-        }
-        this.writeLValue(stmt.target, scope, rhs);
-        return;
-      }
-      case "log": {
-        const v = this.eval(stmt.e, scope);
-        this.onLog(this.stringify(v));
-        return;
-      }
-      case "exprstmt": {
-        this.eval(stmt.e, scope);
-        return;
-      }
-      case "if": {
-        for (const c of stmt.clauses) {
-          if (this.truthy(this.eval(c.cond, scope))) {
-            this.execBlock(c.body, new Scope(scope));
-            return;
-          }
-        }
-        if (stmt.elseBody) this.execBlock(stmt.elseBody, new Scope(scope));
-        return;
-      }
-      case "while": {
-        try {
-          while (this.truthy(this.eval(stmt.cond, scope))) {
-            this.tick();
-            this.execBlock(stmt.body, new Scope(scope));
-          }
-        } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; }
-        return;
-      }
-      case "repeat": {
-        const count = this.eval(stmt.count, scope);
-        try {
-          for (let i=0; i<count; i++) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); }
-        } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; }
-        return;
-      }
-      case "forever": {
-        try {
-          while (true) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); }
-        } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; }
-        return;
-      }
-      case "foreach": {
-        const list = this.eval(stmt.listExpr, scope);
-        if (!Array.isArray(list)) throw new AltairError("ALT0002", "foreach requiere una lista");
-        try {
-          for (const item of list) {
-            this.tick();
-            const s2 = new Scope(scope);
-            s2.define(stmt.varName, {value:item, type:"auto"});
-            this.execBlock(stmt.body, s2);
-          }
-        } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; }
-        return;
-      }
-      case "exit": {
-        throw new ExitProgram();
-      }
-      case "release": {
-        return;
-      }
-      case "fun": {
-        this.functions.set(stmt.name, stmt);
-        return;
-      }
-      case "return": {
-        const v = stmt.e ? this.eval(stmt.e, scope) : null;
-        throw new ReturnSignal(v);
-      }
-      case "try": {
-        try {
-          this.execBlock(stmt.body, new Scope(scope));
-        } catch (e) {
-          if (e instanceof ExitLoop || e instanceof ReturnSignal || e instanceof ExitProgram) throw e;
-          const s2 = new Scope(scope);
-          const errObj = {code: e.code || "ALT_ERROR", message: e.message || String(e), line: e.line || 0};
-          s2.define(stmt.errName, {value: errObj, type:"object"});
-          this.execBlock(stmt.catchBody, s2);
-        }
-        return;
-      }
+      case "define": { let val = stmt.init ? this.eval(stmt.init, scope) : this.defaultFor(stmt.type); if (stmt.storage === "disk" || stmt.storage === "cache") { const existing = this.storageGet(stmt.storage, stmt.name); if (existing !== undefined && !stmt.init) val = existing; this.storageSet(stmt.storage, stmt.name, val); } scope.define(stmt.name, {value: val, type: stmt.type, storage: stmt.storage, isConst: stmt.isConst}); return; }
+      case "assign": { let rhs = this.eval(stmt.rhs, scope); if (stmt.op !== "=") { const cur = this.readLValue(stmt.target, scope); rhs = this.applyOp(stmt.op.slice(0,1), cur, rhs); } this.writeLValue(stmt.target, scope, rhs); return; }
+      case "log": { this.onLog(this.stringify(this.eval(stmt.e, scope))); return; }
+      case "exprstmt": { this.eval(stmt.e, scope); return; }
+      case "if": { for (const c of stmt.clauses) if (this.truthy(this.eval(c.cond, scope))) { this.execBlock(c.body, new Scope(scope)); return; } if (stmt.elseBody) this.execBlock(stmt.elseBody, new Scope(scope)); return; }
+      case "while": { try { while (this.truthy(this.eval(stmt.cond, scope))) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); } } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; } return; }
+      case "repeat": { const count = this.eval(stmt.count, scope); try { for (let i=0; i<count; i++) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); } } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; } return; }
+      case "forever": { try { while (true) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); } } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; } return; }
+      case "foreach": { const list = this.eval(stmt.listExpr, scope); if (!Array.isArray(list)) throw new AltairError("ALT0002", "foreach requiere una lista"); try { for (const item of list) { this.tick(); const s2 = new Scope(scope); s2.define(stmt.varName, {value:item, type:"auto"}); this.execBlock(stmt.body, s2); } } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; } return; }
+      case "exit": { throw new ExitProgram(); }
+      case "release": { return; }
+      case "fun": { this.functions.set(stmt.name, stmt); return; }
+      case "return": { throw new ReturnSignal(stmt.e ? this.eval(stmt.e, scope) : null); }
+      case "try": { try { this.execBlock(stmt.body, new Scope(scope)); } catch (e) { if (e instanceof ExitLoop || e instanceof ReturnSignal || e instanceof ExitProgram) throw e; const s2 = new Scope(scope); s2.define(stmt.errName, {value: {code: e.code || "ALT_ERROR", message: e.message || String(e), line: e.line || 0}, type:"object"}); this.execBlock(stmt.catchBody, s2); } return; }
       case "nop": return;
-      default:
-        throw new AltairError("ALT_PARSE", "Sentencia no soportada: " + stmt.k);
+      default: throw new AltairError("ALT_PARSE", "Sentencia no soportada: " + stmt.k);
     }
   }
 
-  execBlock(stmts, scope){
-    for (const s of stmts) this.exec(s, scope);
-  }
-
-  defaultFor(type){
-    if (type === "numeric") return 0;
-    if (type === "text") return "";
-    if (type === "bool") return false;
-    if (type === "list") return [];
-    return null;
-  }
-
-  truthy(v){ return v === true || (typeof v === "number" && v !== 0) || (typeof v === "string" && v.length>0) ? !!v || v === true : !!v; }
-
-  applyOp(op, a, b){
-    switch(op){
-      case "+": if (typeof a === "string" || typeof b === "string") return this.stringify(a) + this.stringify(b);
-                if (Array.isArray(a) && Array.isArray(b)) return a.concat(b);
-                return a + b;
-      case "-": return a - b;
-      case "*": return a * b;
-      case "/": if (b === 0) throw new AltairError("ALT0003", "División por cero"); return a / b;
-      case "%": if (b === 0) throw new AltairError("ALT0003", "División por cero"); return a % b;
-    }
-  }
-
+  execBlock(stmts, scope){ for (const s of stmts) this.exec(s, scope); }
+  defaultFor(type){ if (type === "numeric") return 0; if (type === "text") return ""; if (type === "bool") return false; if (type === "list") return []; return null; }
+  truthy(v){ return v === true || (typeof v === "number" && v !== 0) || (typeof v === "string" && v.length>0) ? !!v : !!v; }
+  applyOp(op, a, b){ switch(op){ case "+": if (typeof a === "string" || typeof b === "string") return this.stringify(a) + this.stringify(b); if (Array.isArray(a) && Array.isArray(b)) return a.concat(b); return a + b; case "-": return a - b; case "*": return a * b; case "/": if (b === 0) throw new AltairError("ALT0003", "División por cero"); return a / b; case "%": if (b === 0) throw new AltairError("ALT0003", "División por cero"); return a % b; } }
   eval(node, scope){
     this.tick();
     switch (node.k) {
-      case "num": return node.v;
-      case "str": return node.v;
-      case "bool": return node.v;
+      case "num": return node.v; case "str": return node.v; case "bool": return node.v;
       case "list": return node.items.map(it => this.eval(it, scope));
-      case "ident": {
-        const box = scope.get(node.name);
-        return box.value;
-      }
-      case "neg": return -this.eval(node.e, scope);
-      case "not": return !this.truthy(this.eval(node.e, scope));
-      case "logic": {
-        const l = this.truthy(this.eval(node.l, scope));
-        if (node.op === "and") return l && this.truthy(this.eval(node.r, scope));
-        return l || this.truthy(this.eval(node.r, scope));
-      }
-      case "bin": {
-        const l = this.eval(node.l, scope), r = this.eval(node.r, scope);
-        switch(node.op){
-          case "+": case "-": case "*": case "/": case "%": return this.applyOp(node.op, l, r);
-          case "==": return l === r;
-          case "!=": return l !== r;
-          case "<": return l < r;
-          case ">": return l > r;
-          case "<=": return l <= r;
-          case ">=": return l >= r;
-        }
-      }
-      case "index": {
-        const obj = this.eval(node.obj, scope);
-        const idx = this.eval(node.idx, scope);
-        if (!Array.isArray(obj)) throw new AltairError("ALT0002", "Índice sobre valor que no es lista");
-        if (idx < 0 || idx >= obj.length) throw new AltairError("ALT0002", "Índice fuera de rango");
-        return obj[idx];
-      }
-      case "field": {
-        const obj = this.eval(node.obj, scope);
-        if (node.name === "length" && Array.isArray(obj)) return obj.length;
-        if (obj && typeof obj === "object") return obj[node.name];
-        throw new AltairError("ALT0002", `Campo no soportado: ${node.name}`);
-      }
-      case "methodcall": {
-        const objNode = node.obj;
-        const obj = this.eval(objNode, scope);
-        const args = node.args.map(a => this.eval(a, scope));
-        if (Array.isArray(obj)) {
-          switch(node.name){
-            case "append": obj.push(args[0]); this.syncLValueStorage(objNode, scope, obj); return null;
-            case "remove": obj.splice(args[0], 1); this.syncLValueStorage(objNode, scope, obj); return null;
-            case "clear": obj.length = 0; this.syncLValueStorage(objNode, scope, obj); return null;
-            case "length": return obj.length;
-          }
-        }
-        throw new AltairError("ALT0002", `Método no soportado: ${node.name}`);
-      }
-      case "call": {
-        const fn = this.functions.get(node.name);
-        if (!fn) throw new AltairError("ALT0001", `Función no definida: ${node.name}`);
-        const args = node.args.map(a => this.eval(a, scope));
-        const fscope = new Scope(this.global);
-        fn.params.forEach((p, i) => fscope.define(p.name, {value: args[i], type: p.type}));
-        try {
-          this.execBlock(fn.body, fscope);
-        } catch (e) {
-          if (e instanceof ReturnSignal) return e.value;
-          throw e;
-        }
-        return null;
-      }
-      default:
-        throw new AltairError("ALT_PARSE", "Expresión no soportada: " + node.k);
+      case "ident": return scope.get(node.name).value;
+      case "neg": return -this.eval(node.e, scope); case "not": return !this.truthy(this.eval(node.e, scope));
+      case "logic": { const l = this.truthy(this.eval(node.l, scope)); return node.op === "and" ? l && this.truthy(this.eval(node.r, scope)) : l || this.truthy(this.eval(node.r, scope)); }
+      case "bin": { const l = this.eval(node.l, scope), r = this.eval(node.r, scope); switch(node.op){ case "+": case "-": case "*": case "/": case "%": return this.applyOp(node.op, l, r); case "==": return l === r; case "!=": return l !== r; case "<": return l < r; case ">": return l > r; case "<=": return l <= r; case ">=": return l >= r; } }
+      case "index": { const obj = this.eval(node.obj, scope), idx = this.eval(node.idx, scope); if (!Array.isArray(obj)) throw new AltairError("ALT0002", "Índice sobre valor que no es lista"); if (idx < 0 || idx >= obj.length) throw new AltairError("ALT0002", "Índice fuera de rango"); return obj[idx]; }
+      case "field": { const obj = this.eval(node.obj, scope); if (node.name === "length" && Array.isArray(obj)) return obj.length; if (obj && typeof obj === "object") return obj[node.name]; throw new AltairError("ALT0002", `Campo no soportado: ${node.name}`); }
+      case "methodcall": { const objNode = node.obj, obj = this.eval(objNode, scope), args = node.args.map(a => this.eval(a, scope)); if (Array.isArray(obj)) { switch(node.name){ case "append": obj.push(args[0]); this.syncLValueStorage(objNode, scope, obj); return null; case "remove": obj.splice(args[0], 1); this.syncLValueStorage(objNode, scope, obj); return null; case "clear": obj.length = 0; this.syncLValueStorage(objNode, scope, obj); return null; case "length": return obj.length; } } throw new AltairError("ALT0002", `Método no soportado: ${node.name}`); }
+      case "call": { const fn = this.functions.get(node.name); if (!fn) throw new AltairError("ALT0001", `Función no definida: ${node.name}`); const args = node.args.map(a => this.eval(a, scope)); const fscope = new Scope(this.global); fn.params.forEach((p, i) => fscope.define(p.name, {value: args[i], type: p.type})); try { this.execBlock(fn.body, fscope); } catch (e) { if (e instanceof ReturnSignal) return e.value; throw e; } return null; }
+      default: throw new AltairError("ALT_PARSE", "Expresión no soportada: " + node.k);
     }
   }
-
   readLValue(node, scope){ return this.eval(node, scope); }
-
   writeLValue(node, scope, val){
-    if (node.k === "ident") {
-      let s = scope;
-      while (s) { if (s.vars.has(node.name)) {
-        const box = s.vars.get(node.name);
-        if (box.isConst) throw new AltairError("ALT0005", `No se puede reasignar constante: ${node.name}`);
-        box.value = val;
-        if (box.storage === "disk" || box.storage === "cache") this.storageSet(box.storage, node.name, val);
-        return;
-      } s = s.parent; }
-      scope.define(node.name, {value: val, type:"auto"});
-      return;
-    }
-    if (node.k === "index") {
-      const obj = this.eval(node.obj, scope);
-      const idx = this.eval(node.idx, scope);
-      obj[idx] = val;
-      this.syncLValueStorage(node.obj, scope, obj);
-      return;
-    }
-    throw new AltairError("ALT_PARSE", "Destino de asignación no soportado");
-  }
-
-  syncLValueStorage(node, scope, val){
-    if (node.k === "ident") {
-      let s = scope;
-      while (s) { if (s.vars.has(node.name)) {
-        const box = s.vars.get(node.name);
-        box.value = val;
-        if (box.storage === "disk" || box.storage === "cache") this.storageSet(box.storage, node.name, val);
-        return;
-      } s = s.parent; }
-    }
-  }
-
-  resolveLValueBox(node, scope){ return null; }
-
-  stringify(v){
-    if (v === null || v === undefined) return "null";
-    if (typeof v === "boolean") return v ? "true" : "false";
-    if (Array.isArray(v)) return "[" + v.map(x=>this.stringify(x)).join(", ") + "]";
-    if (typeof v === "object") return JSON.stringify(v);
-    return String(v);
-  }
-}
-
-window.AltairInterpreter = Interpreter;
-window.AltairError = AltairError;
-</script>
-
-<!-- Configuración de Monaco Editor -->
-<script>
-require(['vs/editor/editor.main'], function() {
-  // Definir el tema personalizado para Altair
-  monaco.editor.defineTheme('altair-theme', {
-    base: 'vs-dark',
-    inherit: true,
-    rules: [
-      { token: 'keyword.altair', foreground: 'var(--gold)', fontStyle: 'bold' },
-      { token: 'type.altair', foreground: 'var(--gold)' },
-      { token: 'string', foreground: '#8fd3a0' },
-      { token: 'comment', foreground: '#5f6779', fontStyle: 'italic' },
-      { token: 'number', foreground: '#c7ceda' },
-      { token: 'delimiter', foreground: '#838da3' },
-      { token: 'operator', foreground: '#838da3' },
-      { token: 'identifier', foreground: 'var(--text)' }
-    ],
-    colors: {
-      'editor.background': 'var(--bg-panel)',
-      'editor.foreground': 'var(--text)',
-      'editorCursor.foreground': 'var(--gold)',
-      'editor.lineHighlightBackground': 'var(--bg-panel-2)',
-      'editorLineNumber.foreground': 'var(--text-dim)',
-      'editorIndentGuide.background': 'var(--line)',
-      'editorIndentGuide.activeBackground': 'var(--gold)'
-    }
-  });
-
-  // Definir el lenguaje Altair para resaltado de sintaxis
-  monaco.languages.register({
-    id: 'altair',
-    extensions: ['.altair'],
-    aliases: ['Altair', 'altair'],
-    mimetypes: ['text/x-altair']
-  });
-
-  monaco.languages.setMonarchTokensProvider('altair', {
-    keywords: [
-      'define', 'numeric', 'text', 'bool', 'list', 'object', 'token', 'const',
-      'ram', 'disk', 'cache', 'temp', 'auto', 'release',
-      'log', 'if', 'elif', 'else', 'while', 'repeat', 'times', 'forever', 'foreach', 'in',
-      'break', 'exit', 'fun', 'return', 'try', 'catch', 'as', 'wait',
-      'true', 'false', 'and', 'or', 'altair', 'doc', 'create', 'name', 'version', 'author'
-    ],
-    operators: ['=', '==', '!=', '<=', '>=', '<', '>', '+', '-', '*', '/', '%', '+=', '-=', '*=', '/=', '%=', '.', ',', ';', ':', '(', ')', '[', ']', '{', '}'],
-    symbols: /[=!<>+\-*/%&|^~?:,;.\[\]{}()]/,
-    tokenizer: {
-      root: [
-        [/[a-zA-Z_][a-zA-Z0-9_]*/, {
-          cases: {
-            '@keywords': 'keyword.altair',
-            '@default': 'identifier'
-          }
-        }],
-        [/[0-9]+(\.[0-9]+)?/, 'number'],
-        [/"([^"\\]|\\.)*"/, 'string'],
-        [/\/\ .*/, 'comment'],
-        [/@symbols/, {
-          cases: {
-            '@operators': 'operator',
-            '@default': 'delimiter'
-          }
-        }],
-        [/\s+/, 'white']
-      ]
-    }
-  });
-
-  // Crear el editor
-  const monacoEditor = monaco.editor.create(document.getElementById('monaco-editor'), {
-    value: `altair.doc;
-name = "MiPrograma"
-version = "1.0.0"
-author = "Tu nombre"
-create altair.doc
-
-define text nombre = "mundo"
-log "Hola, " + nombre + "!"`,
-    language: 'altair',
-    theme: 'altair-theme',
-    fontFamily: 'var(--font-mono)',
-    fontSize: 14,
-    minimap: { enabled: false },
-    scrollbar: {
-      vertical: 'auto',
-      horizontal: 'auto',
-      useShadows: false
-    },
-    lineNumbers: 'on',
-    lineDecorationsWidth: 10,
-    lineNumbersMinChars: 3,
-    folding: false,
-    overviewRulerBorder: false,
-    overviewRulerLanes: 0,
-    hideCursorInOverviewRuler: true,
-    scrollBeyondLastLine: false,
-    wordWrap: 'on',
-    wrappingIndent: 'same',
-    automaticLayout: true,
-    tabSize: 4,
-    insertSpaces: false
-  });
-
-  // Crear un objeto que simula la API del textarea para compatibilidad
-  window.editor = {
-    get value() { return monacoEditor.getValue(); },
-    set value(v) { monacoEditor.setValue(v); },
-    addEventListener: function(event, callback) {
-      if (event === 'input') {
-        monacoEditor.onDidChangeModelContent(callback);
-      } else if (event === 'keydown') {
-        monacoEditor.addCommand(0, (e) => {
-          if (e.keyCode === 9) { // Tab
-            e.preventDefault();
-            const model = monacoEditor.getModel();
-            const position = monacoEditor.getPosition();
-            model.insert(position.lineNumber, position.column, '    ');
-          } else if ((e.ctrlKey || e.metaKey) && e.keyCode === 13) { // Ctrl+Enter
-            e.preventDefault();
-            runCode();
-          }
-        });
-      } else if (event === 'scroll') {
-        monacoEditor.onDidScrollChange((e) => {
-          // No es necesario sincronizar con highlight externo
-        });
-      }
-    },
-    selectionStart: 0,
-    selectionEnd: 0,
-    focus: () => monacoEditor.focus()
-  };
-
-  // Asignar el editor global
-  window.monacoEditorInstance = monacoEditor;
-});
-
-// Inicializar el resto de la aplicación
-const consoleEl = document.getElementById("console");
-const runBtn = document.getElementById("run-btn");
-const clearBtn = document.getElementById("clear-btn");
-const examples = document.getElementById("examples");
-
-function logLine(text, cls){
-  const div = document.createElement("div");
-  div.className = "line" + (cls ? " " + cls : "");
-  div.textContent = text;
-  consoleEl.appendChild(div);
-  consoleEl.scrollTop = consoleEl.scrollHeight;
-}
-
-function runCode(){
-  consoleEl.innerHTML = "";
-  const src = editor.value;
-  const interp = new AltairInterpreter((msg) => logLine(msg));
-  try {
-    interp.run(src);
-    logLine("✓ Ejecución completada.", "ok");
-  } catch (e) {
-    logLine(`✗ Error${e.code ? " (" + e.code + ")" : ""}: ${e.message}`, "err");
-  }
-}
-
-runBtn.addEventListener("click", runCode);
-clearBtn.addEventListener("click", () => { consoleEl.innerHTML = '<div class="line empty">Consola limpiada.</div>'; });
-
-const HEADER = `altair.doc;
-name = "MiPrograma"
-version = "1.0.0"
-author = "Tu nombre"
-create altair.doc
-`;
-
-const SAMPLES = {
-  hola: HEADER + `define text nombre = "mundo"
-log "Hola, " + nombre + "!"`,
-
-  bucle: HEADER + `define numeric score = 82
-
-if score > 90;
-    log "Excelente"
-break
-elif score > 70;
-    log "Bien"
-break
-else;
-    log "A mejorar"
-break
-
-define numeric n = 1
-while n <= 5;
-    log "vuelta " + n
-    n += 1
-break
-
-repeat 3 times;
-    log "tick"
-break`,
-
-  funciones: HEADER + `fun factorial numeric n numeric;
-    if n <= 1;
-        return 1
-    break
-    return n * factorial(n - 1)
-break
-
-define numeric r = factorial(6)
-log "6! = " + r
-
-fun add numeric x numeric, y numeric;
-    return x + y
-break
-
-log "3 + 4 = " + add(3, 4)`,
-
-  listas: HEADER + `define list frutas = ["manzana", "pera", "kiwi"]
-frutas.append("mango")
-
-foreach fruta in frutas;
-    log fruta
-break
-
-log "Total: " + frutas.length()
-frutas.remove(0)
-log "Tras eliminar la primera: " + frutas`,
-
-  storage: HEADER + `/ Estas variables persisten entre recargas de la página
-/ usando localStorage del navegador (simulando disk/cache)
-define numeric visitas disk = 0
-visitas += 1
-log "Visitas registradas en este navegador: " + visitas
-log "Recarga la página y vuelve a ejecutar: el número subirá."`
-};
-
-examples.addEventListener("change", () => {
-  if (examples.value && SAMPLES[examples.value]) {
-    editor.value = SAMPLES[examples.value];
-  }
-  examples.value = "";
-});
-</script>
-</body>
-</html>
+    if (node.k === "ident") { let s = scope; while (s) { if (s.vars.has(node.name)) { const box = s.vars.get(node.name); if (box.isConst) throw new AltairError("ALT0
