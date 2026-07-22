@@ -22,15 +22,12 @@ body{
 }
 .wrap{max-width:960px; margin:0 auto; padding:0 24px;}
 
-/* Nav (igual que el resto del sitio) */
 nav{display:flex; align-items:center; justify-content:space-between; padding:22px 0;}
 .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.02em; font-size:1.15rem; text-decoration:none; color:var(--text);}
 .brand img{width:26px; height:26px;}
 .navlinks{display:flex; gap:24px; font-size:.92rem; color:var(--text-dim);}
 .navlinks a{text-decoration:none; color:var(--text-dim); transition:color .15s ease;}
 .navlinks a:hover, .navlinks a.active{color:var(--gold);}
-
-/* Sub-nav de community (Foro / Showcase / Noticias) */
 .subnav{
   display:flex; gap:8px; padding:6px; margin:10px 0 40px;
   background:var(--bg-panel); border:1px solid var(--line); border-radius:10px;
@@ -53,7 +50,6 @@ nav{display:flex; align-items:center; justify-content:space-between; padding:22p
 h1{font-size:2.1rem; font-weight:700; letter-spacing:-.01em; margin-bottom:8px;}
 .page-head p{color:var(--text-dim); font-size:.98rem;}
 
-/* Formularios */
 .panel{
   background:var(--bg-panel); border:1px solid var(--line); border-radius:12px;
   padding:24px; margin-bottom:32px;
@@ -80,7 +76,7 @@ h1{font-size:2.1rem; font-weight:700; letter-spacing:-.01em; margin-bottom:8px;}
 .btn-ghost{background:none; border:1px solid var(--line); color:var(--text);}
 .btn-ghost:hover{border-color:var(--gold); color:var(--gold); box-shadow:none;}
 
-/* Tarjetas de contenido (post / showcase / news) */
+
 .card{
   background:var(--bg-panel); border:1px solid var(--line); border-radius:12px;
   padding:22px; margin-bottom:16px; transition:border-color .15s ease;
@@ -97,7 +93,6 @@ h1{font-size:2.1rem; font-weight:700; letter-spacing:-.01em; margin-bottom:8px;}
 }
 .card a.ext-link:hover{color:var(--gold);}
 
-/* Comentarios */
 .comments-toggle{
   background:none; border:none; color:var(--text-dim); font-family:var(--font-mono);
   font-size:.8rem; cursor:pointer; margin-top:14px; padding:0; text-decoration:underline;
