@@ -6,7 +6,8 @@
 <title>Playground — Altair Community</title>
 <meta name="description" content="Prueba código Altair directamente en tu navegador, sin instalar nada.">
 <link rel="canonical" href="https://victios7.github.io/Altair/community/playground.html">
-<link rel="icon" type="image/png" href="../altair-logo.png">
+<!-- Icono desde GitHub Raw (espacio codificado como %20) -->
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/victios7/Altair/main/docs/altair%20logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="community.css">
@@ -18,12 +19,12 @@
     padding:12px 16px; background:var(--bg-panel-2); border-bottom:1px solid var(--line);
     font-family:var(--font-mono); font-size:.78rem; color:var(--text-dim);
   }
-  #monaco-editor{width:100%; height:460px; min-height:460px;}
   #monaco-loading{
     width:100%; height:460px; min-height:460px;
     display:flex; align-items:center; justify-content:center;
     background:var(--bg-panel); color:var(--text-dim); font-family:var(--font-mono);
   }
+  #monaco-editor{width:100%; height:460px; min-height:460px; display:none;}
   #console{
     flex:1; min-height:460px; background:var(--bg); color:#c7ceda; font-family:var(--font-mono);
     font-size:.85rem; padding:18px; overflow-y:auto; white-space:pre-wrap; line-height:1.7;
@@ -49,7 +50,7 @@
 <body>
 <div class="wrap">
   <nav>
-    <a class="brand" href="../index.html"><img src="../altair-logo.png" alt=""> Altair</a>
+    <a class="brand" href="../index.html"><img src="https://raw.githubusercontent.com/victios7/Altair/main/docs/altair%20logo.png" alt="" style="height:24px;"> Altair</a>
     <div class="navlinks">
       <a href="../index.html">Inicio</a>
       <a href="../guia.html">Guía del lenguaje</a>
@@ -87,7 +88,7 @@
     <div class="pg-panel">
       <div class="pg-panel-head"><span>editor.at</span></div>
       <div id="monaco-loading">Cargando editor...</div>
-      <div id="monaco-editor" style="display:none;"></div>
+      <div id="monaco-editor"></div>
     </div>
     <div class="pg-panel">
       <div class="pg-panel-head"><span>output</span></div>
@@ -96,9 +97,9 @@
   </div>
 
   <div class="unsupported">
-    <strong>Qué cubre este playground:</strong> cabecera <code>altair.doc</code>, variables (<code>numeric</code>, <code>text</code>, <code>bool</code>, <code>list</code>), storage tiers, operadores, <code>if/elif/else</code>, bucles, funciones, <code>try/catch</code>, listas y <code>log</code>.
+    <strong>Qué cubre este playground:</strong> cabecera <code>altair.doc</code>, variables (<code>numeric</code>, <code>text</code>, <code>bool</code>, <code>list</code>), storage tiers <code>ram</code>/<code>disk</code>/<code>cache</code>/<code>temp</code> (simulados con <code>localStorage</code> del navegador), operadores, <code>if/elif/else</code>, <code>while</code>, <code>repeat</code>, <code>forever</code>, <code>foreach</code>, <code>exit</code>, funciones (<code>fun</code>/<code>return</code>, con recursión), <code>try/catch</code>, listas y <code>log</code>.
     <br><br>
-    <strong>Qué NO cubre:</strong> <code>class</code>/<code>object</code>, <code>token</code>, <code>snapshot</code>, y toda la capa de servidor.
+    <strong>Qué NO cubre:</strong> <code>class</code>/<code>object</code>, <code>token</code>, <code>snapshot</code>, <code>choose</code>, y toda la capa de servidor (<code>listen</code>, <code>route</code>, <code>config</code>, <code>health</code>, sesiones, jobs, base de datos) — eso requiere el compilador real <code>altairc</code> + <code>gcc</code> corriendo en un servidor, algo que un navegador no puede hacer. Para eso, <a href="https://github.com/victios7/Altair/releases/latest" target="_blank">descarga Altair</a> e instálalo localmente.
   </div>
 
   <footer>
@@ -107,292 +108,51 @@
   </footer>
 </div>
 
-<!-- Cargar Monaco desde Cloudflare CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
-<script>require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });</script>
+<!-- Cargar Monaco desde el CDN OFICIAL de Microsoft -->
+<script src="https://microsoft.github.io/monaco-editor/min/vs/loader.js"></script>
+<script>require.config({ paths: { vs: 'https://microsoft.github.io/monaco-editor/min/vs' } });</script>
 
-<!-- Código del intérprete de Altair (mismo que antes) -->
+<!-- Código del intérprete de Altair (minificado para reducir tamaño) -->
 <script>
-class AltairError extends Error {
-  constructor(code, message, line) {
-    super(message);
-    this.code = code;
-    this.line = line;
-  }
+// ========== INTERPRETER ==========
+class AltairError extends Error { constructor(c,m,l){super(m);this.code=c;this.line=l;}}
+const KW=new Set(["define","numeric","text","bool","list","object","token","const","ram","disk","cache","temp","auto","release","log","if","elif","else","while","repeat","times","forever","foreach","in","break","exit","fun","return","try","catch","as","wait","true","false","and","or"]);
+function lex(s){const t=[];let i=0,l=1,n=s.length;while(i<n){const c=s[i];if(c==="\n"){t.push({t:"NL",line:l});l++;i++;continue}if(" \t\r".includes(c)){i++;continue}if(c==="/"&&(s[i+1]===" "||/[a-zA-Z]/.test(s[i+1]||""))){while(i<n&&s[i]!=="\n")i++;continue}if(c==='"'){let v="";i++;while(i<n&&s[i]!=='"'){if(s[i]==="\\"&&s[i+1]==="n"){v+="\n";i+=2;continue}if(s[i]==="\\"&&s[i+1]==='"'){v+='"';i+=2;continue}v+=s[i];i++;}i++;t.push({t:"STR",v,line:l});continue}if(/[0-9]/.test(c)){let v="";while(i<n&&/[0-9.]/.test(s[i]))v+=s[i++];t.push({t:"NUM",v:parseFloat(v),line:l});continue}if(/[a-zA-Z_]/.test(c)){let v="";while(i<n&&/[a-zA-Z0-9_]/.test(s[i]))v+=s[i++];t.push({t:KW.has(v)?v.toUpperCase():"IDENT",v,line:l});continue}const o=s.substring(i,i+2);if(["==","!=","<=",">=","+=","-=","*=","/=","%="].includes(o)){t.push({t:o,line:l});i+=2;continue}if("+-*/%<>=!.,;:()[]{}".includes(c)){t.push({t:c,line:l});i++;continue}i++;}t.push({t:"EOF",line:l});return t;}
+
+class Parser{constructor(t){this.toks=t;this.pos=0;}peek(o=0){return this.toks[this.pos+o];}cur(){return this.toks[this.pos];}next(){return this.toks[this.pos++];}skipNL(){while(this.cur().t==="NL")this.pos++;}expect(t){this.skipNL();if(this.cur().t!==t)throw new AltairError("ALT_PARSE",`Se esperaba '${t}' pero se encontró '${this.cur().t}' en la línea ${this.cur().line}`,this.cur().line);return this.next();}atEOF(){this.skipNL();return this.cur().t==="EOF";}
+parseHeader(){this.skipNL();if(!(this.cur().t==="IDENT"&&this.cur().v==="altair"))throw new AltairError("ALT_HEADER","Todo programa debe empezar con 'altair.doc;'");this.next();this.expect(".");if(!(this.cur().t==="IDENT"&&this.cur().v==="doc"))throw new AltairError("ALT_HEADER","Se esperaba 'doc' tras 'altair.'");this.next();this.expect(";");const h={name:null,version:null,author:null};this.skipNL();while(!(this.cur().t==="IDENT"&&this.cur().v==="create")){if(this.cur().t==="EOF")throw new AltairError("ALT_HEADER","Falta 'create altair.doc'");const f=this.expect("IDENT").v;this.expect("=");const v=this.parseExpr();if(["name","version","author"].includes(f))h[f]=v;this.skipNL();}this.next();if(!(this.cur().t==="IDENT"&&this.cur().v==="altair"))throw new AltairError("ALT_HEADER","Se esperaba 'altair'");this.next();this.expect(".");if(!(this.cur().t==="IDENT"&&this.cur().v==="doc"))throw new AltairError("ALT_HEADER","Se esperaba 'doc'");this.next();this.header=h;return h;}
+parseProgram(){this.parseHeader();const s=[];this.skipNL();while(this.cur().t!=="EOF"){s.push(this.parseStatement());this.skipNL();}return s;}
+parseBlock(){const s=[];this.skipNL();while(this.cur().t!=="BREAK"&&this.cur().t!=="EOF"){s.push(this.parseStatement());this.skipNL();}this.expect("BREAK");return s;}
+parseStatement(){this.skipNL();const t=this.cur();switch(t.t){case"DEFINE":return this.parseDefine();case"LOG":{this.next();return{k:"log",e:this.parseExpr(),line:t.line};}case"IF":return this.parseIf();case"WHILE":return this.parseWhile();case"REPEAT":return this.parseRepeat();case"FOREVER":return this.parseForever();case"FOREACH":return this.parseForeach();case"EXIT":{this.next();return{k:"exit",line:t.line};}case"RELEASE":{this.next();return{k:"release",name:this.expect("IDENT").v,line:t.line};}case"FUN":return this.parseFun();case"RETURN":{this.next();let e=null;if(this.cur().t!=="NL"&&this.cur().t!=="BREAK"&&this.cur().t!=="EOF")e=this.parseExpr();return{k:"return",e,line:t.line};}case"TRY":return this.parseTry();case"WAIT":{this.next();this.parseExpr();return{k:"nop",line:t.line};}default:return this.parseExprOrAssign();}}
+parseDefine(){const l=this.cur().line;this.expect("DEFINE");let ic=false;if(this.cur().t==="CONST"){ic=true;this.next();}const type=this.next().v;const name=this.expect("IDENT").v;let storage="ram";while(["RAM","DISK","CACHE","TEMP","AUTO"].includes(this.cur().t)){const q=this.next();storage=q.v;if(this.cur().t==="IDENT"&&this.peek(1).t==="="){this.next();if(this.cur().t==="=")this.next();if(this.cur().t!=="NL")this.next();}}let init=null;if(this.cur().t==="="){this.next();init=this.parseExpr();}return{k:"define",type,name,storage,isConst:ic,init,line:l};}
+parseExprOrAssign(){const l=this.cur().line;const e=this.parseExpr();const c=["=","+=","-=","*=","/=","%="];if(c.includes(this.cur().t)){const op=this.next().t;return{k:"assign",target:e,op,rhs:this.parseExpr(),line:l};}return{k:"exprstmt",e:e,line:l};}
+parseIf(){const l=this.cur().line;this.expect("IF");const cond=this.parseExpr();this.expect(";");const body=this.parseBlock();const clauses=[{cond,body}];this.skipNL();while(this.cur().t==="ELIF"){this.next();clauses.push({cond:this.parseExpr(),body:this.parseBlock()});this.skipNL();}let eb=null;if(this.cur().t==="ELSE"){this.next();this.expect(";");eb=this.parseBlock();}return{k:"if",clauses,elseBody:eb,line:l};}
+parseWhile(){const l=this.cur().line;this.expect("WHILE");return{k:"while",cond:this.parseExpr(),body:this.parseBlock(),line:l};}
+parseRepeat(){const l=this.cur().line;this.expect("REPEAT");const count=this.parseExpr();if(this.cur().t==="TIMES")this.next();this.expect(";");return{k:"repeat",count,body:this.parseBlock(),line:l};}
+parseForever(){const l=this.cur().line;this.expect("FOREVER");this.expect(";");return{k:"forever",body:this.parseBlock(),line:l};}
+parseForeach(){const l=this.cur().line;this.expect("FOREACH");const vn=this.expect("IDENT").v;this.expect("IN");const list=this.parseExpr();this.expect(";");return{k:"foreach",varName:vn,listExpr:list,body:this.parseBlock(),line:l};}
+parseFun(){const l=this.cur().line;this.expect("FUN");const name=this.expect("IDENT").v;let rt="auto";const T=["NUMERIC","TEXT","BOOL","LIST","OBJECT"];if(T.includes(this.cur().t)&&this.peek(1).t==="IDENT")rt=this.next().v;const params=[];while(this.cur().t!==";"){const pn=this.expect("IDENT").v;let pt="numeric";if(T.includes(this.cur().t))pt=this.next().v;params.push({name:pn,type:pt});if(this.cur().t===",")this.next();else break;}this.expect(";");return{k:"fun",name,params,retType:rt,body:this.parseBlock(),line:l};}
+parseTry(){const l=this.cur().line;this.expect("TRY");this.expect(";");const body=this.parseBlock();this.skipNL();let en="err",cb=[];if(this.cur().t==="CATCH"){this.next();if(this.cur().t==="AS"){this.next();en=this.expect("IDENT").v;}this.expect(";");cb=this.parseBlock();}return{k:"try",body,errName:en,catchBody:cb,line:l};}
+parseExpr(){return this.parseOr();}parseOr(){let l=this.parseAnd();while(this.cur().t==="OR"){this.next();l={k:"logic",op:"or",l,r:this.parseAnd()};}return l;}parseAnd(){let l=this.parseEquality();while(this.cur().t==="AND"){this.next();l={k:"logic",op:"and",l,r:this.parseEquality()};}return l;}parseEquality(){let l=this.parseCompare();while(["==","!="].includes(this.cur().t)){const op=this.next().t;l={k:"bin",op,l,r:this.parseCompare()};}return l;}parseCompare(){let l=this.parseAdd();while(["<",">","<=",">="].includes(this.cur().t)){const op=this.next().t;l={k:"bin",op,l,r:this.parseAdd()};}return l;}parseAdd(){let l=this.parseMul();while(["+","-"].includes(this.cur().t)){const op=this.next().t;l={k:"bin",op,l,r:this.parseMul()};}return l;}parseMul(){let l=this.parseUnary();while(["*","/","%"].includes(this.cur().t)){const op=this.next().t;l={k:"bin",op,l,r:this.parseUnary()};}return l;}parseUnary(){if(this.cur().t==="!"){this.next();return{k:"not",e:this.parseUnary()};}if(this.cur().t==="-"){this.next();return{k:"neg",e:this.parseUnary()};}return this.parsePostfix();}
+parsePostfix(){let e=this.parsePrimary();for(;;){if(this.cur().t==="["){this.next();e={k:"index",obj:e,idx:this.parseExpr()};this.expect("]");}else if(this.cur().t==="."){this.next();const n=this.expect("IDENT").v;if(this.cur().t==="("){this.next();e={k:"methodcall",obj:e,name:n,args:this.parseArgs()};this.expect(")");}else{e={k:"field",obj:e,name:n};}}else if(this.cur().t==="("&&e.k==="ident"){this.next();e={k:"call",name:e.name,args:this.parseArgs()};this.expect(")");}else break;}return e;}
+parseArgs(){const a=[];if(this.cur().t===")")return a;a.push(this.parseExpr());while(this.cur().t===","){this.next();a.push(this.parseExpr());}return a;}
+parsePrimary(){const t=this.cur();if(t.t==="NUM"){this.next();return{k:"num",v:t.v};}if(t.t==="STR"){this.next();return{k:"str",v:t.v};}if(t.t==="TRUE"){this.next();return{k:"bool",v:true};}if(t.t==="FALSE"){this.next();return{k:"bool",v:false};}if(t.t==="IDENT"){this.next();return{k:"ident",name:t.v};}if(t.t==="("){this.next();const e=this.parseExpr();this.expect(")");return e;}if(t.t==="["){this.next();const items=[];if(this.cur().t!=="]"){items.push(this.parseExpr());while(this.cur().t===","){this.next();items.push(this.parseExpr());}}this.expect("]");return{k:"list",items};}throw new AltairError("ALT_PARSE",`Expresión inesperada '${t.t}' en la línea ${t.line}`,t.line);}
 }
 
-const KEYWORDS = new Set([
-  "define","numeric","text","bool","list","object","token","const",
-  "ram","disk","cache","temp","auto","release",
-  "log","if","elif","else","while","repeat","times","forever","foreach","in",
-  "break","exit","fun","return","try","catch","as","wait",
-  "true","false","and","or"
-]);
+class ExitLoop{};class ExitProgram{};class ReturnSignal{constructor(v){this.value=v;}}
+class Scope{constructor(p){this.vars=new Map();this.parent=p;}get(n){if(this.vars.has(n))return this.vars.get(n);if(this.parent)return this.parent.get(n);throw new AltairError("ALT0001",`Variable no definida: ${n}`);}set(n,v){let s=this;while(s){if(s.vars.has(n)){s.vars.set(n,v);return;}s=s.parent;}this.vars.set(n,v);}define(n,v){this.vars.set(n,v);}has(n){let s=this;while(s){if(s.vars.has(n))return true;s=s.parent;}return false;}}
 
-function lex(src) {
-  const tokens = [];
-  let i = 0, line = 1;
-  const n = src.length;
-  while (i < n) {
-    const c = src[i];
-    if (c === "\n") { tokens.push({t:"NL", line}); line++; i++; continue; }
-    if (c === " " || c === "\t" || c === "\r") { i++; continue; }
-    if (c === "/" && (src[i+1] === " " || /[a-zA-Z]/.test(src[i+1] || ""))) {
-      while (i < n && src[i] !== "\n") i++;
-      continue;
-    }
-    if (c === '"') {
-      let s = ""; i++;
-      while (i < n && src[i] !== '"') {
-        if (src[i] === "\\" && src[i+1] === "n") { s += "\n"; i += 2; continue; }
-        if (src[i] === "\\" && src[i+1] === '"') { s += '"'; i += 2; continue; }
-        s += src[i]; i++;
-      }
-      i++;
-      tokens.push({t:"STR", v:s, line});
-      continue;
-    }
-    if (/[0-9]/.test(c)) {
-      let s = "";
-      while (i < n && /[0-9.]/.test(src[i])) { s += src[i]; i++; }
-      tokens.push({t:"NUM", v:parseFloat(s), line});
-      continue;
-    }
-    if (/[a-zA-Z_]/.test(c)) {
-      let s = "";
-      while (i < n && /[a-zA-Z0-9_]/.test(src[i])) { s += src[i]; i++; }
-      if (KEYWORDS.has(s)) tokens.push({t:s.toUpperCase(), v:s, line});
-      else tokens.push({t:"IDENT", v:s, line});
-      continue;
-    }
-    const two = src.substring(i, i+2);
-    if (["==","!=","<=",">=","+=","-=","*=","/=","%="].includes(two)) {
-      tokens.push({t:two, line}); i += 2; continue;
-    }
-    if ("+-*/%<>=!.,;:()[]{}".includes(c)) {
-      tokens.push({t:c, line}); i++; continue;
-    }
-    i++;
-  }
-  tokens.push({t:"EOF", line});
-  return tokens;
-}
-
-class Parser {
-  constructor(tokens) { this.toks = tokens; this.pos = 0; }
-  peek(o=0){ return this.toks[this.pos+o]; }
-  cur(){ return this.toks[this.pos]; }
-  next(){ return this.toks[this.pos++]; }
-  skipNL(){ while (this.cur().t === "NL") this.pos++; }
-  expect(t){
-    this.skipNL();
-    if (this.cur().t !== t) throw new AltairError("ALT_PARSE", `Se esperaba '${t}' pero se encontró '${this.cur().t}' en la línea ${this.cur().line}`, this.cur().line);
-    return this.next();
-  }
-  atEOF(){ this.skipNL(); return this.cur().t === "EOF"; }
-
-  parseHeader(){
-    this.skipNL();
-    if (!(this.cur().t === "IDENT" && this.cur().v === "altair")) {
-      throw new AltairError("ALT_HEADER", "Todo programa Altair debe empezar con la cabecera 'altair.doc;'");
-    }
-    this.next(); this.expect(".");
-    if (!(this.cur().t === "IDENT" && this.cur().v === "doc")) throw new AltairError("ALT_HEADER", "Se esperaba 'doc' tras 'altair.'");
-    this.next(); this.expect(";");
-    const header = {name:null, version:null, author:null};
-    this.skipNL();
-    while (!(this.cur().t === "IDENT" && this.cur().v === "create")) {
-      if (this.cur().t === "EOF") throw new AltairError("ALT_HEADER", "Falta 'create altair.doc'");
-      const field = this.expect("IDENT").v;
-      this.expect("="); const val = this.parseExpr();
-      if (["name","version","author"].includes(field)) header[field] = val;
-      this.skipNL();
-    }
-    this.next();
-    if (!(this.cur().t === "IDENT" && this.cur().v === "altair")) throw new AltairError("ALT_HEADER", "Se esperaba 'altair'");
-    this.next(); this.expect(".");
-    if (!(this.cur().t === "IDENT" && this.cur().v === "doc")) throw new AltairError("ALT_HEADER", "Se esperaba 'doc'");
-    this.next(); this.header = header; return header;
-  }
-
-  parseProgram(){
-    this.parseHeader(); const stmts = []; this.skipNL();
-    while (this.cur().t !== "EOF") { stmts.push(this.parseStatement()); this.skipNL(); }
-    return stmts;
-  }
-
-  parseBlock(){
-    const stmts = []; this.skipNL();
-    while (this.cur().t !== "BREAK" && this.cur().t !== "EOF") { stmts.push(this.parseStatement()); this.skipNL(); }
-    this.expect("BREAK"); return stmts;
-  }
-
-  parseStatement(){
-    this.skipNL(); const tok = this.cur();
-    switch (tok.t) {
-      case "DEFINE": return this.parseDefine();
-      case "LOG": { this.next(); return {k:"log", e:this.parseExpr(), line:tok.line}; }
-      case "IF": return this.parseIf();
-      case "WHILE": return this.parseWhile();
-      case "REPEAT": return this.parseRepeat();
-      case "FOREVER": return this.parseForever();
-      case "FOREACH": return this.parseForeach();
-      case "EXIT": { this.next(); return {k:"exit", line:tok.line}; }
-      case "RELEASE": { this.next(); return {k:"release", name:this.expect("IDENT").v, line:tok.line}; }
-      case "FUN": return this.parseFun();
-      case "RETURN": {
-        this.next(); let e = null;
-        if (this.cur().t !== "NL" && this.cur().t !== "BREAK" && this.cur().t !== "EOF") e = this.parseExpr();
-        return {k:"return", e, line:tok.line};
-      }
-      case "TRY": return this.parseTry();
-      case "WAIT": { this.next(); this.parseExpr(); return {k:"nop", line:tok.line}; }
-      default: return this.parseExprOrAssign();
-    }
-  }
-
-  parseDefine(){
-    const line = this.cur().line; this.expect("DEFINE");
-    let isConst = false;
-    if (this.cur().t === "CONST") { isConst = true; this.next(); }
-    const type = this.next().v; const name = this.expect("IDENT").v;
-    let storage = "ram";
-    while (["RAM","DISK","CACHE","TEMP","AUTO"].includes(this.cur().t)) {
-      const q = this.next(); storage = q.v;
-      if (this.cur().t === "IDENT" && this.peek(1).t === "=") { this.next(); if (this.cur().t === "=") this.next(); if (this.cur().t !== "NL") this.next(); }
-    }
-    let init = null; if (this.cur().t === "=") { this.next(); init = this.parseExpr(); }
-    return {k:"define", type, name, storage, isConst, init, line};
-  }
-
-  parseExprOrAssign(){
-    const line = this.cur().line; const expr = this.parseExpr();
-    const compound = ["=","+=","-=","*=","/=","%="];
-    if (compound.includes(this.cur().t)) { const op = this.next().t; const rhs = this.parseExpr(); return {k:"assign", target:expr, op, rhs, line}; }
-    return {k:"exprstmt", e:expr, line};
-  }
-
-  parseIf(){
-    const line = this.cur().line; this.expect("IF");
-    const cond = this.parseExpr(); this.expect(";");
-    const body = this.parseBlock(); const clauses = [{cond, body}]; this.skipNL();
-    while (this.cur().t === "ELIF") { this.next(); clauses.push({cond:this.parseExpr(), body:this.parseBlock()}); this.skipNL(); }
-    let elseBody = null; if (this.cur().t === "ELSE") { this.next(); this.expect(";"); elseBody = this.parseBlock(); }
-    return {k:"if", clauses, elseBody, line};
-  }
-
-  parseWhile(){ const line = this.cur().line; this.expect("WHILE"); return {k:"while", cond:this.parseExpr(), body:this.parseBlock(), line}; }
-  parseRepeat(){ const line = this.cur().line; this.expect("REPEAT"); const count = this.parseExpr(); if (this.cur().t === "TIMES") this.next(); this.expect(";"); return {k:"repeat", count, body:this.parseBlock(), line}; }
-  parseForever(){ const line = this.cur().line; this.expect("FOREVER"); this.expect(";"); return {k:"forever", body:this.parseBlock(), line}; }
-  parseForeach(){ const line = this.cur().line; this.expect("FOREACH"); const varName = this.expect("IDENT").v; this.expect("IN"); const listExpr = this.parseExpr(); this.expect(";"); return {k:"foreach", varName, listExpr, body:this.parseBlock(), line}; }
-
-  parseFun(){
-    const line = this.cur().line; this.expect("FUN"); const name = this.expect("IDENT").v;
-    let retType = "auto"; const TYPES = ["NUMERIC","TEXT","BOOL","LIST","OBJECT"];
-    if (TYPES.includes(this.cur().t) && this.peek(1).t === "IDENT") retType = this.next().v;
-    const params = []; while (this.cur().t !== ";") { const pname = this.expect("IDENT").v; let ptype = "numeric"; if (TYPES.includes(this.cur().t)) ptype = this.next().v; params.push({name:pname, type:ptype}); if (this.cur().t === ",") this.next(); else break; }
-    this.expect(";"); return {k:"fun", name, params, retType, body:this.parseBlock(), line};
-  }
-
-  parseTry(){
-    const line = this.cur().line; this.expect("TRY"); this.expect(";"); const body = this.parseBlock(); this.skipNL();
-    let errName = "err", catchBody = []; if (this.cur().t === "CATCH") { this.next(); if (this.cur().t === "AS") { this.next(); errName = this.expect("IDENT").v; } this.expect(";"); catchBody = this.parseBlock(); }
-    return {k:"try", body, errName, catchBody, line};
-  }
-
-  parseExpr(){ return this.parseOr(); }
-  parseOr(){ let l = this.parseAnd(); while (this.cur().t === "OR") { this.next(); l = {k:"logic", op:"or", l, r:this.parseAnd()}; } return l; }
-  parseAnd(){ let l = this.parseEquality(); while (this.cur().t === "AND") { this.next(); l = {k:"logic", op:"and", l, r:this.parseEquality()}; } return l; }
-  parseEquality(){ let l = this.parseCompare(); while (["==","!="].includes(this.cur().t)) { const op = this.next().t; l = {k:"bin", op, l, r:this.parseCompare()}; } return l; }
-  parseCompare(){ let l = this.parseAdd(); while (["<",">","<=",">="].includes(this.cur().t)) { const op = this.next().t; l = {k:"bin", op, l, r:this.parseAdd()}; } return l; }
-  parseAdd(){ let l = this.parseMul(); while (["+","-"].includes(this.cur().t)) { const op = this.next().t; l = {k:"bin", op, l, r:this.parseMul()}; } return l; }
-  parseMul(){ let l = this.parseUnary(); while (["*","/","%"].includes(this.cur().t)) { const op = this.next().t; l = {k:"bin", op, l, r:this.parseUnary()}; } return l; }
-  parseUnary(){ if (this.cur().t === "!") { this.next(); return {k:"not", e:this.parseUnary()}; } if (this.cur().t === "-") { this.next(); return {k:"neg", e:this.parseUnary()}; } return this.parsePostfix(); }
-  parsePostfix(){
-    let e = this.parsePrimary(); for(;;){
-      if (this.cur().t === "[") { this.next(); e = {k:"index", obj:e, idx:this.parseExpr()}; this.expect("]"); }
-      else if (this.cur().t === ".") { this.next(); const name = this.expect("IDENT").v; if (this.cur().t === "(") { this.next(); e = {k:"methodcall", obj:e, name, args:this.parseArgs()}; this.expect(")"); } else { e = {k:"field", obj:e, name}; } }
-      else if (this.cur().t === "(" && e.k === "ident") { this.next(); e = {k:"call", name:e.name, args:this.parseArgs()}; this.expect(")"); }
-      else break;
-    } return e;
-  }
-  parseArgs(){ const args = []; if (this.cur().t === ")") return args; args.push(this.parseExpr()); while (this.cur().t === ",") { this.next(); args.push(this.parseExpr()); } return args; }
-  parsePrimary(){
-    const tok = this.cur(); if (tok.t === "NUM") { this.next(); return {k:"num", v:tok.v}; }
-    if (tok.t === "STR") { this.next(); return {k:"str", v:tok.v}; }
-    if (tok.t === "TRUE") { this.next(); return {k:"bool", v:true}; }
-    if (tok.t === "FALSE") { this.next(); return {k:"bool", v:false}; }
-    if (tok.t === "IDENT") { this.next(); return {k:"ident", name:tok.v}; }
-    if (tok.t === "(") { this.next(); const e = this.parseExpr(); this.expect(")"); return e; }
-    if (tok.t === "[") { this.next(); const items = []; if (this.cur().t !== "]") { items.push(this.parseExpr()); while (this.cur().t === ",") { this.next(); items.push(this.parseExpr()); } } this.expect("]"); return {k:"list", items}; }
-    throw new AltairError("ALT_PARSE", `Expresión inesperada '${tok.t}' en la línea ${tok.line}`, tok.line);
-  }
-}
-
-class ExitLoop {}
-class ExitProgram {}
-class ReturnSignal { constructor(v){ this.value = v; } }
-
-class Scope {
-  constructor(parent){ this.vars = new Map(); this.parent = parent; }
-  get(name){ if (this.vars.has(name)) return this.vars.get(name); if (this.parent) return this.parent.get(name); throw new AltairError("ALT0001", `Variable no definida: ${name}`); }
-  set(name, val){ let s = this; while (s) { if (s.vars.has(name)) { s.vars.set(name, val); return; } s = s.parent; } this.vars.set(name, val); }
-  define(name, val){ this.vars.set(name, val); }
-  has(name){ let s = this; while (s) { if (s.vars.has(name)) return true; s = s.parent; } return false; }
-}
-
-class Interpreter {
-  constructor(onLog){ this.onLog = onLog || (()=>{}); this.functions = new Map(); this.global = new Scope(null); this.storagePrefix = "altair_playground:"; this.stepCount = 0; this.maxSteps = 2000000; }
-
-  run(src){ const tokens = lex(src); const parser = new Parser(tokens); const program = parser.parseProgram(); for (const stmt of program) if (stmt.k === "fun") this.functions.set(stmt.name, stmt); try { for (const stmt of program) this.exec(stmt, this.global); } catch (e) { if (e instanceof ExitProgram || e instanceof ExitLoop) return; throw e; } }
-
-  tick(){ this.stepCount++; if (this.stepCount > this.maxSteps) throw new AltairError("ALT_LIMIT", "Límite de pasos alcanzado"); }
-
-  storageGet(tier, name){ if (tier === "ram" || tier === "temp" || tier === "auto") return undefined; try { const raw = localStorage.getItem(this.storagePrefix + tier + ":" + name); return raw != null ? JSON.parse(raw) : undefined; } catch { return undefined; } }
-  storageSet(tier, name, val){ if (tier === "ram" || tier === "temp" || tier === "auto") return; try { localStorage.setItem(this.storagePrefix + tier + ":" + name, JSON.stringify(val)); } catch {} }
-
-  exec(stmt, scope){
-    this.tick();
-    switch (stmt.k) {
-      case "define": { let val = stmt.init ? this.eval(stmt.init, scope) : this.defaultFor(stmt.type); if (stmt.storage === "disk" || stmt.storage === "cache") { const existing = this.storageGet(stmt.storage, stmt.name); if (existing !== undefined && !stmt.init) val = existing; this.storageSet(stmt.storage, stmt.name, val); } scope.define(stmt.name, {value: val, type: stmt.type, storage: stmt.storage, isConst: stmt.isConst}); return; }
-      case "assign": { let rhs = this.eval(stmt.rhs, scope); if (stmt.op !== "=") { const cur = this.readLValue(stmt.target, scope); rhs = this.applyOp(stmt.op.slice(0,1), cur, rhs); } this.writeLValue(stmt.target, scope, rhs); return; }
-      case "log": { this.onLog(this.stringify(this.eval(stmt.e, scope))); return; }
-      case "exprstmt": { this.eval(stmt.e, scope); return; }
-      case "if": { for (const c of stmt.clauses) if (this.truthy(this.eval(c.cond, scope))) { this.execBlock(c.body, new Scope(scope)); return; } if (stmt.elseBody) this.execBlock(stmt.elseBody, new Scope(scope)); return; }
-      case "while": { try { while (this.truthy(this.eval(stmt.cond, scope))) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); } } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; } return; }
-      case "repeat": { const count = this.eval(stmt.count, scope); try { for (let i=0; i<count; i++) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); } } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; } return; }
-      case "forever": { try { while (true) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); } } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; } return; }
-      case "foreach": { const list = this.eval(stmt.listExpr, scope); if (!Array.isArray(list)) throw new AltairError("ALT0002", "foreach requiere una lista"); try { for (const item of list) { this.tick(); const s2 = new Scope(scope); s2.define(stmt.varName, {value:item, type:"auto"}); this.execBlock(stmt.body, s2); } } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; } return; }
-      case "exit": { throw new ExitProgram(); }
-      case "release": { return; }
-      case "fun": { this.functions.set(stmt.name, stmt); return; }
-      case "return": { throw new ReturnSignal(stmt.e ? this.eval(stmt.e, scope) : null); }
-      case "try": { try { this.execBlock(stmt.body, new Scope(scope)); } catch (e) { if (e instanceof ExitLoop || e instanceof ReturnSignal || e instanceof ExitProgram) throw e; const s2 = new Scope(scope); s2.define(stmt.errName, {value: {code: e.code || "ALT_ERROR", message: e.message || String(e), line: e.line || 0}, type:"object"}); this.execBlock(stmt.catchBody, s2); } return; }
-      case "nop": return;
-      default: throw new AltairError("ALT_PARSE", "Sentencia no soportada: " + stmt.k);
-    }
-  }
-
-  execBlock(stmts, scope){ for (const s of stmts) this.exec(s, scope); }
-  defaultFor(type){ if (type === "numeric") return 0; if (type === "text") return ""; if (type === "bool") return false; if (type === "list") return []; return null; }
-  truthy(v){ return v === true || (typeof v === "number" && v !== 0) || (typeof v === "string" && v.length>0) ? !!v : !!v; }
-  applyOp(op, a, b){ switch(op){ case "+": if (typeof a === "string" || typeof b === "string") return this.stringify(a) + this.stringify(b); if (Array.isArray(a) && Array.isArray(b)) return a.concat(b); return a + b; case "-": return a - b; case "*": return a * b; case "/": if (b === 0) throw new AltairError("ALT0003", "División por cero"); return a / b; case "%": if (b === 0) throw new AltairError("ALT0003", "División por cero"); return a % b; } }
-  eval(node, scope){
-    this.tick();
-    switch (node.k) {
-      case "num": return node.v; case "str": return node.v; case "bool": return node.v;
-      case "list": return node.items.map(it => this.eval(it, scope));
-      case "ident": return scope.get(node.name).value;
-      case "neg": return -this.eval(node.e, scope); case "not": return !this.truthy(this.eval(node.e, scope));
-      case "logic": { const l = this.truthy(this.eval(node.l, scope)); return node.op === "and" ? l && this.truthy(this.eval(node.r, scope)) : l || this.truthy(this.eval(node.r, scope)); }
-      case "bin": { const l = this.eval(node.l, scope), r = this.eval(node.r, scope); switch(node.op){ case "+": case "-": case "*": case "/": case "%": return this.applyOp(node.op, l, r); case "==": return l === r; case "!=": return l !== r; case "<": return l < r; case ">": return l > r; case "<=": return l <= r; case ">=": return l >= r; } }
-      case "index": { const obj = this.eval(node.obj, scope), idx = this.eval(node.idx, scope); if (!Array.isArray(obj)) throw new AltairError("ALT0002", "Índice sobre valor que no es lista"); if (idx < 0 || idx >= obj.length) throw new AltairError("ALT0002", "Índice fuera de rango"); return obj[idx]; }
-      case "field": { const obj = this.eval(node.obj, scope); if (node.name === "length" && Array.isArray(obj)) return obj.length; if (obj && typeof obj === "object") return obj[node.name]; throw new AltairError("ALT0002", `Campo no soportado: ${node.name}`); }
-      case "methodcall": { const objNode = node.obj, obj = this.eval(objNode, scope), args = node.args.map(a => this.eval(a, scope)); if (Array.isArray(obj)) { switch(node.name){ case "append": obj.push(args[0]); this.syncLValueStorage(objNode, scope, obj); return null; case "remove": obj.splice(args[0], 1); this.syncLValueStorage(objNode, scope, obj); return null; case "clear": obj.length = 0; this.syncLValueStorage(objNode, scope, obj); return null; case "length": return obj.length; } } throw new AltairError("ALT0002", `Método no soportado: ${node.name}`); }
-      case "call": { const fn = this.functions.get(node.name); if (!fn) throw new AltairError("ALT0001", `Función no definida: ${node.name}`); const args = node.args.map(a => this.eval(a, scope)); const fscope = new Scope(this.global); fn.params.forEach((p, i) => fscope.define(p.name, {value: args[i], type: p.type})); try { this.execBlock(fn.body, fscope); } catch (e) { if (e instanceof ReturnSignal) return e.value; throw e; } return null; }
-      default: throw new AltairError("ALT_PARSE", "Expresión no soportada: " + node.k);
-    }
-  }
-  readLValue(node, scope){ return this.eval(node, scope); }
-  writeLValue(node, scope, val){
-    if (node.k === "ident") { let s = scope; while (s) { if (s.vars.has(node.name)) { const box = s.vars.get(node.name); if (box.isConst) throw new AltairError("ALT0
+class Interpreter{constructor(log){this.onLog=log||(()=>{});this.functions=new Map();this.global=new Scope(null);this.storagePrefix="altair_playground:";this.stepCount=0;this.maxSteps=2000000;}
+run(src){const tokens=lex(src);const parser=new Parser(tokens);const program=parser.parseProgram();for(const stmt of program)if(stmt.k==="fun")this.functions.set(stmt.name,stmt);try{for(const stmt of program)this.exec(stmt,this.global);}catch(e){if(e instanceof ExitProgram||e instanceof ExitLoop)return;throw e;}}
+tick(){this.stepCount++;if(this.stepCount>this.maxSteps)throw new AltairError("ALT_LIMIT","Límite de pasos alcanzado");}
+storageGet(tier,name){if(tier==="ram"||tier==="temp"||tier==="auto")return undefined;try{const raw=localStorage.getItem(this.storagePrefix+tier+":"+name);return raw!=null?JSON.parse(raw):undefined;}catch{return undefined;}}
+storageSet(tier,name,val){if(tier==="ram"||tier==="temp"||tier==="auto")return;try{localStorage.setItem(this.storagePrefix+tier+":"+name,JSON.stringify(val));}catch{}}
+exec(stmt,scope){this.tick();switch(stmt.k){case"define":{let val=stmt.init?this.eval(stmt.init,scope):this.defaultFor(stmt.type);if(stmt.storage==="disk"||stmt.storage==="cache"){const existing=this.storageGet(stmt.storage,stmt.name);if(existing!==undefined&&!stmt.init)val=existing;this.storageSet(stmt.storage,stmt.name,val);}scope.define(stmt.name,{value:val,type:stmt.type,storage:stmt.storage,isConst:stmt.isConst});return;}case"assign":{let rhs=this.eval(stmt.rhs,scope);if(stmt.op!=="="){const cur=this.readLValue(stmt.target,scope);rhs=this.applyOp(stmt.op.slice(0,1),cur,rhs);}this.writeLValue(stmt.target,scope,rhs);return;}case"log":{this.onLog(this.stringify(this.eval(stmt.e,scope)));return;}case"exprstmt":{this.eval(stmt.e,scope);return;}case"if":{for(const c of stmt.clauses)if(this.truthy(this.eval(c.cond,scope))){this.execBlock(c.body,new Scope(scope));return;}if(stmt.elseBody)this.execBlock(stmt.elseBody,new Scope(scope));return;}case"while":{try{while(this.truthy(this.eval(stmt.cond,scope))){this.tick();this.execBlock(stmt.body,new Scope(scope));}}catch(e){if(!(e instanceof ExitLoop||e instanceof ExitProgram))throw e;}return;}case"repeat":{const count=this.eval(stmt.count,scope);try{for(let i=0;i<count;i++){this.tick();this.execBlock(stmt.body,new Scope(scope));}}catch(e){if(!(e instanceof ExitLoop||e instanceof ExitProgram))throw e;}return;}case"forever":{try{while(true){this.tick();this.execBlock(stmt.body,new Scope(scope));}}catch(e){if(!(e instanceof ExitLoop||e instanceof ExitProgram))throw e;}return;}case"foreach":{const list=this.eval(stmt.listExpr,scope);if(!Array.isArray(list))throw new AltairError("ALT0002","foreach requiere una lista");try{for(const item of list){this.tick();const s2=new Scope(scope);s2.define(stmt.varName,{value:item,type:"auto"});this.execBlock(stmt.body,s2);} }catch(e){if(!(e instanceof ExitLoop||e instanceof ExitProgram))throw e;}return;}case"exit":{throw new ExitProgram();}case"release":{return;}case"fun":{this.functions.set(stmt.name,stmt);return;}case"return":{throw new ReturnSignal(stmt.e?this.eval(stmt.e,scope):null);}case"try":{try{this.execBlock(stmt.body,new Scope(scope));}catch(e){if(e instanceof ExitLoop||e instanceof ReturnSignal||e instanceof ExitProgram)throw e;const s2=new Scope(scope);s2.define(stmt.errName,{value:{code:e.code||"ALT_ERROR",message:e.message||String(e),line:e.line||0},type:"object"});this.execBlock(stmt.catchBody,s2);}return;}case"nop":return;default:throw new AltairError("ALT_PARSE","Sentencia no soportada: "+stmt.k);}}
+execBlock(stmts,scope){for(const s of stmts)this.exec(s,scope);}
+defaultFor(type){if(type==="numeric")return 0;if(type==="text")return"";if(type==="bool")return false;if(type==="list")return[];return null;}
+truthy(v){return v===true||(typeof v==="number"&&v!==0)||(typeof v==="string"&&v.length>0)?!!v:!!v;}
+applyOp(op,a,b){switch(op){case"+":if(typeof a==="string"||typeof b==="string")return this.stringify(a)+this.stringify(b);if(Array.isArray(a)&&Array.isArray(b))return a.concat(b);return a+b;case"-":return a-b;case"*":return a*b;case"/":if(b===0)throw new AltairError("ALT0003","División por cero");return a/b;case"%":if(b===0)throw new AltairError("ALT0003","División por cero");return a%b;}}
+eval(node,scope){this.tick();switch(node.k){case"num":return node.v;case"str":return node.v;case"bool":return node.v;case"list":return node.items.map(it=>this.eval(it,scope));case"ident":return scope.get(node.name).value;case"neg":return-this.eval(node.e,scope);case"not":return!this.truthy(this.eval(node.e,scope));case"logic":{const l=this.truthy(this.eval(node.l,scope));return node.op==="and"?l&&this.truthy(this.eval(node.r,scope)):l||this.truthy(this.eval(node.r,scope));}case"bin":{const l=this.eval(node.l,scope),r=this.eval(node.r,scope);switch(node.op){case"+":case"-":case"*":case"/":case"%":return this.applyOp(node.op,l,r);case"==":return l===r;case"!=":return l!==r;case"<":return l<r;case">":return l>r;case"<=":return l<=r;case">=":return l>=r;}}case"index":{const obj=this.eval(node.obj,scope),idx=this.eval(node.idx,scope);if(!Array.isArray(obj))throw new AltairError("ALT0002","Índice sobre valor que no es lista");if(idx<0||idx>=obj.length)throw new AltairError("ALT0002","Índice fuera de rango");return obj[idx];}case"field":{const obj=this.eval(node.obj,scope);if(node.name==="length"&&Array.isArray(obj))return obj.length;if(obj&&typeof obj==="object")return obj[node.name];throw new AltairError("ALT0002",`Campo no soportado: ${node.name}`);}case"methodcall":{const objNode=node.obj,obj=this.eval(objNode,scope),args=node.args.map(a=>this.eval(a,scope));if(Array.isArray(obj)){switch(node.name){case"append":obj.push(args[0]);this.syncLValueStorage(objNode,scope,obj);return null;case"remove":obj.splice(args[0],1);this.syncLValueStorage(objNode,scope,obj);return null;case"clear":obj.length=0;this.syncLValueStorage(objNode,scope,obj);return null;case"length":return obj.length;}}throw new AltairError("ALT0002",`Método no soportado: ${node.name}`);}case"call":{const fn=this.functions.get(node.name);if(!fn)throw new AltairError("ALT0001",`Función no definida: ${node.name}`);const args=node.args.map(a=>this.eval(a,scope));const fscope=new Scope(this.global);fn.params.forEach((p,i)=>fscope.define(p.name,{value:args[i],type:p.type}));try{this.execBlock(fn.body,fscope);}catch(e){if(e instanceof ReturnSignal)return e.value;throw e;}return null;}default:throw new AltairError("ALT_PARSE","Expresión no soportada: "+node.k);}}
+readLValue(node,scope){return this.eval(node,scope);}
+writeLValue(node,scope,val){if(node.k==="ident"){let s=scope;while(s){if(s.vars.has(node.name)){const box=s.vars.get(node.name);if(box.isConst)throw new AltairError("ALT0005",`No se puede reasignar constante: ${node.name}`);box.value=val;if(box.storage==="disk"||box.storage==="cache")this.storageSet(box.storage,node.name,val);return;}s=s.parent;}scope.define(node.name,{value:val,type:"auto"});return;}if(node.k==="index"){const obj=this.eval(node.obj,scope),idx=this.eval(node.idx,scope);obj[idx]=val;this.syncLValueStorage(node.obj,scope,obj);return;}throw new AltairError("ALT_PARSE","Destino de asignación no soportado");}
+syncLValueStorage(node,scope,val){if(node.k==="ident"){let s=scope;while(s){if(s.vars.has(node.name)){const box=s.vars.get(node.name);box.value=val;if(box.storage==="disk"||box.storage==="cache")this.storageSet(box.storage,node.name,val);return;}s=s
