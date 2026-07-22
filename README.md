@@ -63,7 +63,7 @@ de tipos, control de flujo, clases, snapshots y el resto de la sintaxis.
 Altair se distribuye como instalador para Windows (10/11, 64-bit).
 
 1. Descarga `Altair-Setup.exe` desde la página de
-   [**Releases**](https://github.com/TU-USUARIO/altair/releases/latest).
+   [**Releases**](https://github.com/victios7/altair/releases/latest).
 2. Ejecútalo y acepta permisos de administrador (necesarios para añadir
    `altairc` al `PATH` del sistema).
 3. Abre **Altair Terminal** desde el acceso directo del escritorio, o una
@@ -117,13 +117,13 @@ altair/
 
 Los binarios (`altairc.exe`, `altair-terminal.exe`, `Altair-Setup.exe`) **no
 se versionan en el repositorio** — se publican en la sección de
-[Releases](https://github.com/TU-USUARIO/altair/releases) para no inflar el
+[Releases](https://github.com/victios7/altair/releases) para no inflar el
 historial de git con archivos binarios.
 
 ## Contribuir
 
 Las incidencias y propuestas de mejora son bienvenidas a través de
-[Issues](https://github.com/TU-USUARIO/altair/issues). Si quieres proponer
+[Issues](https://github.com/victios7/altair/issues). Si quieres proponer
 cambios al compilador o a la guía del lenguaje, abre un Pull Request.
 
 ## Licencia
