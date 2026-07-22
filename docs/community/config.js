@@ -1,14 +1,7 @@
-// ============================================================
-// CONFIGURACIÓN DE SUPABASE — Altair Community
-// ============================================================
-// 1. Crea un proyecto gratis en https://supabase.com
-// 2. Ve a Project Settings → API
-// 3. Copia "Project URL" y "anon public key" aquí abajo
-// 4. Ejecuta el SQL de community/schema.sql en el SQL Editor de Supabase
-// ============================================================
 
-const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
-const SUPABASE_ANON_KEY = "TU-ANON-KEY-PUBLICA";
+
+const SUPABASE_URL = "https://yxbdvaijcawzibijcxdv.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_cDwLZD6i0Cc2m0QdaDk_vg_Sxg6o8Wd";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
