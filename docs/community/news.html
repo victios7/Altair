@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noticias — Altair Community</title>
+<meta name="description" content="Anuncios y novedades del proyecto Altair Lang.">
+<link rel="canonical" href="https://victios7.github.io/Altair/community/news.html">
+<link rel="icon" type="image/png" href="../altair logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="community.css">
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="../index.html"><img src="../altair logo.png" alt=""> Altair</a>
+    <div class="navlinks">
+      <a href="../index.html">Inicio</a>
+      <a href="../guia.html">Guía del lenguaje</a>
+      <a href="https://github.com/victios7/Altair" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="subnav">
+    <a href="index.html">Foro</a>
+    <a href="showcase.html">Showcase</a>
+    <a href="news.html" class="active">Noticias</a>
+  </div>
+
+  <div class="page-head">
+    <div class="eyebrow">Comunidad Altair</div>
+    <h1>Noticias</h1>
+    <p>Anuncios oficiales, nuevas versiones y novedades del proyecto.</p>
+  </div>
+
+  <!--
+    Panel de publicación deshabilitado por defecto: las noticias suelen
+    ser solo del mantenedor del proyecto. Si quieres que cualquiera
+    pueda publicar aquí, borra el comentario que envuelve el panel
+    de abajo (y deja la política "public insert news" en schema.sql).
+  -->
+  <!--
+  <div class="panel">
+    <h3>Publicar noticia</h3>
+    <div id="post-msg"></div>
+    <div class="field-row">
+      <div class="field">
+        <label>Tu nombre</label>
+        <input type="text" id="n-author" placeholder="ej. victios7">
+      </div>
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="n-title" placeholder="ej. Altair v1.7 disponible">
+      </div>
+    </div>
+    <div class="field">
+      <label>Contenido</label>
+      <textarea id="n-content" rows="4" placeholder="Escribe aquí..."></textarea>
+    </div>
+    <button class="btn" id="n-submit">Publicar</button>
+  </div>
+  -->
+
+  <div id="news-list">
+    <div class="empty-state">Cargando noticias…</div>
+  </div>
+
+  <footer>
+    <span>Altair Community</span>
+    <a href="https://github.com/victios7/Altair" target="_blank">github.com/victios7/Altair</a>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const list = document.getElementById("news-list");
+
+async function loadNews(){
+  const { data, error } = await supabaseClient
+    .from("news")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    list.innerHTML = `<div class="state-msg error">Error al cargar noticias: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  if (!data.length) {
+    list.innerHTML = `<div class="empty-state">Todavía no hay noticias publicadas.</div>`;
+    return;
+  }
+  list.innerHTML = data.map(item => `
+    <div class="card">
+      <div class="card-head">
+        <h3>${escapeHtml(item.title)}</h3>
+        <span class="card-meta"><span class="author">${escapeHtml(item.author)}</span> · ${timeAgo(item.created_at)}</span>
+      </div>
+      <p>${escapeHtml(item.content)}</p>
+    </div>
+  `).join("");
+}
+
+loadNews();
+</script>
+</body>
+</html>

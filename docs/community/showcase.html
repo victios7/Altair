@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Showcase — Altair Community</title>
+<meta name="description" content="Descubre proyectos hechos con Altair Lang por la comunidad.">
+<link rel="canonical" href="https://victios7.github.io/Altair/community/showcase.html">
+<link rel="icon" type="image/png" href="../altair logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="community.css">
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="../index.html"><img src="../altair logo.png" alt=""> Altair</a>
+    <div class="navlinks">
+      <a href="../index.html">Inicio</a>
+      <a href="../guia.html">Guía del lenguaje</a>
+      <a href="https://github.com/victios7/Altair" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="subnav">
+    <a href="index.html">Foro</a>
+    <a href="showcase.html" class="active">Showcase</a>
+    <a href="news.html">Noticias</a>
+    <a href="playground.html">Playground</a>
+  </div>
+
+  <div class="page-head">
+    <div class="eyebrow">Comunidad Altair</div>
+    <h1>Showcase</h1>
+    <p>Proyectos, herramientas y experimentos construidos con Altair por la comunidad.</p>
+  </div>
+
+  <div class="panel">
+    <h3>Compartir un proyecto</h3>
+    <div id="post-msg"></div>
+    <div class="field-row">
+      <div class="field">
+        <label>Tu nombre</label>
+        <input type="text" id="s-author" placeholder="ej. victios7">
+      </div>
+      <div class="field">
+        <label>Nombre del proyecto</label>
+        <input type="text" id="s-title" placeholder="ej. servidor-blog.at">
+      </div>
+    </div>
+    <div class="field">
+      <label>Descripción</label>
+      <textarea id="s-description" rows="3" placeholder="¿Qué hace tu proyecto?"></textarea>
+    </div>
+    <div class="field">
+      <label>Enlace (repo, demo, etc.) — opcional</label>
+      <input type="text" id="s-link" placeholder="https://github.com/...">
+    </div>
+    <button class="btn" id="s-submit">Compartir</button>
+  </div>
+
+  <div id="showcase-list">
+    <div class="empty-state">Cargando proyectos…</div>
+  </div>
+
+  <footer>
+    <span>Altair Community</span>
+    <a href="https://github.com/victios7/Altair" target="_blank">github.com/victios7/Altair</a>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const list = document.getElementById("showcase-list");
+const msg = document.getElementById("post-msg");
+document.getElementById("s-author").value = getAuthorName();
+
+async function loadShowcase(){
+  const { data, error } = await supabaseClient
+    .from("showcase")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    list.innerHTML = `<div class="state-msg error">Error al cargar: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  if (!data.length) {
+    list.innerHTML = `<div class="empty-state">Todavía no hay proyectos compartidos. ¡Sé el primero!</div>`;
+    return;
+  }
+  list.innerHTML = data.map(item => `
+    <div class="card">
+      <div class="card-head">
+        <h3>${escapeHtml(item.title)}</h3>
+        <span class="card-meta"><span class="author">${escapeHtml(item.author)}</span> · ${timeAgo(item.created_at)}</span>
+      </div>
+      <p>${escapeHtml(item.description)}</p>
+      ${item.link ? `<a class="ext-link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer">🔗 Ver proyecto</a>` : ""}
+    </div>
+  `).join("");
+}
+
+document.getElementById("s-submit").addEventListener("click", async () => {
+  const author = document.getElementById("s-author").value.trim() || "Anónimo";
+  const title = document.getElementById("s-title").value.trim();
+  const description = document.getElementById("s-description").value.trim();
+  let link = document.getElementById("s-link").value.trim();
+  if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
+
+  if (!title || !description) {
+    msg.innerHTML = `<div class="state-msg error">Escribe al menos un nombre y una descripción.</div>`;
+    return;
+  }
+
+  setAuthorName(author);
+  const btn = document.getElementById("s-submit");
+  btn.disabled = true; btn.textContent = "Compartiendo…";
+
+  const { error } = await supabaseClient.from("showcase").insert({ author, title, description, link: link || null });
+
+  btn.disabled = false; btn.textContent = "Compartir";
+
+  if (error) {
+    msg.innerHTML = `<div class="state-msg error">Error: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  msg.innerHTML = `<div class="state-msg ok">¡Proyecto compartido!</div>`;
+  document.getElementById("s-title").value = "";
+  document.getElementById("s-description").value = "";
+  document.getElementById("s-link").value = "";
+  loadShowcase();
+});
+
+loadShowcase();
+</script>
+</body>
+</html>

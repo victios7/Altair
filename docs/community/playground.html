@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playground — Altair Community</title>
+<meta name="description" content="Prueba código Altair directamente en tu navegador, sin instalar nada.">
+<link rel="canonical" href="https://victios7.github.io/Altair/community/playground.html">
+<link rel="icon" type="image/png" href="../altair logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="community.css">
+<style>
+  .pg-wrap{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .pg-panel{background:var(--bg-panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column;}
+  .pg-panel-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px; background:var(--bg-panel-2); border-bottom:1px solid var(--line);
+    font-family:var(--font-mono); font-size:.78rem; color:var(--text-dim);
+  }
+  #editor{
+    flex:1; min-height:420px; background:var(--bg); color:var(--text); border:none; outline:none;
+    font-family:var(--font-mono); font-size:.88rem; padding:18px; resize:none; line-height:1.6;
+    tab-size:4;
+  }
+  #console{
+    flex:1; min-height:420px; background:var(--bg); color:#c7ceda; font-family:var(--font-mono);
+    font-size:.85rem; padding:18px; overflow-y:auto; white-space:pre-wrap; line-height:1.7;
+  }
+  #console .line{border-bottom:1px dashed var(--line); padding:4px 0;}
+  #console .err{color:var(--ember);}
+  #console .ok{color:#8fd3a0;}
+  #console .empty{color:var(--text-dim);}
+  select#examples{
+    background:var(--bg); border:1px solid var(--line); color:var(--text);
+    font-family:var(--font-mono); font-size:.78rem; padding:6px 10px; border-radius:6px;
+  }
+  .toolbar{display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap;}
+  .unsupported{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:12px;
+    padding:20px 24px; margin-top:24px; font-size:.88rem; color:var(--text-dim);
+  }
+  .unsupported strong{color:var(--text);}
+  @media (max-width: 860px){ .pg-wrap{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="../index.html"><img src="../altair logo.png" alt=""> Altair</a>
+    <div class="navlinks">
+      <a href="../index.html">Inicio</a>
+      <a href="../guia.html">Guía del lenguaje</a>
+      <a href="https://github.com/victios7/Altair" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="subnav">
+    <a href="index.html">Foro</a>
+    <a href="showcase.html">Showcase</a>
+    <a href="news.html">Noticias</a>
+    <a href="playground.html" class="active">Playground</a>
+  </div>
+
+  <div class="page-head">
+    <div class="eyebrow">Comunidad Altair</div>
+    <h1>Playground</h1>
+    <p>Prueba código Altair directamente aquí, sin instalar nada. Corre con un intérprete en JavaScript en tu navegador — no es el compilador oficial <code>altairc</code>, así que algunas funciones no están disponibles (ver nota abajo).</p>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn" id="run-btn">▶ Ejecutar</button>
+    <button class="btn-ghost btn" id="clear-btn">Limpiar consola</button>
+    <select id="examples">
+      <option value="">Cargar ejemplo…</option>
+      <option value="hola">Hola mundo</option>
+      <option value="bucle">Bucles y condicionales</option>
+      <option value="funciones">Funciones recursivas</option>
+      <option value="listas">Listas</option>
+      <option value="storage">Storage tiers (disk/cache)</option>
+    </select>
+  </div>
+
+  <div class="pg-wrap">
+    <div class="pg-panel">
+      <div class="pg-panel-head"><span>editor.at</span></div>
+      <textarea id="editor" spellcheck="false">define text nombre = "mundo"
+log "Hola, " + nombre + "!"
+
+define numeric n = 5
+define numeric total = 0
+define numeric i = 1
+while i <= n;
+    total += i
+    i += 1
+break
+log "Suma de 1 a " + n + " = " + total</textarea>
+    </div>
+    <div class="pg-panel">
+      <div class="pg-panel-head"><span>output</span></div>
+      <div id="console"><div class="line empty">Pulsa "▶ Ejecutar" para ver el resultado aquí.</div></div>
+    </div>
+  </div>
+
+  <div class="unsupported">
+    <strong>Qué cubre este playground:</strong> variables (<code>numeric</code>, <code>text</code>, <code>bool</code>, <code>list</code>), storage tiers <code>ram</code>/<code>disk</code>/<code>cache</code>/<code>temp</code> (simulados con <code>localStorage</code> del navegador), operadores, <code>if/elif/else</code>, <code>while</code>, <code>repeat</code>, <code>forever</code>, <code>foreach</code>, <code>exit</code>, funciones (<code>fun</code>/<code>return</code>, con recursión), <code>try/catch</code>, listas y <code>log</code>.
+    <br><br>
+    <strong>Qué NO cubre:</strong> <code>class</code>/<code>object</code>, <code>token</code>, <code>snapshot</code>, <code>choose</code>, y toda la capa de servidor (<code>listen</code>, <code>route</code>, sesiones, config, jobs, base de datos) — eso requiere el compilador real <code>altairc</code> + <code>gcc</code> corriendo en un servidor, algo que un navegador no puede hacer. Para eso, <a href="https://github.com/victios7/Altair/releases/latest" target="_blank">descarga Altair</a> e instálalo localmente.
+  </div>
+
+  <footer>
+    <span>Altair Community</span>
+    <a href="https://github.com/victios7/Altair" target="_blank">github.com/victios7/Altair</a>
+  </footer>
+</div>
+
+<script src="altair-interpreter.js"></script>
+<script>
+const editor = document.getElementById("editor");
+const consoleEl = document.getElementById("console");
+const runBtn = document.getElementById("run-btn");
+const clearBtn = document.getElementById("clear-btn");
+const examples = document.getElementById("examples");
+
+function logLine(text, cls){
+  const div = document.createElement("div");
+  div.className = "line" + (cls ? " " + cls : "");
+  div.textContent = text;
+  consoleEl.appendChild(div);
+  consoleEl.scrollTop = consoleEl.scrollHeight;
+}
+
+function runCode(){
+  consoleEl.innerHTML = "";
+  const src = editor.value;
+  const interp = new AltairInterpreter((msg) => logLine(msg));
+  try {
+    interp.run(src);
+    logLine("✓ Ejecución completada.", "ok");
+  } catch (e) {
+    logLine(`✗ Error${e.code ? " (" + e.code + ")" : ""}: ${e.message}`, "err");
+  }
+}
+
+runBtn.addEventListener("click", runCode);
+clearBtn.addEventListener("click", () => { consoleEl.innerHTML = '<div class="line empty">Consola limpiada.</div>'; });
+
+// Ejecutar con Ctrl+Enter / Cmd+Enter
+editor.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runCode(); }
+  if (e.key === "Tab") { e.preventDefault();
+    const s = editor.selectionStart, en = editor.selectionEnd;
+    editor.value = editor.value.slice(0, s) + "    " + editor.value.slice(en);
+    editor.selectionStart = editor.selectionEnd = s + 4;
+  }
+});
+
+const SAMPLES = {
+  hola: `define text nombre = "mundo"
+log "Hola, " + nombre + "!"`,
+
+  bucle: `define numeric score = 82
+
+if score > 90;
+    log "Excelente"
+break
+elif score > 70;
+    log "Bien"
+break
+else;
+    log "A mejorar"
+break
+
+define numeric n = 1
+while n <= 5;
+    log "vuelta " + n
+    n += 1
+break
+
+repeat 3 times;
+    log "tick"
+break`,
+
+  funciones: `fun factorial numeric n numeric;
+    if n <= 1;
+        return 1
+    break
+    return n * factorial(n - 1)
+break
+
+define numeric r = factorial(6)
+log "6! = " + r
+
+fun add numeric x numeric, y numeric;
+    return x + y
+break
+
+log "3 + 4 = " + add(3, 4)`,
+
+  listas: `define list frutas = ["manzana", "pera", "kiwi"]
+frutas.append("mango")
+
+foreach fruta in frutas;
+    log fruta
+break
+
+log "Total: " + frutas.length()
+frutas.remove(0)
+log "Tras eliminar la primera: " + frutas`,
+
+  storage: `/ Estas variables persisten entre recargas de la página
+/ usando localStorage del navegador (simulando disk/cache)
+define numeric visitas disk = 0
+visitas += 1
+log "Visitas registradas en este navegador: " + visitas
+log "Recarga la página y vuelve a ejecutar: el número subirá."`
+};
+
+examples.addEventListener("change", () => {
+  if (examples.value && SAMPLES[examples.value]) {
+    editor.value = SAMPLES[examples.value];
+  }
+  examples.value = "";
+});
+</script>
+</body>
+</html>
