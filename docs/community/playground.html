@@ -6,7 +6,7 @@
 <title>Playground — Altair Community</title>
 <meta name="description" content="Prueba código Altair directamente en tu navegador, sin instalar nada.">
 <link rel="canonical" href="https://victios7.github.io/Altair/community/playground.html">
-<link rel="icon" type="image/png" href="../altair logo.png">
+<link rel="icon" type="image/png" href="../altair-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="community.css">
@@ -18,41 +18,7 @@
     padding:12px 16px; background:var(--bg-panel-2); border-bottom:1px solid var(--line);
     font-family:var(--font-mono); font-size:.78rem; color:var(--text-dim);
   }
-  .editor-shell{position:relative; flex:1; min-height:460px;}
-  .editor-shell pre, .editor-shell textarea{
-    position:absolute; top:0; left:0; right:0; bottom:0; margin:0;
-    padding:18px; font-family:var(--font-mono); font-size:.88rem; line-height:1.65;
-    white-space:pre-wrap; word-break:break-word; overflow-wrap:break-word;
-    overflow-y:auto; overflow-x:hidden; tab-size:4; border:none;
-  }
-  .editor-shell pre{
-    color:var(--text); pointer-events:none; z-index:1; background:var(--bg);
-    overflow:hidden; /* el scroll real lo controla el textarea; este solo se sincroniza */
-  }
-  .editor-shell pre code{font-family:inherit; white-space:inherit;}
-  #editor{
-    background:transparent; color:transparent; caret-color:var(--gold);
-    resize:none; outline:none; z-index:2; position:relative;
-  }
-  /* Scrollbar oscura y consistente con el tema (en vez de la barra blanca nativa) */
-  .editor-shell textarea::-webkit-scrollbar{width:10px; height:10px;}
-  .editor-shell textarea::-webkit-scrollbar-track{background:var(--bg-panel);}
-  .editor-shell textarea::-webkit-scrollbar-thumb{background:var(--line); border-radius:6px;}
-  .editor-shell textarea::-webkit-scrollbar-thumb:hover{background:#3a4258;}
-  .editor-shell textarea{scrollbar-width:thin; scrollbar-color:var(--line) var(--bg-panel);}
-  #console::-webkit-scrollbar{width:10px;}
-  #console::-webkit-scrollbar-track{background:var(--bg-panel);}
-  #console::-webkit-scrollbar-thumb{background:var(--line); border-radius:6px;}
-  #console{scrollbar-width:thin; scrollbar-color:var(--line) var(--bg-panel);}
-  /* Highlight token colors — coinciden con la paleta de la captura */
-  .tok-kw{color:var(--gold);}
-  .tok-fn{color:var(--blue-glow);}
-  .tok-str{color:#8fd3a0;}
-  .tok-cm{color:#5f6779; font-style:italic;}
-  .tok-num{color:#c7ceda;}
-  .tok-op{color:#838da3;}
-  .tok-punct{color:#838da3;}
-
+  #monaco-editor{width:100%; height:460px; min-height:460px;}
   #console{
     flex:1; min-height:460px; background:var(--bg); color:#c7ceda; font-family:var(--font-mono);
     font-size:.85rem; padding:18px; overflow-y:auto; white-space:pre-wrap; line-height:1.7;
@@ -72,13 +38,13 @@
   }
   .unsupported strong{color:var(--text);}
   .unsupported code{color:var(--gold); font-family:var(--font-mono); font-size:.85em;}
-  @media (max-width: 860px){ .pg-wrap{grid-template-columns:1fr;} }
+  @media (max-width: 860px){ .pg-wrap{grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <nav>
-    <a class="brand" href="../index.html"><img src="../altair logo.png" alt=""> Altair</a>
+    <a class="brand" href="../index.html"><img src="../altair-logo.png" alt=""> Altair</a>
     <div class="navlinks">
       <a href="../index.html">Inicio</a>
       <a href="../guia.html">Guía del lenguaje</a>
@@ -115,10 +81,7 @@
   <div class="pg-wrap">
     <div class="pg-panel">
       <div class="pg-panel-head"><span>editor.at</span></div>
-      <div class="editor-shell">
-        <pre id="highlight"><code></code></pre>
-        <textarea id="editor" spellcheck="false"></textarea>
-      </div>
+      <div id="monaco-editor"></div>
     </div>
     <div class="pg-panel">
       <div class="pg-panel-head"><span>output</span></div>
@@ -138,8 +101,14 @@
   </footer>
 </div>
 
+<!-- Cargar Monaco Editor -->
+<script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
 <script>
+  require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@latest/min/vs' } });
+</script>
 
+<script>
+// ---------- INTERPRETER (igual que antes) ----------
 class AltairError extends Error {
   constructor(code, message, line) {
     super(message);
@@ -148,13 +117,12 @@ class AltairError extends Error {
   }
 }
 
-// ---------- LEXER ----------
 const KEYWORDS = new Set([
   "define","numeric","text","bool","list","object","token","const",
   "ram","disk","cache","temp","auto","release",
-  "log","if","elif","else","while","repeat","times","forever","foreach","in",
-  "break","exit","fun","return","try","catch","as","wait",
-  "true","false","and","or"
+  "log","if","elif","else\",\"while\",\"repeat\",\"times\",\"forever\",\"foreach\",\"in",
+  "break\",\"exit\",\"fun\",\"return\",\"try\",\"catch\",\"as\",\"wait",
+  "true\",\"false\",\"and\",\"or"
 ]);
 
 function lex(src) {
@@ -165,7 +133,6 @@ function lex(src) {
     const c = src[i];
     if (c === "\n") { tokens.push({t:"NL", line}); line++; i++; continue; }
     if (c === " " || c === "\t" || c === "\r") { i++; continue; }
-    // comment: "/" at start of a token followed by space or letter (not "/=" style, altair has no // )
     if (c === "/" && (src[i+1] === " " || /[a-zA-Z]/.test(src[i+1] || ""))) {
       while (i < n && src[i] !== "\n") i++;
       continue;
@@ -177,12 +144,12 @@ function lex(src) {
         if (src[i] === "\\" && src[i+1] === '"') { s += '"'; i += 2; continue; }
         s += src[i]; i++;
       }
-      i++; // closing quote
+      i++;
       tokens.push({t:"STR", v:s, line});
       continue;
     }
     if (/[0-9]/.test(c)) {
-      let s = ""; 
+      let s = "";
       while (i < n && /[0-9.]/.test(src[i])) { s += src[i]; i++; }
       tokens.push({t:"NUM", v:parseFloat(s), line});
       continue;
@@ -194,15 +161,13 @@ function lex(src) {
       else tokens.push({t:"IDENT", v:s, line});
       continue;
     }
-    // multi-char operators
-    const two = src.substr(i, 2);
+    const two = src.substring(i, i+2);
     if (["==","!=","<=",">=","+=","-=","*=","/=","%="].includes(two)) {
       tokens.push({t:two, line}); i += 2; continue;
     }
     if ("+-*/%<>=!.,;:()[]{}".includes(c)) {
       tokens.push({t:c, line}); i++; continue;
     }
-    // unknown char, skip
     i++;
   }
   tokens.push({t:"EOF", line});
@@ -224,14 +189,13 @@ class Parser {
 
   parseHeader(){
     this.skipNL();
-    // altair.doc;
     if (!(this.cur().t === "IDENT" && this.cur().v === "altair")) {
       throw new AltairError("ALT_HEADER", "Todo programa Altair debe empezar con la cabecera 'altair.doc;' (falta al inicio del archivo)");
     }
-    this.next(); // altair
+    this.next();
     this.expect(".");
     if (!(this.cur().t === "IDENT" && this.cur().v === "doc")) throw new AltairError("ALT_HEADER", "Se esperaba 'doc' tras 'altair.'");
-    this.next(); // doc
+    this.next();
     this.expect(";");
     const header = {name:null, version:null, author:null};
     this.skipNL();
@@ -243,7 +207,7 @@ class Parser {
       if (["name","version","author"].includes(field)) header[field] = val;
       this.skipNL();
     }
-    this.next(); // create
+    this.next();
     if (!(this.cur().t === "IDENT" && this.cur().v === "altair")) throw new AltairError("ALT_HEADER", "Se esperaba 'altair.doc' tras 'create'");
     this.next();
     this.expect(".");
@@ -264,7 +228,6 @@ class Parser {
     return stmts;
   }
 
-  // Parses statements until a BREAK token is found; consumes the BREAK.
   parseBlock(){
     const stmts = [];
     this.skipNL();
@@ -290,33 +253,42 @@ class Parser {
       case "EXIT": { this.next(); return {k:"exit", line:tok.line}; }
       case "RELEASE": { this.next(); const name = this.expect("IDENT").v; return {k:"release", name, line:tok.line}; }
       case "FUN": return this.parseFun();
-      case "RETURN": { this.next(); 
-        this.skipNLNoConsumeBlock=true;
+      case "RETURN": {
+        this.next();
         let e = null;
         if (this.cur().t !== "NL" && this.cur().t !== "BREAK" && this.cur().t !== "EOF") e = this.parseExpr();
-        return {k:"return", e, line:tok.line}; }
+        return {k:"return", e, line:tok.line};
+      }
       case "TRY": return this.parseTry();
-      case "WAIT": { this.next(); this.parseExpr(); return {k:"nop", line:tok.line}; } // no-op, no sleeping in browser
-      default:
-        return this.parseExprOrAssign();
+      case "WAIT": { this.next(); this.parseExpr(); return {k:"nop", line:tok.line}; }
+      default: return this.parseExprOrAssign();
     }
   }
 
   parseDefine(){
     const line = this.cur().line;
     this.expect("DEFINE");
-    const type = this.next().v; // numeric/text/bool/list/object/token
+
+    let isConst = false;
+    if (this.cur().t === "CONST") {
+      isConst = true;
+      this.next();
+    }
+
+    const type = this.next().v;
     const name = this.expect("IDENT").v;
-    let storage = "ram", isConst = false;
-    while (["RAM","DISK","CACHE","TEMP","AUTO","CONST"].includes(this.cur().t)) {
+
+    let storage = "ram";
+    while (["RAM","DISK","CACHE","TEMP","AUTO"].includes(this.cur().t)) {
       const q = this.next();
-      if (q.t === "CONST") isConst = true; else storage = q.v;
-      // skip qualifiers like expire=30m / weight=5 (IDENT = ...)
+      storage = q.v;
       if (this.cur().t === "IDENT" && this.peek(1).t === "=") {
-        // could be a qualifier like expire=30m; treat as ident= value, skip
-        // but this collides with our expr assign; only skip if it's expire/weight
+        this.next();
+        if (this.cur().t === "=") this.next();
+        if (this.cur().t !== "NL" && this.cur().t !== "BREAK" && this.cur().t !== "EOF") this.next();
       }
     }
+
     let init = null;
     if (this.cur().t === "=") { this.next(); init = this.parseExpr(); }
     return {k:"define", type, name, storage, isConst, init, line};
@@ -325,7 +297,6 @@ class Parser {
   parseExprOrAssign(){
     const line = this.cur().line;
     const expr = this.parseExpr();
-    // assignment forms: IDENT = expr, IDENT += expr, list[idx] = expr, obj.field = expr
     const compound = ["=","+=","-=","*=","/=","%="];
     if (compound.includes(this.cur().t)) {
       const op = this.next().t;
@@ -404,13 +375,11 @@ class Parser {
     this.expect("FUN");
     const name = this.expect("IDENT").v;
     let retType = "auto";
-    // optional return type: a TYPE keyword followed by an IDENT (the first param name)
     const TYPES = ["NUMERIC","TEXT","BOOL","LIST","OBJECT"];
     if (TYPES.includes(this.cur().t) && this.peek(1).t === "IDENT") {
       retType = this.next().v;
     }
     const params = [];
-    // params: name type, name type, ... until ";"
     while (this.cur().t !== ";") {
       const pname = this.expect("IDENT").v;
       let ptype = "numeric";
@@ -439,7 +408,6 @@ class Parser {
     return {k:"try", body, errName, catchBody, line};
   }
 
-  // ---- Expressions (precedence climbing) ----
   parseExpr(){ return this.parseOr(); }
   parseOr(){
     let l = this.parseAnd();
@@ -472,7 +440,7 @@ class Parser {
     return l;
   }
   parseUnary(){
-    if (this.cur().t === "!" ) { this.next(); const e = this.parseUnary(); return {k:"not", e}; }
+    if (this.cur().t === "!") { this.next(); const e = this.parseUnary(); return {k:"not", e}; }
     if (this.cur().t === "-") { this.next(); const e = this.parseUnary(); return {k:"neg", e}; }
     return this.parsePostfix();
   }
@@ -541,7 +509,6 @@ class Scope {
   set(name, val){
     let s = this;
     while (s) { if (s.vars.has(name)) { s.vars.set(name, val); return; } s = s.parent; }
-    // fallback: set in current (used for globals fallback in functions)
     this.vars.set(name, val);
   }
   define(name, val){ this.vars.set(name, val); }
@@ -559,14 +526,13 @@ class Interpreter {
     this.global = new Scope(null);
     this.storagePrefix = "altair_playground:";
     this.stepCount = 0;
-    this.maxSteps = 2_000_000; // safety net against infinite loops
+    this.maxSteps = 2_000_000;
   }
 
   run(src){
     const tokens = lex(src);
     const parser = new Parser(tokens);
     const program = parser.parseProgram();
-    // hoist function declarations
     for (const stmt of program) if (stmt.k === "fun") this.functions.set(stmt.name, stmt);
     try {
       for (const stmt of program) this.exec(stmt, this.global);
@@ -582,7 +548,7 @@ class Interpreter {
   }
 
   storageGet(tier, name){
-    if (tier === "ram" || tier === "temp" || tier === "auto") return undefined; // handled by scope
+    if (tier === "ram" || tier === "temp" || tier === "auto") return undefined;
     try {
       const raw = localStorage.getItem(this.storagePrefix + tier + ":" + name);
       return raw != null ? JSON.parse(raw) : undefined;
@@ -607,7 +573,6 @@ class Interpreter {
         return;
       }
       case "assign": {
-        const box = this.resolveLValueBox(stmt.target, scope);
         let rhs = this.eval(stmt.rhs, scope);
         if (stmt.op !== "=") {
           const cur = this.readLValue(stmt.target, scope);
@@ -641,20 +606,20 @@ class Interpreter {
             this.tick();
             this.execBlock(stmt.body, new Scope(scope));
           }
-        } catch (e) { if (!(e instanceof ExitLoop)) throw e; }
+        } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; }
         return;
       }
       case "repeat": {
         const count = this.eval(stmt.count, scope);
         try {
           for (let i=0; i<count; i++) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); }
-        } catch (e) { if (!(e instanceof ExitLoop)) throw e; }
+        } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; }
         return;
       }
       case "forever": {
         try {
           while (true) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); }
-        } catch (e) { if (!(e instanceof ExitLoop)) throw e; }
+        } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; }
         return;
       }
       case "foreach": {
@@ -667,15 +632,14 @@ class Interpreter {
             s2.define(stmt.varName, {value:item, type:"auto"});
             this.execBlock(stmt.body, s2);
           }
-        } catch (e) { if (!(e instanceof ExitLoop)) throw e; }
+        } catch (e) { if (!(e instanceof ExitLoop || e instanceof ExitProgram)) throw e; }
         return;
       }
       case "exit": {
-        // exits nearest loop if inside one; interpreter distinguishes via try/catch chain
-        throw new ExitLoop();
+        throw new ExitProgram();
       }
       case "release": {
-        return; // no-op in playground
+        return;
       }
       case "fun": {
         this.functions.set(stmt.name, stmt);
@@ -790,7 +754,7 @@ class Interpreter {
         const fn = this.functions.get(node.name);
         if (!fn) throw new AltairError("ALT0001", `Función no definida: ${node.name}`);
         const args = node.args.map(a => this.eval(a, scope));
-        const fscope = new Scope(this.global); // globals accessible, per language spec bugfix #4
+        const fscope = new Scope(this.global);
         fn.params.forEach((p, i) => fscope.define(p.name, {value: args[i], type: p.type}));
         try {
           this.execBlock(fn.body, fscope);
@@ -805,13 +769,12 @@ class Interpreter {
     }
   }
 
-  // Resolve assignment targets: ident, index, field
   readLValue(node, scope){ return this.eval(node, scope); }
 
   writeLValue(node, scope, val){
     if (node.k === "ident") {
       let s = scope;
-      while (s) { if (s.vars.has(node.name)) { 
+      while (s) { if (s.vars.has(node.name)) {
         const box = s.vars.get(node.name);
         if (box.isConst) throw new AltairError("ALT0005", `No se puede reasignar constante: ${node.name}`);
         box.value = val;
@@ -854,153 +817,152 @@ class Interpreter {
   }
 }
 
-// Export for use in playground.html
 window.AltairInterpreter = Interpreter;
 window.AltairError = AltairError;
-
 </script>
+
+<!-- Configuración de Monaco Editor -->
 <script>
-// ============================================================
-// ALTAIR HIGHLIGHTER — resaltado de sintaxis propio (sin Monaco)
-// Reutiliza la misma tokenización que el intérprete, pero en vez
-// de ejecutar, envuelve cada token en <span> con su clase de color.
-// ============================================================
-
-(function(){
-  // Palabras clave "estructurales" (gold) — igual que en la captura:
-  // config, break, health, check, listen, route, respond, etc.
-  const STRUCT_KEYWORDS = new Set([
-    "altair","doc","create","config","health","check","listen","route","respond",
-    "define","break","if","elif","else","while","repeat","times","forever",
-    "foreach","in","exit","fun","return","try","catch","as","wait","release",
-    "log","name","version","author"
-  ]);
-
-  // Tipos y storage tiers también en gold (son palabras reservadas del lenguaje)
-  const TYPE_KEYWORDS = new Set([
-    "numeric","text","bool","list","object","token","const",
-    "ram","disk","cache","temp","auto","true","false","and","or",
-    "default","required","rate_limit","per_minute"
-  ]);
-
-  function escapeHtml(s){
-    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  }
-
-  function highlight(src){
-    let out = "";
-    let i = 0;
-    const n = src.length;
-
-    while (i < n) {
-      const c = src[i];
-
-      // Comentario: "/" seguido de espacio o letra
-      if (c === "/" && (src[i+1] === " " || /[a-zA-Z]/.test(src[i+1] || ""))) {
-        let j = i;
-        while (j < n && src[j] !== "\n") j++;
-        out += `<span class="tok-cm">${escapeHtml(src.slice(i, j))}</span>`;
-        i = j;
-        continue;
-      }
-
-      // Cadenas de texto
-      if (c === '"') {
-        let j = i + 1;
-        while (j < n && src[j] !== '"') {
-          if (src[j] === "\\") j++;
-          j++;
-        }
-        j = Math.min(j + 1, n);
-        out += `<span class="tok-str">${escapeHtml(src.slice(i, j))}</span>`;
-        i = j;
-        continue;
-      }
-
-      // Números
-      if (/[0-9]/.test(c)) {
-        let j = i;
-        while (j < n && /[0-9.]/.test(src[j])) j++;
-        out += `<span class="tok-num">${escapeHtml(src.slice(i, j))}</span>`;
-        i = j;
-        continue;
-      }
-
-      // Identificadores / palabras clave
-      if (/[a-zA-Z_]/.test(c)) {
-        let j = i;
-        while (j < n && /[a-zA-Z0-9_]/.test(src[j])) j++;
-        const word = src.slice(i, j);
-
-        // ¿Es llamada a función? identificador seguido de "(" (ignorando espacios)
-        let k = j;
-        while (k < n && (src[k] === " " || src[k] === "\t")) k++;
-        const isCall = src[k] === "(";
-
-        if (STRUCT_KEYWORDS.has(word)) {
-          out += `<span class="tok-kw">${escapeHtml(word)}</span>`;
-        } else if (TYPE_KEYWORDS.has(word)) {
-          out += `<span class="tok-kw">${escapeHtml(word)}</span>`;
-        } else if (isCall) {
-          out += `<span class="tok-fn">${escapeHtml(word)}</span>`;
-        } else {
-          out += escapeHtml(word);
-        }
-        i = j;
-        continue;
-      }
-
-      // Operadores de dos caracteres
-      const two = src.substr(i, 2);
-      if (["==","!=","<=",">=","+=","-=","*=","/=","%="].includes(two)) {
-        out += `<span class="tok-op">${escapeHtml(two)}</span>`;
-        i += 2;
-        continue;
-      }
-
-      // Operadores / puntuación de un carácter
-      if ("+-*/%<>=!".includes(c)) {
-        out += `<span class="tok-op">${escapeHtml(c)}</span>`;
-        i++;
-        continue;
-      }
-      if (".,;:()[]{}".includes(c)) {
-        out += `<span class="tok-punct">${escapeHtml(c)}</span>`;
-        i++;
-        continue;
-      }
-
-      // Cualquier otro carácter (espacios, saltos de línea, etc.)
-      out += escapeHtml(c);
-      i++;
+require(['vs/editor/editor.main'], function() {
+  // Definir el tema personalizado para Altair
+  monaco.editor.defineTheme('altair-theme', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: 'keyword.altair', foreground: 'var(--gold)', fontStyle: 'bold' },
+      { token: 'type.altair', foreground: 'var(--gold)' },
+      { token: 'string', foreground: '#8fd3a0' },
+      { token: 'comment', foreground: '#5f6779', fontStyle: 'italic' },
+      { token: 'number', foreground: '#c7ceda' },
+      { token: 'delimiter', foreground: '#838da3' },
+      { token: 'operator', foreground: '#838da3' },
+      { token: 'identifier', foreground: 'var(--text)' }
+    ],
+    colors: {
+      'editor.background': 'var(--bg-panel)',
+      'editor.foreground': 'var(--text)',
+      'editorCursor.foreground': 'var(--gold)',
+      'editor.lineHighlightBackground': 'var(--bg-panel-2)',
+      'editorLineNumber.foreground': 'var(--text-dim)',
+      'editorIndentGuide.background': 'var(--line)',
+      'editorIndentGuide.activeBackground': 'var(--gold)'
     }
-    // Añade un salto final para que el textarea y el highlight no desincronicen
-    // en la última línea vacía.
-    return out + " ";
-  }
+  });
 
-  window.AltairHighlight = { highlight };
-})();
+  // Definir el lenguaje Altair para resaltado de sintaxis
+  monaco.languages.register({
+    id: 'altair',
+    extensions: ['.altair'],
+    aliases: ['Altair', 'altair'],
+    mimetypes: ['text/x-altair']
+  });
 
-</script>
-<script>
-const editor = document.getElementById("editor");
-const hl = document.getElementById("highlight");
-const hlCode = hl.querySelector("code");
+  monaco.languages.setMonarchTokensProvider('altair', {
+    keywords: [
+      'define', 'numeric', 'text', 'bool', 'list', 'object', 'token', 'const',
+      'ram', 'disk', 'cache', 'temp', 'auto', 'release',
+      'log', 'if', 'elif', 'else', 'while', 'repeat', 'times', 'forever', 'foreach', 'in',
+      'break', 'exit', 'fun', 'return', 'try', 'catch', 'as', 'wait',
+      'true', 'false', 'and', 'or', 'altair', 'doc', 'create', 'name', 'version', 'author'
+    ],
+    operators: ['=', '==', '!=', '<=', '>=', '<', '>', '+', '-', '*', '/', '%', '+=', '-=', '*=', '/=', '%=', '.', ',', ';', ':', '(', ')', '[', ']', '{', '}'],
+    symbols: /[=!<>+\-*/%&|^~?:,;.\[\]{}()]/,
+    tokenizer: {
+      root: [
+        [/[a-zA-Z_][a-zA-Z0-9_]*/, {
+          cases: {
+            '@keywords': 'keyword.altair',
+            '@default': 'identifier'
+          }
+        }],
+        [/[0-9]+(\.[0-9]+)?/, 'number'],
+        [/"([^"\\]|\\.)*"/, 'string'],
+        [/\/\ .*/, 'comment'],
+        [/@symbols/, {
+          cases: {
+            '@operators': 'operator',
+            '@default': 'delimiter'
+          }
+        }],
+        [/\s+/, 'white']
+      ]
+    }
+  });
+
+  // Crear el editor
+  const monacoEditor = monaco.editor.create(document.getElementById('monaco-editor'), {
+    value: `altair.doc;
+name = "MiPrograma"
+version = "1.0.0"
+author = "Tu nombre"
+create altair.doc
+
+define text nombre = "mundo"
+log "Hola, " + nombre + "!"`,
+    language: 'altair',
+    theme: 'altair-theme',
+    fontFamily: 'var(--font-mono)',
+    fontSize: 14,
+    minimap: { enabled: false },
+    scrollbar: {
+      vertical: 'auto',
+      horizontal: 'auto',
+      useShadows: false
+    },
+    lineNumbers: 'on',
+    lineDecorationsWidth: 10,
+    lineNumbersMinChars: 3,
+    folding: false,
+    overviewRulerBorder: false,
+    overviewRulerLanes: 0,
+    hideCursorInOverviewRuler: true,
+    scrollBeyondLastLine: false,
+    wordWrap: 'on',
+    wrappingIndent: 'same',
+    automaticLayout: true,
+    tabSize: 4,
+    insertSpaces: false
+  });
+
+  // Crear un objeto que simula la API del textarea para compatibilidad
+  window.editor = {
+    get value() { return monacoEditor.getValue(); },
+    set value(v) { monacoEditor.setValue(v); },
+    addEventListener: function(event, callback) {
+      if (event === 'input') {
+        monacoEditor.onDidChangeModelContent(callback);
+      } else if (event === 'keydown') {
+        monacoEditor.addCommand(0, (e) => {
+          if (e.keyCode === 9) { // Tab
+            e.preventDefault();
+            const model = monacoEditor.getModel();
+            const position = monacoEditor.getPosition();
+            model.insert(position.lineNumber, position.column, '    ');
+          } else if ((e.ctrlKey || e.metaKey) && e.keyCode === 13) { // Ctrl+Enter
+            e.preventDefault();
+            runCode();
+          }
+        });
+      } else if (event === 'scroll') {
+        monacoEditor.onDidScrollChange((e) => {
+          // No es necesario sincronizar con highlight externo
+        });
+      }
+    },
+    selectionStart: 0,
+    selectionEnd: 0,
+    focus: () => monacoEditor.focus()
+  };
+
+  // Asignar el editor global
+  window.monacoEditorInstance = monacoEditor;
+});
+
+// Inicializar el resto de la aplicación
 const consoleEl = document.getElementById("console");
 const runBtn = document.getElementById("run-btn");
 const clearBtn = document.getElementById("clear-btn");
 const examples = document.getElementById("examples");
-
-function renderHighlight(){
-  hlCode.innerHTML = window.AltairHighlight.highlight(editor.value);
-}
-
-editor.addEventListener("input", renderHighlight);
-editor.addEventListener("scroll", () => {
-  hl.scrollTop = editor.scrollTop;
-  hl.scrollLeft = editor.scrollLeft;
-});
 
 function logLine(text, cls){
   const div = document.createElement("div");
@@ -1024,16 +986,6 @@ function runCode(){
 
 runBtn.addEventListener("click", runCode);
 clearBtn.addEventListener("click", () => { consoleEl.innerHTML = '<div class="line empty">Consola limpiada.</div>'; });
-
-editor.addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runCode(); }
-  if (e.key === "Tab") { e.preventDefault();
-    const s = editor.selectionStart, en = editor.selectionEnd;
-    editor.value = editor.value.slice(0, s) + "    " + editor.value.slice(en);
-    editor.selectionStart = editor.selectionEnd = s + 4;
-    renderHighlight();
-  }
-});
 
 const HEADER = `altair.doc;
 name = "MiPrograma"
@@ -1106,14 +1058,9 @@ log "Recarga la página y vuelve a ejecutar: el número subirá."`
 examples.addEventListener("change", () => {
   if (examples.value && SAMPLES[examples.value]) {
     editor.value = SAMPLES[examples.value];
-    renderHighlight();
   }
   examples.value = "";
 });
-
-// Estado inicial
-editor.value = SAMPLES.hola;
-renderHighlight();
 </script>
 </body>
 </html>
