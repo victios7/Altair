@@ -22,16 +22,28 @@
   .editor-shell pre, .editor-shell textarea{
     position:absolute; top:0; left:0; right:0; bottom:0; margin:0;
     padding:18px; font-family:var(--font-mono); font-size:.88rem; line-height:1.65;
-    white-space:pre; overflow:auto; tab-size:4; border:none;
+    white-space:pre-wrap; word-break:break-word; overflow-wrap:break-word;
+    overflow-y:auto; overflow-x:hidden; tab-size:4; border:none;
   }
   .editor-shell pre{
     color:var(--text); pointer-events:none; z-index:1; background:var(--bg);
+    overflow:hidden; /* el scroll real lo controla el textarea; este solo se sincroniza */
   }
   .editor-shell pre code{font-family:inherit; white-space:inherit;}
   #editor{
     background:transparent; color:transparent; caret-color:var(--gold);
     resize:none; outline:none; z-index:2; position:relative;
   }
+  /* Scrollbar oscura y consistente con el tema (en vez de la barra blanca nativa) */
+  .editor-shell textarea::-webkit-scrollbar{width:10px; height:10px;}
+  .editor-shell textarea::-webkit-scrollbar-track{background:var(--bg-panel);}
+  .editor-shell textarea::-webkit-scrollbar-thumb{background:var(--line); border-radius:6px;}
+  .editor-shell textarea::-webkit-scrollbar-thumb:hover{background:#3a4258;}
+  .editor-shell textarea{scrollbar-width:thin; scrollbar-color:var(--line) var(--bg-panel);}
+  #console::-webkit-scrollbar{width:10px;}
+  #console::-webkit-scrollbar-track{background:var(--bg-panel);}
+  #console::-webkit-scrollbar-thumb{background:var(--line); border-radius:6px;}
+  #console{scrollbar-width:thin; scrollbar-color:var(--line) var(--bg-panel);}
   /* Highlight token colors — coinciden con la paleta de la captura */
   .tok-kw{color:var(--gold);}
   .tok-fn{color:var(--blue-glow);}
