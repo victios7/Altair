@@ -1,11 +1,4 @@
-// ============================================================
-// ALTAIR INTERPRETER (subset) — corre 100% en el navegador
-// Cubre: define, log, if/elif/else, while, repeat, forever,
-// foreach, exit, fun/return (con recursión), try/catch, listas,
-// operadores, storage tiers (ram/disk/cache/temp vía localStorage).
-// NO cubre: class/object, token, snapshot, choose, servidor HTTP,
-// sesiones, config, jobs, db pool (requieren compilar a binario real).
-// ============================================================
+
 
 class AltairError extends Error {
   constructor(code, message, line) {
