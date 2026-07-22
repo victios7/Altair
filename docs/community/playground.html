@@ -18,13 +18,31 @@
     padding:12px 16px; background:var(--bg-panel-2); border-bottom:1px solid var(--line);
     font-family:var(--font-mono); font-size:.78rem; color:var(--text-dim);
   }
-  #editor{
-    flex:1; min-height:420px; background:var(--bg); color:var(--text); border:none; outline:none;
-    font-family:var(--font-mono); font-size:.88rem; padding:18px; resize:none; line-height:1.6;
-    tab-size:4;
+  .editor-shell{position:relative; flex:1; min-height:460px;}
+  .editor-shell pre, .editor-shell textarea{
+    position:absolute; top:0; left:0; right:0; bottom:0; margin:0;
+    padding:18px; font-family:var(--font-mono); font-size:.88rem; line-height:1.65;
+    white-space:pre; overflow:auto; tab-size:4; border:none;
   }
+  .editor-shell pre{
+    color:var(--text); pointer-events:none; z-index:1; background:var(--bg);
+  }
+  .editor-shell pre code{font-family:inherit; white-space:inherit;}
+  #editor{
+    background:transparent; color:transparent; caret-color:var(--gold);
+    resize:none; outline:none; z-index:2; position:relative;
+  }
+  /* Highlight token colors — coinciden con la paleta de la captura */
+  .tok-kw{color:var(--gold);}
+  .tok-fn{color:var(--blue-glow);}
+  .tok-str{color:#8fd3a0;}
+  .tok-cm{color:#5f6779; font-style:italic;}
+  .tok-num{color:#c7ceda;}
+  .tok-op{color:#838da3;}
+  .tok-punct{color:#838da3;}
+
   #console{
-    flex:1; min-height:420px; background:var(--bg); color:#c7ceda; font-family:var(--font-mono);
+    flex:1; min-height:460px; background:var(--bg); color:#c7ceda; font-family:var(--font-mono);
     font-size:.85rem; padding:18px; overflow-y:auto; white-space:pre-wrap; line-height:1.7;
   }
   #console .line{border-bottom:1px dashed var(--line); padding:4px 0;}
@@ -41,6 +59,7 @@
     padding:20px 24px; margin-top:24px; font-size:.88rem; color:var(--text-dim);
   }
   .unsupported strong{color:var(--text);}
+  .unsupported code{color:var(--gold); font-family:var(--font-mono); font-size:.85em;}
   @media (max-width: 860px){ .pg-wrap{grid-template-columns:1fr;} }
 </style>
 </head>
@@ -65,7 +84,7 @@
   <div class="page-head">
     <div class="eyebrow">Comunidad Altair</div>
     <h1>Playground</h1>
-    <p>Prueba código Altair directamente aquí, sin instalar nada. Corre con un intérprete en JavaScript en tu navegador — no es el compilador oficial <code>altairc</code>, así que algunas funciones no están disponibles (ver nota abajo).</p>
+    <p>Prueba código Altair directamente aquí, sin instalar nada. Todo programa debe empezar con la cabecera <code>altair.doc;</code> — igual que exige el compilador real. Corre con un intérprete propio en JavaScript (no es <code>altairc</code>), así que algunas funciones no están disponibles (ver nota abajo).</p>
   </div>
 
   <div class="toolbar">
@@ -84,17 +103,10 @@
   <div class="pg-wrap">
     <div class="pg-panel">
       <div class="pg-panel-head"><span>editor.at</span></div>
-      <textarea id="editor" spellcheck="false">define text nombre = "mundo"
-log "Hola, " + nombre + "!"
-
-define numeric n = 5
-define numeric total = 0
-define numeric i = 1
-while i <= n;
-    total += i
-    i += 1
-break
-log "Suma de 1 a " + n + " = " + total</textarea>
+      <div class="editor-shell">
+        <pre id="highlight"><code></code></pre>
+        <textarea id="editor" spellcheck="false"></textarea>
+      </div>
     </div>
     <div class="pg-panel">
       <div class="pg-panel-head"><span>output</span></div>
@@ -103,9 +115,9 @@ log "Suma de 1 a " + n + " = " + total</textarea>
   </div>
 
   <div class="unsupported">
-    <strong>Qué cubre este playground:</strong> variables (<code>numeric</code>, <code>text</code>, <code>bool</code>, <code>list</code>), storage tiers <code>ram</code>/<code>disk</code>/<code>cache</code>/<code>temp</code> (simulados con <code>localStorage</code> del navegador), operadores, <code>if/elif/else</code>, <code>while</code>, <code>repeat</code>, <code>forever</code>, <code>foreach</code>, <code>exit</code>, funciones (<code>fun</code>/<code>return</code>, con recursión), <code>try/catch</code>, listas y <code>log</code>.
+    <strong>Qué cubre este playground:</strong> cabecera <code>altair.doc</code>, variables (<code>numeric</code>, <code>text</code>, <code>bool</code>, <code>list</code>), storage tiers <code>ram</code>/<code>disk</code>/<code>cache</code>/<code>temp</code> (simulados con <code>localStorage</code> del navegador), operadores, <code>if/elif/else</code>, <code>while</code>, <code>repeat</code>, <code>forever</code>, <code>foreach</code>, <code>exit</code>, funciones (<code>fun</code>/<code>return</code>, con recursión), <code>try/catch</code>, listas y <code>log</code>.
     <br><br>
-    <strong>Qué NO cubre:</strong> <code>class</code>/<code>object</code>, <code>token</code>, <code>snapshot</code>, <code>choose</code>, y toda la capa de servidor (<code>listen</code>, <code>route</code>, sesiones, config, jobs, base de datos) — eso requiere el compilador real <code>altairc</code> + <code>gcc</code> corriendo en un servidor, algo que un navegador no puede hacer. Para eso, <a href="https://github.com/victios7/Altair/releases/latest" target="_blank">descarga Altair</a> e instálalo localmente.
+    <strong>Qué NO cubre:</strong> <code>class</code>/<code>object</code>, <code>token</code>, <code>snapshot</code>, <code>choose</code>, y toda la capa de servidor (<code>listen</code>, <code>route</code>, <code>config</code>, <code>health</code>, sesiones, jobs, base de datos) — eso requiere el compilador real <code>altairc</code> + <code>gcc</code> corriendo en un servidor, algo que un navegador no puede hacer. Para eso, <a href="https://github.com/victios7/Altair/releases/latest" target="_blank">descarga Altair</a> e instálalo localmente.
   </div>
 
   <footer>
@@ -114,13 +126,878 @@ log "Suma de 1 a " + n + " = " + total</textarea>
   </footer>
 </div>
 
-<script src="altair-interpreter.js"></script>
+<script>
+// ============================================================
+// ALTAIR INTERPRETER (subset) — corre 100% en el navegador
+// Cubre: define, log, if/elif/else, while, repeat, forever,
+// foreach, exit, fun/return (con recursión), try/catch, listas,
+// operadores, storage tiers (ram/disk/cache/temp vía localStorage).
+// NO cubre: class/object, token, snapshot, choose, servidor HTTP,
+// sesiones, config, jobs, db pool (requieren compilar a binario real).
+// ============================================================
+
+class AltairError extends Error {
+  constructor(code, message, line) {
+    super(message);
+    this.code = code;
+    this.line = line;
+  }
+}
+
+// ---------- LEXER ----------
+const KEYWORDS = new Set([
+  "define","numeric","text","bool","list","object","token","const",
+  "ram","disk","cache","temp","auto","release",
+  "log","if","elif","else","while","repeat","times","forever","foreach","in",
+  "break","exit","fun","return","try","catch","as","wait",
+  "true","false","and","or"
+]);
+
+function lex(src) {
+  const tokens = [];
+  let i = 0, line = 1;
+  const n = src.length;
+  while (i < n) {
+    const c = src[i];
+    if (c === "\n") { tokens.push({t:"NL", line}); line++; i++; continue; }
+    if (c === " " || c === "\t" || c === "\r") { i++; continue; }
+    // comment: "/" at start of a token followed by space or letter (not "/=" style, altair has no // )
+    if (c === "/" && (src[i+1] === " " || /[a-zA-Z]/.test(src[i+1] || ""))) {
+      while (i < n && src[i] !== "\n") i++;
+      continue;
+    }
+    if (c === '"') {
+      let s = ""; i++;
+      while (i < n && src[i] !== '"') {
+        if (src[i] === "\\" && src[i+1] === "n") { s += "\n"; i += 2; continue; }
+        if (src[i] === "\\" && src[i+1] === '"') { s += '"'; i += 2; continue; }
+        s += src[i]; i++;
+      }
+      i++; // closing quote
+      tokens.push({t:"STR", v:s, line});
+      continue;
+    }
+    if (/[0-9]/.test(c)) {
+      let s = ""; 
+      while (i < n && /[0-9.]/.test(src[i])) { s += src[i]; i++; }
+      tokens.push({t:"NUM", v:parseFloat(s), line});
+      continue;
+    }
+    if (/[a-zA-Z_]/.test(c)) {
+      let s = "";
+      while (i < n && /[a-zA-Z0-9_]/.test(src[i])) { s += src[i]; i++; }
+      if (KEYWORDS.has(s)) tokens.push({t:s.toUpperCase(), v:s, line});
+      else tokens.push({t:"IDENT", v:s, line});
+      continue;
+    }
+    // multi-char operators
+    const two = src.substr(i, 2);
+    if (["==","!=","<=",">=","+=","-=","*=","/=","%="].includes(two)) {
+      tokens.push({t:two, line}); i += 2; continue;
+    }
+    if ("+-*/%<>=!.,;:()[]{}".includes(c)) {
+      tokens.push({t:c, line}); i++; continue;
+    }
+    // unknown char, skip
+    i++;
+  }
+  tokens.push({t:"EOF", line});
+  return tokens;
+}
+
+// ---------- PARSER ----------
+class Parser {
+  constructor(tokens) { this.toks = tokens; this.pos = 0; }
+  peek(o=0){ return this.toks[this.pos+o]; }
+  cur(){ return this.toks[this.pos]; }
+  next(){ return this.toks[this.pos++]; }
+  skipNL(){ while (this.cur().t === "NL") this.pos++; }
+  expect(t){
+    this.skipNL();
+    if (this.cur().t !== t) throw new AltairError("ALT_PARSE", `Se esperaba '${t}' pero se encontró '${this.cur().t}' en la línea ${this.cur().line}`, this.cur().line);
+    return this.next();
+  }
+  atEOF(){ this.skipNL(); return this.cur().t === "EOF"; }
+
+  parseHeader(){
+    this.skipNL();
+    // altair.doc;
+    if (!(this.cur().t === "IDENT" && this.cur().v === "altair")) {
+      throw new AltairError("ALT_HEADER", "Todo programa Altair debe empezar con la cabecera 'altair.doc;' (falta al inicio del archivo)");
+    }
+    this.next(); // altair
+    this.expect(".");
+    if (!(this.cur().t === "IDENT" && this.cur().v === "doc")) throw new AltairError("ALT_HEADER", "Se esperaba 'doc' tras 'altair.'");
+    this.next(); // doc
+    this.expect(";");
+    const header = {name:null, version:null, author:null};
+    this.skipNL();
+    while (!(this.cur().t === "IDENT" && this.cur().v === "create")) {
+      if (this.cur().t === "EOF") throw new AltairError("ALT_HEADER", "Falta 'create altair.doc' para cerrar la cabecera");
+      const field = this.expect("IDENT").v;
+      this.expect("=");
+      const val = this.parseExpr();
+      if (["name","version","author"].includes(field)) header[field] = val;
+      this.skipNL();
+    }
+    this.next(); // create
+    if (!(this.cur().t === "IDENT" && this.cur().v === "altair")) throw new AltairError("ALT_HEADER", "Se esperaba 'altair.doc' tras 'create'");
+    this.next();
+    this.expect(".");
+    if (!(this.cur().t === "IDENT" && this.cur().v === "doc")) throw new AltairError("ALT_HEADER", "Se esperaba 'doc' tras 'create altair.'");
+    this.next();
+    this.header = header;
+    return header;
+  }
+
+  parseProgram(){
+    this.parseHeader();
+    const stmts = [];
+    this.skipNL();
+    while (this.cur().t !== "EOF") {
+      stmts.push(this.parseStatement());
+      this.skipNL();
+    }
+    return stmts;
+  }
+
+  // Parses statements until a BREAK token is found; consumes the BREAK.
+  parseBlock(){
+    const stmts = [];
+    this.skipNL();
+    while (this.cur().t !== "BREAK" && this.cur().t !== "EOF") {
+      stmts.push(this.parseStatement());
+      this.skipNL();
+    }
+    this.expect("BREAK");
+    return stmts;
+  }
+
+  parseStatement(){
+    this.skipNL();
+    const tok = this.cur();
+    switch (tok.t) {
+      case "DEFINE": return this.parseDefine();
+      case "LOG": { this.next(); const e = this.parseExpr(); return {k:"log", e, line:tok.line}; }
+      case "IF": return this.parseIf();
+      case "WHILE": return this.parseWhile();
+      case "REPEAT": return this.parseRepeat();
+      case "FOREVER": return this.parseForever();
+      case "FOREACH": return this.parseForeach();
+      case "EXIT": { this.next(); return {k:"exit", line:tok.line}; }
+      case "RELEASE": { this.next(); const name = this.expect("IDENT").v; return {k:"release", name, line:tok.line}; }
+      case "FUN": return this.parseFun();
+      case "RETURN": { this.next(); 
+        this.skipNLNoConsumeBlock=true;
+        let e = null;
+        if (this.cur().t !== "NL" && this.cur().t !== "BREAK" && this.cur().t !== "EOF") e = this.parseExpr();
+        return {k:"return", e, line:tok.line}; }
+      case "TRY": return this.parseTry();
+      case "WAIT": { this.next(); this.parseExpr(); return {k:"nop", line:tok.line}; } // no-op, no sleeping in browser
+      default:
+        return this.parseExprOrAssign();
+    }
+  }
+
+  parseDefine(){
+    const line = this.cur().line;
+    this.expect("DEFINE");
+    const type = this.next().v; // numeric/text/bool/list/object/token
+    const name = this.expect("IDENT").v;
+    let storage = "ram", isConst = false;
+    while (["RAM","DISK","CACHE","TEMP","AUTO","CONST"].includes(this.cur().t)) {
+      const q = this.next();
+      if (q.t === "CONST") isConst = true; else storage = q.v;
+      // skip qualifiers like expire=30m / weight=5 (IDENT = ...)
+      if (this.cur().t === "IDENT" && this.peek(1).t === "=") {
+        // could be a qualifier like expire=30m; treat as ident= value, skip
+        // but this collides with our expr assign; only skip if it's expire/weight
+      }
+    }
+    let init = null;
+    if (this.cur().t === "=") { this.next(); init = this.parseExpr(); }
+    return {k:"define", type, name, storage, isConst, init, line};
+  }
+
+  parseExprOrAssign(){
+    const line = this.cur().line;
+    const expr = this.parseExpr();
+    // assignment forms: IDENT = expr, IDENT += expr, list[idx] = expr, obj.field = expr
+    const compound = ["=","+=","-=","*=","/=","%="];
+    if (compound.includes(this.cur().t)) {
+      const op = this.next().t;
+      const rhs = this.parseExpr();
+      return {k:"assign", target: expr, op, rhs, line};
+    }
+    return {k:"exprstmt", e: expr, line};
+  }
+
+  parseIf(){
+    const line = this.cur().line;
+    this.expect("IF");
+    const cond = this.parseExpr();
+    this.expect(";");
+    const body = this.parseBlock();
+    const clause = {cond, body};
+    const clauses = [clause];
+    this.skipNL();
+    while (this.cur().t === "ELIF") {
+      this.next();
+      const c2 = this.parseExpr();
+      this.expect(";");
+      const b2 = this.parseBlock();
+      clauses.push({cond:c2, body:b2});
+      this.skipNL();
+    }
+    let elseBody = null;
+    if (this.cur().t === "ELSE") {
+      this.next();
+      this.expect(";");
+      elseBody = this.parseBlock();
+    }
+    return {k:"if", clauses, elseBody, line};
+  }
+
+  parseWhile(){
+    const line = this.cur().line;
+    this.expect("WHILE");
+    const cond = this.parseExpr();
+    this.expect(";");
+    const body = this.parseBlock();
+    return {k:"while", cond, body, line};
+  }
+
+  parseRepeat(){
+    const line = this.cur().line;
+    this.expect("REPEAT");
+    const count = this.parseExpr();
+    if (this.cur().t === "TIMES") this.next();
+    this.expect(";");
+    const body = this.parseBlock();
+    return {k:"repeat", count, body, line};
+  }
+
+  parseForever(){
+    const line = this.cur().line;
+    this.expect("FOREVER");
+    this.expect(";");
+    const body = this.parseBlock();
+    return {k:"forever", body, line};
+  }
+
+  parseForeach(){
+    const line = this.cur().line;
+    this.expect("FOREACH");
+    const varName = this.expect("IDENT").v;
+    this.expect("IN");
+    const listExpr = this.parseExpr();
+    this.expect(";");
+    const body = this.parseBlock();
+    return {k:"foreach", varName, listExpr, body, line};
+  }
+
+  parseFun(){
+    const line = this.cur().line;
+    this.expect("FUN");
+    const name = this.expect("IDENT").v;
+    let retType = "auto";
+    // optional return type: a TYPE keyword followed by an IDENT (the first param name)
+    const TYPES = ["NUMERIC","TEXT","BOOL","LIST","OBJECT"];
+    if (TYPES.includes(this.cur().t) && this.peek(1).t === "IDENT") {
+      retType = this.next().v;
+    }
+    const params = [];
+    // params: name type, name type, ... until ";"
+    while (this.cur().t !== ";") {
+      const pname = this.expect("IDENT").v;
+      let ptype = "numeric";
+      if (["NUMERIC","TEXT","BOOL","LIST","OBJECT"].includes(this.cur().t)) ptype = this.next().v;
+      params.push({name:pname, type:ptype});
+      if (this.cur().t === ",") this.next(); else break;
+    }
+    this.expect(";");
+    const body = this.parseBlock();
+    return {k:"fun", name, params, retType, body, line};
+  }
+
+  parseTry(){
+    const line = this.cur().line;
+    this.expect("TRY");
+    this.expect(";");
+    const body = this.parseBlock();
+    this.skipNL();
+    let errName = "err", catchBody = [];
+    if (this.cur().t === "CATCH") {
+      this.next();
+      if (this.cur().t === "AS") { this.next(); errName = this.expect("IDENT").v; }
+      this.expect(";");
+      catchBody = this.parseBlock();
+    }
+    return {k:"try", body, errName, catchBody, line};
+  }
+
+  // ---- Expressions (precedence climbing) ----
+  parseExpr(){ return this.parseOr(); }
+  parseOr(){
+    let l = this.parseAnd();
+    while (this.cur().t === "OR") { this.next(); const r = this.parseAnd(); l = {k:"logic", op:"or", l, r}; }
+    return l;
+  }
+  parseAnd(){
+    let l = this.parseEquality();
+    while (this.cur().t === "AND") { this.next(); const r = this.parseEquality(); l = {k:"logic", op:"and", l, r}; }
+    return l;
+  }
+  parseEquality(){
+    let l = this.parseCompare();
+    while (["==","!="].includes(this.cur().t)) { const op = this.next().t; const r = this.parseCompare(); l = {k:"bin", op, l, r}; }
+    return l;
+  }
+  parseCompare(){
+    let l = this.parseAdd();
+    while (["<",">","<=",">="].includes(this.cur().t)) { const op = this.next().t; const r = this.parseAdd(); l = {k:"bin", op, l, r}; }
+    return l;
+  }
+  parseAdd(){
+    let l = this.parseMul();
+    while (["+","-"].includes(this.cur().t)) { const op = this.next().t; const r = this.parseMul(); l = {k:"bin", op, l, r}; }
+    return l;
+  }
+  parseMul(){
+    let l = this.parseUnary();
+    while (["*","/","%"].includes(this.cur().t)) { const op = this.next().t; const r = this.parseUnary(); l = {k:"bin", op, l, r}; }
+    return l;
+  }
+  parseUnary(){
+    if (this.cur().t === "!" ) { this.next(); const e = this.parseUnary(); return {k:"not", e}; }
+    if (this.cur().t === "-") { this.next(); const e = this.parseUnary(); return {k:"neg", e}; }
+    return this.parsePostfix();
+  }
+  parsePostfix(){
+    let e = this.parsePrimary();
+    for(;;){
+      if (this.cur().t === "[") {
+        this.next(); const idx = this.parseExpr(); this.expect("]");
+        e = {k:"index", obj:e, idx};
+      } else if (this.cur().t === ".") {
+        this.next(); const name = this.expect("IDENT").v;
+        if (this.cur().t === "(") {
+          this.next(); const args = this.parseArgs(); this.expect(")");
+          e = {k:"methodcall", obj:e, name, args};
+        } else {
+          e = {k:"field", obj:e, name};
+        }
+      } else if (this.cur().t === "(" && e.k === "ident") {
+        this.next(); const args = this.parseArgs(); this.expect(")");
+        e = {k:"call", name:e.name, args};
+      } else break;
+    }
+    return e;
+  }
+  parseArgs(){
+    const args = [];
+    if (this.cur().t === ")") return args;
+    args.push(this.parseExpr());
+    while (this.cur().t === ",") { this.next(); args.push(this.parseExpr()); }
+    return args;
+  }
+  parsePrimary(){
+    const tok = this.cur();
+    if (tok.t === "NUM") { this.next(); return {k:"num", v:tok.v}; }
+    if (tok.t === "STR") { this.next(); return {k:"str", v:tok.v}; }
+    if (tok.t === "TRUE") { this.next(); return {k:"bool", v:true}; }
+    if (tok.t === "FALSE") { this.next(); return {k:"bool", v:false}; }
+    if (tok.t === "IDENT") { this.next(); return {k:"ident", name:tok.v}; }
+    if (tok.t === "(") { this.next(); const e = this.parseExpr(); this.expect(")"); return e; }
+    if (tok.t === "[") {
+      this.next();
+      const items = [];
+      if (this.cur().t !== "]") {
+        items.push(this.parseExpr());
+        while (this.cur().t === ",") { this.next(); items.push(this.parseExpr()); }
+      }
+      this.expect("]");
+      return {k:"list", items};
+    }
+    throw new AltairError("ALT_PARSE", `Expresión inesperada '${tok.t}' en la línea ${tok.line}`, tok.line);
+  }
+}
+
+// ---------- INTERPRETER ----------
+class ExitLoop {}
+class ExitProgram {}
+class ReturnSignal { constructor(v){ this.value = v; } }
+
+class Scope {
+  constructor(parent){ this.vars = new Map(); this.parent = parent; }
+  get(name){
+    if (this.vars.has(name)) return this.vars.get(name);
+    if (this.parent) return this.parent.get(name);
+    throw new AltairError("ALT0001", `Variable no definida: ${name}`);
+  }
+  set(name, val){
+    let s = this;
+    while (s) { if (s.vars.has(name)) { s.vars.set(name, val); return; } s = s.parent; }
+    // fallback: set in current (used for globals fallback in functions)
+    this.vars.set(name, val);
+  }
+  define(name, val){ this.vars.set(name, val); }
+  has(name){
+    let s = this;
+    while (s) { if (s.vars.has(name)) return true; s = s.parent; }
+    return false;
+  }
+}
+
+class Interpreter {
+  constructor(onLog){
+    this.onLog = onLog || (()=>{});
+    this.functions = new Map();
+    this.global = new Scope(null);
+    this.storagePrefix = "altair_playground:";
+    this.stepCount = 0;
+    this.maxSteps = 2_000_000; // safety net against infinite loops
+  }
+
+  run(src){
+    const tokens = lex(src);
+    const parser = new Parser(tokens);
+    const program = parser.parseProgram();
+    // hoist function declarations
+    for (const stmt of program) if (stmt.k === "fun") this.functions.set(stmt.name, stmt);
+    try {
+      for (const stmt of program) this.exec(stmt, this.global);
+    } catch (e) {
+      if (e instanceof ExitProgram || e instanceof ExitLoop) return;
+      throw e;
+    }
+  }
+
+  tick(){
+    this.stepCount++;
+    if (this.stepCount > this.maxSteps) throw new AltairError("ALT_LIMIT", "Se alcanzó el límite de pasos de ejecución (¿bucle infinito?)");
+  }
+
+  storageGet(tier, name){
+    if (tier === "ram" || tier === "temp" || tier === "auto") return undefined; // handled by scope
+    try {
+      const raw = localStorage.getItem(this.storagePrefix + tier + ":" + name);
+      return raw != null ? JSON.parse(raw) : undefined;
+    } catch { return undefined; }
+  }
+  storageSet(tier, name, val){
+    if (tier === "ram" || tier === "temp" || tier === "auto") return;
+    try { localStorage.setItem(this.storagePrefix + tier + ":" + name, JSON.stringify(val)); } catch {}
+  }
+
+  exec(stmt, scope){
+    this.tick();
+    switch (stmt.k) {
+      case "define": {
+        let val = stmt.init ? this.eval(stmt.init, scope) : this.defaultFor(stmt.type);
+        if (stmt.storage === "disk" || stmt.storage === "cache") {
+          const existing = this.storageGet(stmt.storage, stmt.name);
+          if (existing !== undefined && !stmt.init) val = existing;
+          this.storageSet(stmt.storage, stmt.name, val);
+        }
+        scope.define(stmt.name, {value: val, type: stmt.type, storage: stmt.storage, isConst: stmt.isConst});
+        return;
+      }
+      case "assign": {
+        const box = this.resolveLValueBox(stmt.target, scope);
+        let rhs = this.eval(stmt.rhs, scope);
+        if (stmt.op !== "=") {
+          const cur = this.readLValue(stmt.target, scope);
+          rhs = this.applyOp(stmt.op.slice(0,1), cur, rhs);
+        }
+        this.writeLValue(stmt.target, scope, rhs);
+        return;
+      }
+      case "log": {
+        const v = this.eval(stmt.e, scope);
+        this.onLog(this.stringify(v));
+        return;
+      }
+      case "exprstmt": {
+        this.eval(stmt.e, scope);
+        return;
+      }
+      case "if": {
+        for (const c of stmt.clauses) {
+          if (this.truthy(this.eval(c.cond, scope))) {
+            this.execBlock(c.body, new Scope(scope));
+            return;
+          }
+        }
+        if (stmt.elseBody) this.execBlock(stmt.elseBody, new Scope(scope));
+        return;
+      }
+      case "while": {
+        try {
+          while (this.truthy(this.eval(stmt.cond, scope))) {
+            this.tick();
+            this.execBlock(stmt.body, new Scope(scope));
+          }
+        } catch (e) { if (!(e instanceof ExitLoop)) throw e; }
+        return;
+      }
+      case "repeat": {
+        const count = this.eval(stmt.count, scope);
+        try {
+          for (let i=0; i<count; i++) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); }
+        } catch (e) { if (!(e instanceof ExitLoop)) throw e; }
+        return;
+      }
+      case "forever": {
+        try {
+          while (true) { this.tick(); this.execBlock(stmt.body, new Scope(scope)); }
+        } catch (e) { if (!(e instanceof ExitLoop)) throw e; }
+        return;
+      }
+      case "foreach": {
+        const list = this.eval(stmt.listExpr, scope);
+        if (!Array.isArray(list)) throw new AltairError("ALT0002", "foreach requiere una lista");
+        try {
+          for (const item of list) {
+            this.tick();
+            const s2 = new Scope(scope);
+            s2.define(stmt.varName, {value:item, type:"auto"});
+            this.execBlock(stmt.body, s2);
+          }
+        } catch (e) { if (!(e instanceof ExitLoop)) throw e; }
+        return;
+      }
+      case "exit": {
+        // exits nearest loop if inside one; interpreter distinguishes via try/catch chain
+        throw new ExitLoop();
+      }
+      case "release": {
+        return; // no-op in playground
+      }
+      case "fun": {
+        this.functions.set(stmt.name, stmt);
+        return;
+      }
+      case "return": {
+        const v = stmt.e ? this.eval(stmt.e, scope) : null;
+        throw new ReturnSignal(v);
+      }
+      case "try": {
+        try {
+          this.execBlock(stmt.body, new Scope(scope));
+        } catch (e) {
+          if (e instanceof ExitLoop || e instanceof ReturnSignal || e instanceof ExitProgram) throw e;
+          const s2 = new Scope(scope);
+          const errObj = {code: e.code || "ALT_ERROR", message: e.message || String(e), line: e.line || 0};
+          s2.define(stmt.errName, {value: errObj, type:"object"});
+          this.execBlock(stmt.catchBody, s2);
+        }
+        return;
+      }
+      case "nop": return;
+      default:
+        throw new AltairError("ALT_PARSE", "Sentencia no soportada: " + stmt.k);
+    }
+  }
+
+  execBlock(stmts, scope){
+    for (const s of stmts) this.exec(s, scope);
+  }
+
+  defaultFor(type){
+    if (type === "numeric") return 0;
+    if (type === "text") return "";
+    if (type === "bool") return false;
+    if (type === "list") return [];
+    return null;
+  }
+
+  truthy(v){ return v === true || (typeof v === "number" && v !== 0) || (typeof v === "string" && v.length>0) ? !!v || v === true : !!v; }
+
+  applyOp(op, a, b){
+    switch(op){
+      case "+": if (typeof a === "string" || typeof b === "string") return this.stringify(a) + this.stringify(b);
+                if (Array.isArray(a) && Array.isArray(b)) return a.concat(b);
+                return a + b;
+      case "-": return a - b;
+      case "*": return a * b;
+      case "/": if (b === 0) throw new AltairError("ALT0003", "División por cero"); return a / b;
+      case "%": if (b === 0) throw new AltairError("ALT0003", "División por cero"); return a % b;
+    }
+  }
+
+  eval(node, scope){
+    this.tick();
+    switch (node.k) {
+      case "num": return node.v;
+      case "str": return node.v;
+      case "bool": return node.v;
+      case "list": return node.items.map(it => this.eval(it, scope));
+      case "ident": {
+        const box = scope.get(node.name);
+        return box.value;
+      }
+      case "neg": return -this.eval(node.e, scope);
+      case "not": return !this.truthy(this.eval(node.e, scope));
+      case "logic": {
+        const l = this.truthy(this.eval(node.l, scope));
+        if (node.op === "and") return l && this.truthy(this.eval(node.r, scope));
+        return l || this.truthy(this.eval(node.r, scope));
+      }
+      case "bin": {
+        const l = this.eval(node.l, scope), r = this.eval(node.r, scope);
+        switch(node.op){
+          case "+": case "-": case "*": case "/": case "%": return this.applyOp(node.op, l, r);
+          case "==": return l === r;
+          case "!=": return l !== r;
+          case "<": return l < r;
+          case ">": return l > r;
+          case "<=": return l <= r;
+          case ">=": return l >= r;
+        }
+      }
+      case "index": {
+        const obj = this.eval(node.obj, scope);
+        const idx = this.eval(node.idx, scope);
+        if (!Array.isArray(obj)) throw new AltairError("ALT0002", "Índice sobre valor que no es lista");
+        if (idx < 0 || idx >= obj.length) throw new AltairError("ALT0002", "Índice fuera de rango");
+        return obj[idx];
+      }
+      case "field": {
+        const obj = this.eval(node.obj, scope);
+        if (node.name === "length" && Array.isArray(obj)) return obj.length;
+        if (obj && typeof obj === "object") return obj[node.name];
+        throw new AltairError("ALT0002", `Campo no soportado: ${node.name}`);
+      }
+      case "methodcall": {
+        const objNode = node.obj;
+        const obj = this.eval(objNode, scope);
+        const args = node.args.map(a => this.eval(a, scope));
+        if (Array.isArray(obj)) {
+          switch(node.name){
+            case "append": obj.push(args[0]); this.syncLValueStorage(objNode, scope, obj); return null;
+            case "remove": obj.splice(args[0], 1); this.syncLValueStorage(objNode, scope, obj); return null;
+            case "clear": obj.length = 0; this.syncLValueStorage(objNode, scope, obj); return null;
+            case "length": return obj.length;
+          }
+        }
+        throw new AltairError("ALT0002", `Método no soportado: ${node.name}`);
+      }
+      case "call": {
+        const fn = this.functions.get(node.name);
+        if (!fn) throw new AltairError("ALT0001", `Función no definida: ${node.name}`);
+        const args = node.args.map(a => this.eval(a, scope));
+        const fscope = new Scope(this.global); // globals accessible, per language spec bugfix #4
+        fn.params.forEach((p, i) => fscope.define(p.name, {value: args[i], type: p.type}));
+        try {
+          this.execBlock(fn.body, fscope);
+        } catch (e) {
+          if (e instanceof ReturnSignal) return e.value;
+          throw e;
+        }
+        return null;
+      }
+      default:
+        throw new AltairError("ALT_PARSE", "Expresión no soportada: " + node.k);
+    }
+  }
+
+  // Resolve assignment targets: ident, index, field
+  readLValue(node, scope){ return this.eval(node, scope); }
+
+  writeLValue(node, scope, val){
+    if (node.k === "ident") {
+      let s = scope;
+      while (s) { if (s.vars.has(node.name)) { 
+        const box = s.vars.get(node.name);
+        if (box.isConst) throw new AltairError("ALT0005", `No se puede reasignar constante: ${node.name}`);
+        box.value = val;
+        if (box.storage === "disk" || box.storage === "cache") this.storageSet(box.storage, node.name, val);
+        return;
+      } s = s.parent; }
+      scope.define(node.name, {value: val, type:"auto"});
+      return;
+    }
+    if (node.k === "index") {
+      const obj = this.eval(node.obj, scope);
+      const idx = this.eval(node.idx, scope);
+      obj[idx] = val;
+      this.syncLValueStorage(node.obj, scope, obj);
+      return;
+    }
+    throw new AltairError("ALT_PARSE", "Destino de asignación no soportado");
+  }
+
+  syncLValueStorage(node, scope, val){
+    if (node.k === "ident") {
+      let s = scope;
+      while (s) { if (s.vars.has(node.name)) {
+        const box = s.vars.get(node.name);
+        box.value = val;
+        if (box.storage === "disk" || box.storage === "cache") this.storageSet(box.storage, node.name, val);
+        return;
+      } s = s.parent; }
+    }
+  }
+
+  resolveLValueBox(node, scope){ return null; }
+
+  stringify(v){
+    if (v === null || v === undefined) return "null";
+    if (typeof v === "boolean") return v ? "true" : "false";
+    if (Array.isArray(v)) return "[" + v.map(x=>this.stringify(x)).join(", ") + "]";
+    if (typeof v === "object") return JSON.stringify(v);
+    return String(v);
+  }
+}
+
+// Export for use in playground.html
+window.AltairInterpreter = Interpreter;
+window.AltairError = AltairError;
+
+</script>
+<script>
+// ============================================================
+// ALTAIR HIGHLIGHTER — resaltado de sintaxis propio (sin Monaco)
+// Reutiliza la misma tokenización que el intérprete, pero en vez
+// de ejecutar, envuelve cada token en <span> con su clase de color.
+// ============================================================
+
+(function(){
+  // Palabras clave "estructurales" (gold) — igual que en la captura:
+  // config, break, health, check, listen, route, respond, etc.
+  const STRUCT_KEYWORDS = new Set([
+    "altair","doc","create","config","health","check","listen","route","respond",
+    "define","break","if","elif","else","while","repeat","times","forever",
+    "foreach","in","exit","fun","return","try","catch","as","wait","release",
+    "log","name","version","author"
+  ]);
+
+  // Tipos y storage tiers también en gold (son palabras reservadas del lenguaje)
+  const TYPE_KEYWORDS = new Set([
+    "numeric","text","bool","list","object","token","const",
+    "ram","disk","cache","temp","auto","true","false","and","or",
+    "default","required","rate_limit","per_minute"
+  ]);
+
+  function escapeHtml(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function highlight(src){
+    let out = "";
+    let i = 0;
+    const n = src.length;
+
+    while (i < n) {
+      const c = src[i];
+
+      // Comentario: "/" seguido de espacio o letra
+      if (c === "/" && (src[i+1] === " " || /[a-zA-Z]/.test(src[i+1] || ""))) {
+        let j = i;
+        while (j < n && src[j] !== "\n") j++;
+        out += `<span class="tok-cm">${escapeHtml(src.slice(i, j))}</span>`;
+        i = j;
+        continue;
+      }
+
+      // Cadenas de texto
+      if (c === '"') {
+        let j = i + 1;
+        while (j < n && src[j] !== '"') {
+          if (src[j] === "\\") j++;
+          j++;
+        }
+        j = Math.min(j + 1, n);
+        out += `<span class="tok-str">${escapeHtml(src.slice(i, j))}</span>`;
+        i = j;
+        continue;
+      }
+
+      // Números
+      if (/[0-9]/.test(c)) {
+        let j = i;
+        while (j < n && /[0-9.]/.test(src[j])) j++;
+        out += `<span class="tok-num">${escapeHtml(src.slice(i, j))}</span>`;
+        i = j;
+        continue;
+      }
+
+      // Identificadores / palabras clave
+      if (/[a-zA-Z_]/.test(c)) {
+        let j = i;
+        while (j < n && /[a-zA-Z0-9_]/.test(src[j])) j++;
+        const word = src.slice(i, j);
+
+        // ¿Es llamada a función? identificador seguido de "(" (ignorando espacios)
+        let k = j;
+        while (k < n && (src[k] === " " || src[k] === "\t")) k++;
+        const isCall = src[k] === "(";
+
+        if (STRUCT_KEYWORDS.has(word)) {
+          out += `<span class="tok-kw">${escapeHtml(word)}</span>`;
+        } else if (TYPE_KEYWORDS.has(word)) {
+          out += `<span class="tok-kw">${escapeHtml(word)}</span>`;
+        } else if (isCall) {
+          out += `<span class="tok-fn">${escapeHtml(word)}</span>`;
+        } else {
+          out += escapeHtml(word);
+        }
+        i = j;
+        continue;
+      }
+
+      // Operadores de dos caracteres
+      const two = src.substr(i, 2);
+      if (["==","!=","<=",">=","+=","-=","*=","/=","%="].includes(two)) {
+        out += `<span class="tok-op">${escapeHtml(two)}</span>`;
+        i += 2;
+        continue;
+      }
+
+      // Operadores / puntuación de un carácter
+      if ("+-*/%<>=!".includes(c)) {
+        out += `<span class="tok-op">${escapeHtml(c)}</span>`;
+        i++;
+        continue;
+      }
+      if (".,;:()[]{}".includes(c)) {
+        out += `<span class="tok-punct">${escapeHtml(c)}</span>`;
+        i++;
+        continue;
+      }
+
+      // Cualquier otro carácter (espacios, saltos de línea, etc.)
+      out += escapeHtml(c);
+      i++;
+    }
+    // Añade un salto final para que el textarea y el highlight no desincronicen
+    // en la última línea vacía.
+    return out + " ";
+  }
+
+  window.AltairHighlight = { highlight };
+})();
+
+</script>
 <script>
 const editor = document.getElementById("editor");
+const hl = document.getElementById("highlight");
+const hlCode = hl.querySelector("code");
 const consoleEl = document.getElementById("console");
 const runBtn = document.getElementById("run-btn");
 const clearBtn = document.getElementById("clear-btn");
 const examples = document.getElementById("examples");
+
+function renderHighlight(){
+  hlCode.innerHTML = window.AltairHighlight.highlight(editor.value);
+}
+
+editor.addEventListener("input", renderHighlight);
+editor.addEventListener("scroll", () => {
+  hl.scrollTop = editor.scrollTop;
+  hl.scrollLeft = editor.scrollLeft;
+});
 
 function logLine(text, cls){
   const div = document.createElement("div");
@@ -145,21 +1022,29 @@ function runCode(){
 runBtn.addEventListener("click", runCode);
 clearBtn.addEventListener("click", () => { consoleEl.innerHTML = '<div class="line empty">Consola limpiada.</div>'; });
 
-// Ejecutar con Ctrl+Enter / Cmd+Enter
 editor.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runCode(); }
   if (e.key === "Tab") { e.preventDefault();
     const s = editor.selectionStart, en = editor.selectionEnd;
     editor.value = editor.value.slice(0, s) + "    " + editor.value.slice(en);
     editor.selectionStart = editor.selectionEnd = s + 4;
+    renderHighlight();
   }
 });
 
+const HEADER = `altair.doc;
+name = MiPrograma
+version = 1.0.0
+author = "Tu nombre"
+create altair.doc
+
+`;
+
 const SAMPLES = {
-  hola: `define text nombre = "mundo"
+  hola: HEADER + `define text nombre = "mundo"
 log "Hola, " + nombre + "!"`,
 
-  bucle: `define numeric score = 82
+  bucle: HEADER + `define numeric score = 82
 
 if score > 90;
     log "Excelente"
@@ -181,7 +1066,7 @@ repeat 3 times;
     log "tick"
 break`,
 
-  funciones: `fun factorial numeric n numeric;
+  funciones: HEADER + `fun factorial numeric n numeric;
     if n <= 1;
         return 1
     break
@@ -197,7 +1082,7 @@ break
 
 log "3 + 4 = " + add(3, 4)`,
 
-  listas: `define list frutas = ["manzana", "pera", "kiwi"]
+  listas: HEADER + `define list frutas = ["manzana", "pera", "kiwi"]
 frutas.append("mango")
 
 foreach fruta in frutas;
@@ -208,7 +1093,7 @@ log "Total: " + frutas.length()
 frutas.remove(0)
 log "Tras eliminar la primera: " + frutas`,
 
-  storage: `/ Estas variables persisten entre recargas de la página
+  storage: HEADER + `/ Estas variables persisten entre recargas de la página
 / usando localStorage del navegador (simulando disk/cache)
 define numeric visitas disk = 0
 visitas += 1
@@ -219,9 +1104,14 @@ log "Recarga la página y vuelve a ejecutar: el número subirá."`
 examples.addEventListener("change", () => {
   if (examples.value && SAMPLES[examples.value]) {
     editor.value = SAMPLES[examples.value];
+    renderHighlight();
   }
   examples.value = "";
 });
+
+// Estado inicial
+editor.value = SAMPLES.hola;
+renderHighlight();
 </script>
 </body>
 </html>
