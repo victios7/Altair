@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Altair Lang — Lenguaje de programación compilado a C nativo</title>
-<meta name="description" content="Altair Lang es un lenguaje de programación compilado a C nativo para Windows y Linux. Incluye el compilador altairc, gestión de RAM/disco/caché, servidores HTTP, sesiones y tareas programadas.">
-<meta name="keywords" content="altair, altair lang, altair language, altairc, lenguaje de programación altair, altair programming language, lenguaje compilado a C, lenguaje con servidor HTTP integrado, storage tiers lenguaje de programación, crear lenguaje de programación propio, altair vs altair basic, altair linux, altair debian package, altair amd64, altair compiler linux">
+<meta name="description" content="Altair Lang es un lenguaje de programación compilado a C nativo para Windows, Linux y macOS. Incluye el compilador altairc, gestión de RAM/disco/caché, servidores HTTP, sesiones y tareas programadas.">
+<meta name="keywords" content="altair, altair lang, altair language, altairc, lenguaje de programación altair, altair programming language, lenguaje compilado a C, lenguaje con servidor HTTP integrado, storage tiers lenguaje de programación, crear lenguaje de programación propio, altair vs altair basic, altair linux, altair macos, altair debian package, altair pkg, altair amd64, altair compiler linux, altair compiler macos">
 <meta name="author" content="Altair Language">
 <link rel="canonical" href="https://victios7.github.io/Altair/">
 <link rel="icon" type="image/png" href="ALTAIR_LOGO.png">
@@ -13,12 +13,12 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Altair Lang">
 <meta property="og:title" content="Altair Lang — Lenguaje de programación compilado a C nativo">
-<meta property="og:description" content="Lenguaje compilado a C nativo para Windows y Linux con servidor HTTP, gestión de RAM/disco/caché, jobs y sesiones integrados en la sintaxis.">
+<meta property="og:description" content="Lenguaje compilado a C nativo para Windows, Linux y macOS con servidor HTTP, gestión de RAM/disco/caché, jobs y sesiones integrados en la sintaxis.">
 <meta property="og:url" content="https://victios7.github.io/Altair/">
 <meta property="og:image" content="https://victios7.github.io/Altair/altair logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Altair Lang">
-<meta name="twitter:description" content="Lenguaje de programación compilado a C nativo para Windows y Linux, con servidor HTTP y gestión de datos integrados en la sintaxis.">
+<meta name="twitter:description" content="Lenguaje de programación compilado a C nativo para Windows, Linux y macOS, con servidor HTTP y gestión de datos integrados en la sintaxis.">
 
 <script type="application/ld+json">
 {
@@ -28,8 +28,9 @@
   "alternateName": ["Altair", "Altair Language", "Altair Programming Language"],
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": [
- "Windows",
- "Linux"
+    "Windows",
+    "Linux",
+    "macOS"
   ],
   "description": "Lenguaje de programación compilado a C nativo con servidor HTTP, gestión declarativa de RAM/disco/caché, jobs, sesiones y storage tiers integrados en la sintaxis.",
   "softwareVersion": "1.6.5vC",
@@ -63,7 +64,7 @@
       "name": "¿Cómo se compila un programa en Altair?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Con el compilador altairc: por ejemplo, 'altairc programa.at -o programa' genera un binario nativo para Windows y Linux sin dependencias externas."
+        "text": "Con el compilador altairc: por ejemplo, 'altairc programa.at -o programa' genera un binario nativo para Windows, Linux y macOS sin dependencias externas."
       }
     },
     {
@@ -71,7 +72,7 @@
       "name": "¿Altair es gratis y de código abierto?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sí, Altair se distribuye bajo licencia MIT y los instaladores para Windows y Linux son gratuitos, disponibles en la sección de Releases de su repositorio en GitHub."
+        "text": "Sí, Altair se distribuye bajo licencia MIT y los instaladores para Windows, Linux y macOS son gratuitos, disponibles en la sección de Releases de su repositorio en GitHub."
       }
     }
   ]
@@ -298,9 +299,10 @@
       <div class="cta-row">
         <a class="btn btn-primary" href="https://github.com/victios7/Altair/releases/latest">⬇ Descargar Altair</a>
         <a class="btn btn-ghost" href="https://github.com/victios7/Altair/releases/latest">🐧 Descargar para Linux</a>
+        <a class="btn btn-ghost" href="https://github.com/victios7/Altair/releases/latest">🍎 Descargar para macOS</a>
         <a class="btn btn-ghost" href="#instalar">Ver instalación</a>
       </div>
-      <div class="meta-line">Windows/Linux 64-bit · instaladores nativos · MIT License · sin dependencias externas</div>
+      <div class="meta-line">Windows/Linux/macOS 64-bit · instaladores nativos · MIT License · sin dependencias externas</div>
     </div>
 
     <div class="terminal">
@@ -333,21 +335,21 @@
         <div class="step-num"></div>
         <div>
           <h3>Descarga el instalador o paquete</h3>
-          <p>Baja el instalador para Windows o el paquete .deb para Linux desde la sección de <a href="https://github.com/victios7/Altair/releases/latest" style="color:var(--gold); text-decoration:none;">Releases en GitHub</a>. No necesitas instalar nada más: el compilador incluye su propio toolchain.</p>
+          <p>Baja el instalador para Windows, el paquete .deb para Linux o el paquete .pkg para macOS desde la sección de <a href="https://github.com/victios7/Altair/releases/latest" style="color:var(--gold); text-decoration:none;">Releases en GitHub</a>. No necesitas instalar nada más: el compilador incluye su propio toolchain.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num"></div>
         <div>
           <h3>Ejecuta el instalador o paquete</h3>
-          <p>En Windows: acepta los permisos de administrador (necesarios para escribir en el PATH del sistema) y sigue el asistente. Windows puede mostrar un aviso de SmartScreen por ser un instalador nuevo — pulsa <code>Más información → Ejecutar de todas formas</code>. En Linux: instala el .deb con <code>sudo dpkg -i altair-1.6.5vC.deb</code>.</p>
+          <p>En Windows: acepta los permisos de administrador (necesarios para escribir en el PATH del sistema) y sigue el asistente. Windows puede mostrar un aviso de SmartScreen por ser un instalador nuevo — pulsa <code>Más información → Ejecutar de todas formas</code>. En Linux: instala el .deb con <code>sudo dpkg -i altair-1.6.5vC.deb</code>. En macOS: abre el paquete .pkg y sigue los pasos.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num"></div>
         <div>
           <h3>Abre Altair Terminal</h3>
-          <p>En Windows: usa el acceso directo del escritorio. En Linux: ejecuta <code>altairc</code> desde cualquier terminal. Comprueba la instalación con <code>altairc --version</code>. Para compilar tu primer programa: <code>altairc hola.at -o hola</code>.</p>
+          <p>En Windows: usa el acceso directo del escritorio. En Linux/macOS: ejecuta <code>altairc</code> desde cualquier terminal. Comprueba la instalación con <code>altairc --version</code>. Para compilar tu primer programa: <code>altairc hola.at -o hola</code>.</p>
         </div>
       </div>
     </div>
@@ -387,7 +389,7 @@
       <div class="card">
         <span class="icon">06</span>
         <h3>Compila a binario nativo</h3>
-        <p>Todo transpila a C y se compila con gcc: un único binario para Windows o Linux sin runtime que instalar.</p>
+        <p>Todo transpila a C y se compila con gcc: un único binario para Windows, Linux o macOS sin runtime que instalar.</p>
       </div>
     </div>
   </section>
@@ -422,8 +424,8 @@
         </div>
       </div>
       <div class="file-info">
-        <div><span>Archivos</span><span>.exe · .deb</span></div>
-        <div><span>Plataformas</span><span>Windows 10/11 · Linux x64</span></div>
+        <div><span>Archivos</span><span>.exe · .deb · .pkg</span></div>
+        <div><span>Plataformas</span><span>Windows 10/11 · Linux x64 · macOS</span></div>
         <div><span>Compilador</span><span>altairc 1.6.5vC</span></div>
         <div><span>Licencia</span><span>MIT</span></div>
       </div>
@@ -440,7 +442,7 @@
         <div class="step-num" style="counter-increment:none;">Q</div>
         <div>
           <h3>¿Qué es Altair Lang?</h3>
-          <p>Altair (también llamado Altair Lang o Altair Language) es un lenguaje de programación compilado que transpila a C y genera un binario nativo para Windows y Linux. Permite declarar servidores HTTP, niveles de almacenamiento (RAM, disco, caché), sesiones y tareas programadas directamente en la sintaxis del lenguaje, sin depender de librerías externas.</p>
+          <p>Altair (también llamado Altair Lang o Altair Language) es un lenguaje de programación compilado que transpila a C y genera un binario nativo para Windows, Linux y macOS. Permite declarar servidores HTTP, niveles de almacenamiento (RAM, disco, caché), sesiones y tareas programadas directamente en la sintaxis del lenguaje, sin depender de librerías externas.</p>
         </div>
       </div>
       <div class="step">
@@ -454,14 +456,14 @@
         <div class="step-num" style="counter-increment:none;">Q</div>
         <div>
           <h3>¿Cómo se compila un programa en Altair?</h3>
-          <p>Con el compilador <code>altairc</code>: por ejemplo <code>altairc programa.at -o programa</code> genera un binario nativo para Windows y Linux sin dependencias externas. Consulta la <a href="guia.html" style="color:var(--gold); text-decoration:none;">guía completa del lenguaje</a> para la referencia de sintaxis.</p>
+          <p>Con el compilador <code>altairc</code>: por ejemplo <code>altairc programa.at -o programa</code> genera un binario nativo para Windows, Linux y macOS sin dependencias externas. Consulta la <a href="guia.html" style="color:var(--gold); text-decoration:none;">guía completa del lenguaje</a> para la referencia de sintaxis.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num" style="counter-increment:none;">Q</div>
         <div>
           <h3>¿Altair es gratis y de código abierto?</h3>
-          <p>Sí, se distribuye bajo licencia MIT. Los instaladores para Windows y Linux son gratuitos y están disponibles junto con el código fuente en el <a href="https://github.com/victios7/Altair" style="color:var(--gold); text-decoration:none;">repositorio de GitHub</a>.</p>
+          <p>Sí, se distribuye bajo licencia MIT. Los instaladores para Windows, Linux y macOS son gratuitos y están disponibles junto con el código fuente en el <a href="https://github.com/victios7/Altair" style="color:var(--gold); text-decoration:none;">repositorio de GitHub</a>.</p>
         </div>
       </div>
     </div>
