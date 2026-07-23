@@ -11,7 +11,7 @@ jobs, sesiones y storage tiers integrados directamente en la sintaxis.**
 [![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#instalación)
 [![Version](https://img.shields.io/badge/version-1.6.5vC-ff6a3d.svg)](ALTAIR_GUIDE.md)
 
-[**Descargar Altair**](https://github.com/victios7/altair-builder/releases/latest) ·
+[**Descargar Altair**](https://github.com/victios7/altair/releases/latest) ·
 [Sitio web](https://victios7.github.io/Altair/) ·
 [Guía del lenguaje](ALTAIR_GUIDE.md) ·
 [Ejemplos](examples)
@@ -62,7 +62,7 @@ de tipos, control de flujo, clases, snapshots y el resto de la sintaxis.
 
 Altair se distribuye como instalador nativo para **Windows**, **Linux** y
 **macOS**. Descarga el paquete de tu sistema desde la página de
-[**Releases**](https://github.com/victios7/altair-builder/releases/latest).
+[**Releases**](https://github.com/victios7/altair/releases/latest)
 
 ### 🪟 Windows (10/11, 64-bit)
 
@@ -161,13 +161,13 @@ altair/
 Los binarios (`altairc.exe`, `altairc` de Linux/macOS, `.deb`, `.pkg`,
 `Altair-Setup.exe`) **no se versionan en el repositorio** — se compilan y
 publican automáticamente para las tres plataformas en la sección de
-[Releases](https://github.com/victios7/altair-builder/releases) para no
+[Repo de compilación](https://github.com/victios7/altair-builder/releases) para no
 inflar el historial de git con archivos binarios.
 
 ## Contribuir
 
 Las incidencias y propuestas de mejora son bienvenidas a través de
-[Issues](https://github.com/victios7/altair-builder/issues). Si quieres
+[Issues](https://github.com/victios7/altair/issues). Si quieres
 proponer cambios al compilador o a la guía del lenguaje, abre un Pull
 Request.
 
