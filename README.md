@@ -8,10 +8,10 @@
 jobs, sesiones y storage tiers integrados directamente en la sintaxis.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-e8b34d.svg)](LICENSE)
-[![Platform: Windows](https://img.shields.io/badge/platform-Windows%2010%2F11-blue.svg)](#instalación)
+[![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#instalación)
 [![Version](https://img.shields.io/badge/version-1.6.5vC-ff6a3d.svg)](ALTAIR_GUIDE.md)
 
-[**Descargar Altair**](https://github.com/victios7/altair/releases/latest) ·
+[**Descargar Altair**](https://github.com/victios7/altair-builder/releases/latest) ·
 [Sitio web](https://victios7.github.io/Altair/) ·
 [Guía del lenguaje](ALTAIR_GUIDE.md) ·
 [Ejemplos](examples)
@@ -53,19 +53,22 @@ break
 | 🔐 **Sesiones y config** | Sesiones con TTL y variables de entorno tipadas vía `session` y `config`. |
 | ⏱️ **Jobs programados** | Tareas recurrentes con `job … every`. |
 | 📊 **Salud y métricas** | Endpoints `/health` y `/metrics` compatibles con Prometheus en una línea. |
-| ⚙️ **Binario nativo** | Todo compila a un único `.exe` sin runtime que instalar. |
+| ⚙️ **Binario nativo** | Todo compila a un único ejecutable sin runtime que instalar, en Windows, Linux y macOS. |
 
 Consulta la [guía completa del lenguaje](ALTAIR_GUIDE.md) para la referencia
 de tipos, control de flujo, clases, snapshots y el resto de la sintaxis.
 
 ## Instalación
 
-Altair se distribuye como instalador para Windows (10/11, 64-bit).
+Altair se distribuye como instalador nativo para **Windows**, **Linux** y
+**macOS**. Descarga el paquete de tu sistema desde la página de
+[**Releases**](https://github.com/victios7/altair-builder/releases/latest).
 
-1. Descarga `Altair-Setup.exe` desde la página de
-   [**Releases**](https://github.com/victios7/altair/releases/latest).
+### 🪟 Windows (10/11, 64-bit)
+
+1. Descarga `Altair-Setup-<version>.exe`
 2. Ejecútalo y acepta permisos de administrador (necesarios para añadir
-   `altairc` al `PATH` del sistema).
+   `altairc` al `PATH` del sistema)
 3. Abre **Altair Terminal** desde el acceso directo del escritorio, o una
    terminal normal, y comprueba la instalación:
 
@@ -76,6 +79,44 @@ Altair se distribuye como instalador para Windows (10/11, 64-bit).
 El instalador incluye el compilador, la terminal de Altair, el toolchain
 `mingw64` necesario para generar el binario final, e íconos y accesos
 directos — no hace falta instalar nada más.
+
+### 🐧 Linux (paquete `.deb`)
+
+1. Descarga `altair_<version>_amd64.deb`
+2. Instálalo con:
+
+   ```bash
+   sudo dpkg -i altair_<version>_amd64.deb
+   ```
+3. Comprueba la instalación:
+
+   ```bash
+   altairc --version
+   ```
+
+Alternativamente, descarga `altair-linux-<version>.tar.gz` para obtener el
+binario `altairc` suelto sin necesidad de paquete `.deb`.
+
+### 🍎 macOS (Apple Silicon)
+
+1. Descarga `Altair-Setup-<version>.pkg`
+2. Haz doble clic para abrir el instalador
+
+   > ⚠️ Como el paquete no está firmado con un certificado de Apple
+   > Developer, macOS puede mostrar un aviso de "desarrollador no
+   > verificado" la primera vez. Para abrirlo: clic derecho sobre el
+   > `.pkg` → **Abrir**, o ve a **Ajustes del Sistema → Privacidad y
+   > Seguridad** y pulsa **Abrir de todas formas**.
+
+3. Sigue el asistente — instala `altairc` en `/usr/local/bin`
+4. Comprueba la instalación:
+
+   ```bash
+   altairc --version
+   ```
+
+Alternativamente, descarga `altair-macos-<version>.tar.gz` para obtener el
+binario `altairc` suelto sin necesidad de instalador.
 
 ## Uso rápido
 
@@ -102,6 +143,8 @@ curl http://localhost:3000/health
 
 ```
 altair/
+├── .github/workflows/    # Compilación e integración continua multiplataforma
+│   └── release.yml
 ├── docs/                 # Sitio web (GitHub Pages) — altair.github.io/altair
 │   ├── index.html
 │   ├── ALTAIR_LOGO.ico
@@ -115,16 +158,18 @@ altair/
 └── README.md
 ```
 
-Los binarios (`altairc.exe`, `altair-terminal.exe`, `Altair-Setup.exe`) **no
-se versionan en el repositorio** — se publican en la sección de
-[Releases](https://github.com/victios7/altair/releases) para no inflar el
-historial de git con archivos binarios.
+Los binarios (`altairc.exe`, `altairc` de Linux/macOS, `.deb`, `.pkg`,
+`Altair-Setup.exe`) **no se versionan en el repositorio** — se compilan y
+publican automáticamente para las tres plataformas en la sección de
+[Releases](https://github.com/victios7/altair-builder/releases) para no
+inflar el historial de git con archivos binarios.
 
 ## Contribuir
 
 Las incidencias y propuestas de mejora son bienvenidas a través de
-[Issues](https://github.com/victios7/altair/issues). Si quieres proponer
-cambios al compilador o a la guía del lenguaje, abre un Pull Request.
+[Issues](https://github.com/victios7/altair-builder/issues). Si quieres
+proponer cambios al compilador o a la guía del lenguaje, abre un Pull
+Request.
 
 ## Licencia
 
