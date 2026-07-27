@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guía del lenguaje Altair — Referencia completa v1.6.5vC</title>
-<meta name="description" content="Referencia completa del lenguaje Altair: variables, tipos, storage tiers, funciones, clases, servidor HTTP, gráficos Raylib y CLI de altairc.">
-<meta name="keywords" content="altair lang guia, altair language reference, altairc, como usar altair, altair tutorial, altair storage tiers, altair servidor http, altair raylib">
+<title>Guía del lenguaje Altair — Referencia completa</title>
+<meta name="description" content="Referencia completa del lenguaje Altair: variables, tipos, storage tiers, funciones, clases, punteros, servidor HTTP, gráficos Raylib y CLI de altairc. Disponible en Español e Inglés.">
+<meta name="keywords" content="altair lang guia, altair language reference, altairc, como usar altair, altair tutorial, altair storage tiers, altair servidor http, altair raylib, altair pointers">
 <link rel="canonical" href="https://victios7.github.io/Altair/guia.html">
 <link rel="icon" href="altair logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -22,18 +22,30 @@ body{background:var(--bg); color:var(--text); font-family:var(--font-display); l
 .wrap{max-width:860px; margin:0 auto; padding:0 24px 100px;}
 
 /* nav */
-nav{display:flex; justify-content:space-between; align-items:center; padding:22px 0 30px; border-bottom:1px solid var(--line); margin-bottom:50px;}
+nav{display:flex; justify-content:space-between; align-items:center; padding:22px 0 30px; border-bottom:1px solid var(--line); margin-bottom:30px; flex-wrap:wrap; gap:14px;}
 .brand{font-weight:700; font-size:1.1rem; text-decoration:none; color:var(--text); display:flex; align-items:center; gap:8px;}
 .brand img{width:22px; height:22px; border-radius:50%;}
-.navlinks{display:flex; align-items:center; gap:20px;}
+.navlinks{display:flex; align-items:center; gap:20px; flex-wrap:wrap;}
 .navlinks a{color:var(--text-dim); text-decoration:none; font-size:.88rem; font-family:var(--font-mono); transition:color .15s;}
 .navlinks a:hover{color:var(--gold);}
+
+/* language toggle */
+.lang-toggle{
+  display:flex; align-items:center; background:var(--bg-panel); border:1px solid var(--line);
+  border-radius:999px; padding:4px; font-family:var(--font-mono); font-size:.8rem; gap:2px;
+}
+.lang-toggle button{
+  background:none; border:none; color:var(--text-dim); padding:6px 16px; border-radius:999px;
+  cursor:pointer; font-family:var(--font-mono); font-size:.8rem; font-weight:600; transition:all .15s;
+}
+.lang-toggle button.active{background:linear-gradient(135deg,var(--gold),var(--ember)); color:#160b02;}
+.lang-toggle button:not(.active):hover{color:var(--text);}
 
 /* headings */
 h1{font-size:2.2rem; font-weight:700; letter-spacing:-.01em; margin-bottom:10px; line-height:1.2;}
 .subtitle{color:var(--text-dim); font-size:1rem; margin-bottom:40px;}
 h2{font-size:1.4rem; font-weight:700; margin-top:60px; margin-bottom:18px; color:var(--gold); border-bottom:1px solid var(--line); padding-bottom:10px; scroll-margin-top:20px;}
-h3{font-size:1.1rem; font-weight:600; margin-top:30px; margin-bottom:12px; color:var(--text);}
+h3{font-size:1.1rem; font-weight:600; margin-top:30px; margin-bottom:12px; color:var(--text); scroll-margin-top:20px;}
 
 /* text */
 p{color:#c7ceda; font-size:.97rem; margin-bottom:14px;}
@@ -57,6 +69,7 @@ td code{font-size:.82em;}
 
 /* blockquote */
 blockquote{border-left:3px solid var(--gold); margin:20px 0; padding:8px 20px; color:var(--text-dim); background:var(--bg-panel); border-radius:0 8px 8px 0; font-size:.95rem;}
+blockquote p{margin-bottom:0;}
 
 /* eyebrow */
 .eyebrow{font-family:var(--font-mono); font-size:.75rem; color:var(--gold); letter-spacing:.14em; text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
@@ -64,12 +77,12 @@ blockquote{border-left:3px solid var(--gold); margin:20px 0; padding:8px 20px; c
 
 /* toc */
 .toc{background:var(--bg-panel); border:1px solid var(--line); border-radius:12px; padding:24px 28px; margin-bottom:50px;}
-.toc h3{margin-top:0; margin-bottom:14px; font-size:1rem; color:var(--text-dim); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.08em;}
+.toc h3,.toc h2{margin-top:0; margin-bottom:14px; font-size:1rem; color:var(--text-dim); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.08em; border:none; padding:0;}
 .toc ol{column-count:2; column-gap:24px;}
 .toc li{font-size:.87rem; margin-bottom:6px;}
 .toc a{color:var(--text-dim); transition:color .15s;}
 .toc a:hover{color:var(--gold); text-decoration:none;}
-@media(max-width:600px){.toc ol{column-count:1;}}
+@media(max-width:600px){.toc ol{column-count:1;} nav{flex-direction:column; align-items:flex-start;}}
 
 /* version badge */
 .badge{display:inline-block; font-family:var(--font-mono); font-size:.72rem; padding:3px 10px; border-radius:20px; background:linear-gradient(135deg,var(--gold),var(--ember)); color:#160b02; font-weight:700; margin-left:10px; vertical-align:middle;}
@@ -80,14 +93,12 @@ blockquote{border-left:3px solid var(--gold); margin:20px 0; padding:8px 20px; c
 /* divider */
 hr{border:none; border-top:1px solid var(--line); margin:48px 0;}
 
-/* pipeline diagram */
-.pipeline{display:flex; align-items:center; gap:0; flex-wrap:wrap; margin:20px 0 24px; font-family:var(--font-mono); font-size:.82rem;}
-.pipeline-step{background:var(--bg-panel); border:1px solid var(--line); border-radius:7px; padding:8px 14px; color:var(--text-dim);}
-.pipeline-step span{color:var(--gold);}
-.pipeline-arrow{color:var(--line); padding:0 6px; font-size:1rem;}
-
 /* footer */
 footer{margin-top:80px; padding-top:24px; border-top:1px solid var(--line); color:var(--text-dim); font-size:.82rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;}
+
+/* lang panes */
+.lang-pane{display:none;}
+.lang-pane.active{display:block;}
 </style>
 </head>
 <body>
@@ -100,674 +111,3154 @@ footer{margin-top:80px; padding-top:24px; border-top:1px solid var(--line); colo
     <a href="community/playground.html">Playground</a>
     <a href="index.html">&larr; Inicio</a>
   </div>
+  <div class="lang-toggle" role="group" aria-label="Language switch">
+    <button id="btn-es" class="active" onclick="setLang('es')">ES</button>
+    <button id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
 </nav>
 
-<div class="eyebrow">Referencia del lenguaje</div>
-<h1>Altair Language Reference <span class="badge">v1.6.5vC</span></h1>
-<p class="subtitle">Documentación generada a partir del compilador real <code>altairc v1.6.5vC</code>.</p>
+<div class="eyebrow" id="eyebrow-text">Referencia del lenguaje</div>
+<h1 id="title-text">Altair Language Reference <span class="badge">v1.7vB</span></h1>
+<p class="subtitle" id="subtitle-text">Documentación generada a partir del compilador real <code>altairc</code>.</p>
 
-<div class="toc">
-  <h3>Tabla de contenidos</h3>
-  <ol>
-    <li><a href="#overview">Visión general</a></li>
-    <li><a href="#pipeline">Pipeline del compilador</a></li>
-    <li><a href="#estructura">Estructura del programa</a></li>
-    <li><a href="#variables">Variables y almacenamiento</a></li>
-    <li><a href="#tipos">Tipos</a></li>
-    <li><a href="#operadores">Operadores</a></li>
-    <li><a href="#control">Control de flujo</a></li>
-    <li><a href="#funciones">Funciones</a></li>
-    <li><a href="#clases">Clases y objetos</a></li>
-    <li><a href="#listas">Listas</a></li>
-    <li><a href="#errores">Manejo de errores</a></li>
-    <li><a href="#snapshots">Snapshots</a></li>
-    <li><a href="#choose">Choose</a></li>
-    <li><a href="#introspect">Introspección</a></li>
-    <li><a href="#token">Token</a></li>
-    <li><a href="#orbit">Orbit y Prefer</a></li>
-    <li><a href="#release">Release</a></li>
-    <li><a href="#input">Entrada del usuario</a></li>
-    <li><a href="#servidor">Servidor HTTP</a></li>
-    <li><a href="#rutas">Rutas y handlers</a></li>
-    <li><a href="#middleware">Middleware</a></li>
-    <li><a href="#ratelimit">Rate limiting</a></li>
-    <li><a href="#health">Health checks</a></li>
-    <li><a href="#metricas">Métricas</a></li>
-    <li><a href="#shutdown">Graceful shutdown</a></li>
-    <li><a href="#sesiones">Sesiones</a></li>
-    <li><a href="#config">Config y entorno</a></li>
-    <li><a href="#dbpool">Pool de base de datos</a></li>
-    <li><a href="#jobs">Jobs programados</a></li>
-    <li><a href="#graficos">Gráficos con Raylib</a></li>
-    <li><a href="#cli">CLI de altairc</a></li>
-    <li><a href="#errorcodes">Códigos de error</a></li>
-  </ol>
-</div>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="overview">1. Visión general</h2>
-<p>Altair es un lenguaje <strong>compilado estáticamente y orientado a expresiones</strong> que transpila a C mediante <code>altairc</code>. Cada programa <code>.at</code> se convierte en un binario nativo sin dependencias en tiempo de ejecución.</p>
-<table>
-  <tr><th>Característica</th><th>Descripción</th></tr>
-  <tr><td><strong>Storage tiers</strong></td><td>Cada variable declara dónde vive: <code>ram</code>, <code>disk</code>, <code>cache</code> o <code>temp</code></td></tr>
-  <tr><td><strong>Servidor HTTP</strong></td><td><code>listen</code> y <code>route</code> son palabras clave del lenguaje, sin frameworks externos</td></tr>
-  <tr><td><strong>Orbit</strong></td><td>Variables que migran entre tiers en tiempo de ejecución</td></tr>
-  <tr><td><strong>Gráficos <span class="new">v1.6.5vC</span></strong></td><td>Ventana y loop de juego vía Raylib (<code>link * raylib</code>)</td></tr>
-  <tr><td><strong>Binario nativo</strong></td><td>Compila a un ejecutable sin runtime instalado</td></tr>
-  <tr><td><strong>Plataformas</strong></td><td>Windows (10/11), Linux, macOS</td></tr>
-</table>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="pipeline">2. Pipeline del compilador</h2>
-<div class="pipeline">
-  <div class="pipeline-step"><span>lexer.c</span></div><div class="pipeline-arrow">→</div>
-  <div class="pipeline-step"><span>parser.c</span><br><small>recursivo descendente</small></div><div class="pipeline-arrow">→</div>
-  <div class="pipeline-step"><span>sema.c</span><br><small>análisis semántico</small></div><div class="pipeline-arrow">→</div>
-  <div class="pipeline-step"><span>codegen.c</span><br><small>genera C</small></div><div class="pipeline-arrow">→</div>
-  <div class="pipeline-step"><span>gcc -O2</span><br><small>binario nativo</small></div>
-</div>
-<p>El compilador escribe el C generado a un temporal <code>/tmp/altair_&lt;pid&gt;_gen.c</code>, invoca <code>gcc -O2</code> y lo elimina. En Windows usa el <code>mingw64</code> incluido en el instalador.</p>
-<pre><code>/ Ver el C generado sin compilar:
-altairc programa.at --emit-c
-
-/ Ver el número de nodos del AST:
-altairc programa.at --emit-ast</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="estructura">3. Estructura del programa</h2>
-<pre><code>altair.doc;
-    name = "MiApp"
-    version = "1.0"
-    author = "Tu Nombre"
+<div id="pane-es" class="lang-pane active">
+<h1 id="es-guia-completa-del-lenguaje-altair">Guía completa del lenguaje Altair</h1>
+<blockquote>
+<p>Basada en el funcionamiento interno real del compilador (<code>altairc</code>, escrito en C:
+lexer → parser → sema → codegen → C → gcc → binario nativo) y del runtime
+(<code>altair_rt.c</code>). No incluye las funcionalidades de <code>async</code>, <code>safe block</code> ni
+<code>data ... save data</code>, que todavía no están implementadas.</p>
+</blockquote>
+<h2 id="es-indice">Índice</h2>
+<ol>
+<li><a href="#es-1-visión-general">Visión general</a></li>
+<li><a href="#es-2-estructura-de-un-programa">Estructura de un programa</a></li>
+<li><a href="#es-3-variables-y-almacenamiento">Variables y almacenamiento</a></li>
+<li><a href="#es-4-tipos-de-datos">Tipos de datos</a></li>
+<li><a href="#es-5-operadores-y-expresiones">Operadores y expresiones</a></li>
+<li><a href="#es-6-control-de-flujo">Control de flujo</a></li>
+<li><a href="#es-7-funciones">Funciones</a></li>
+<li><a href="#es-8-clases-y-objetos">Clases y objetos</a></li>
+<li><a href="#es-9-listas">Listas</a></li>
+<li><a href="#es-10-manejo-de-errores">Manejo de errores</a></li>
+<li><a href="#es-11-snapshots">Snapshots</a></li>
+<li><a href="#es-12-choose-aleatoriedad-ponderada">Choose (aleatoriedad ponderada)</a></li>
+<li><a href="#es-13-introspección">Introspección</a></li>
+<li><a href="#es-14-variables-token">Variables token</a></li>
+<li><a href="#es-15-orbit-y-prefer">Orbit y prefer</a></li>
+<li><a href="#es-16-servidor-http">Servidor HTTP</a></li>
+<li><a href="#es-17-rutas-y-handlers">Rutas y handlers</a></li>
+<li><a href="#es-18-middleware">Middleware</a></li>
+<li><a href="#es-19-límite-de-tasa-rate-limiting">Límite de tasa (rate limiting)</a></li>
+<li><a href="#es-20-health-checks">Health checks</a></li>
+<li><a href="#es-21-métricas">Métricas</a></li>
+<li><a href="#es-22-apagado-ordenado-graceful-shutdown">Apagado ordenado (graceful shutdown)</a></li>
+<li><a href="#es-23-sesiones">Sesiones</a></li>
+<li><a href="#es-24-configuración-y-variables-de-entorno">Configuración y variables de entorno</a></li>
+<li><a href="#es-25-pool-de-base-de-datos">Pool de base de datos</a></li>
+<li><a href="#es-26-planificador-de-tareas-job-scheduler">Planificador de tareas (job scheduler)</a></li>
+<li><a href="#es-27-gráficos-raylib">Gráficos (raylib)</a></li>
+<li><a href="#es-28-consultas-de-sistema-integradas">Consultas de sistema integradas</a></li>
+<li><a href="#es-29-referencia-de-la-cli-altairc">Referencia de la CLI <code>altairc</code></a></li>
+<li><a href="#es-30-códigos-de-error">Códigos de error</a></li>
+<li><a href="#es-31-char-file-pointtipo-y-operadores-a-nivel-de-bit"><code>char</code>, <code>file</code>, <code>point@Tipo</code> y operadores a nivel de bit</a></li>
+<li><a href="#es-32-es-de-ficheros-y-ejecución-de-procesos">E/S de ficheros y ejecución de procesos</a></li>
+<li><a href="#es-33-punteros-crudos">Punteros crudos</a></li>
+<li><a href="#es-34-argumentos-de-línea-de-comandos">Argumentos de línea de comandos</a></li>
+<li><a href="#es-35-variables-persistentes-con-archivo-propio">Variables persistentes con archivo propio</a></li>
+<li><a href="#es-36-el-compilador-auto-hospedado-altair-core">El compilador auto-hospedado (Altair-Core)</a></li>
+</ol>
+<hr />
+<h2 id="es-1-vision-general">1. Visión general</h2>
+<p>Altair es un lenguaje <strong>compilado estáticamente</strong> y orientado a expresiones que
+se traduce a C mediante <code>altairc</code>. Cada programa termina siendo un único
+binario nativo, sin dependencias de runtime externas.</p>
+<p><strong>Pipeline del compilador:</strong></p>
+<pre><code>código .at → lexer → parser → sema → codegen → código .c → gcc → binario
+</code></pre>
+<p><strong>Propiedades clave:</strong>
+- Cada variable tiene un <em>nivel de almacenamiento</em> declarado (<code>ram</code>/<code>disk</code>/<code>cache</code>/<code>temp</code>).
+- Las variables pueden migrar entre niveles de almacenamiento en tiempo de
+  ejecución mediante <code>orbit</code>.
+- Texto, listas, objetos y tokens son valores de primera clase.
+- Toda la memoria la gestiona el runtime (no hay que hacer <code>malloc</code>/<code>free</code>
+  manual, salvo con los punteros crudos nuevos, ver §33).
+- Los servidores HTTP se declaran con <code>listen</code>; las rutas con <code>route</code>.</p>
+<hr />
+<h2 id="es-2-estructura-de-un-programa">2. Estructura de un programa</h2>
+<p>Todo programa Altair tiene una cabecera opcional y un cuerpo. La cabecera da
+metadatos del programa; el cuerpo contiene todas las sentencias.</p>
+<pre><code class="language-altair">altair.doc;
+    name = MyApp
+    version = 1.0.0
+    author = &quot;Jane Smith&quot;
 create altair.doc
 
-/ Esto es un comentario
+/ Esto es un comentario (línea que empieza por /)
 
-log "Hola desde Altair!"</code></pre>
-<p>La cabecera (<code>altair.doc;</code> … <code>create altair.doc</code>) es <strong>opcional</strong>. Campos disponibles: <code>name</code>, <code>version</code>, <code>author</code>.</p>
-<blockquote><strong>Comentarios:</strong> una <code>/</code> al inicio del token (o tras espacio) seguida de espacio o letra inicia un comentario de línea. Si el token anterior era un valor, la <code>/</code> se interpreta como división.</blockquote>
+define text greeting = &quot;Hello, world!&quot;
+log greeting
+</code></pre>
+<p><strong>Campos de cabecera:</strong> <code>name</code>, <code>version</code>, <code>author</code>.</p>
+<p>El parser lee la cabecera desde <code>altair.doc;</code> hasta <code>create altair.doc</code>. Todo
+lo demás es el cuerpo del programa.</p>
+<p><strong>Comentarios:</strong> un <code>/</code> al inicio de una línea (o tras espacios en blanco)
+seguido de un espacio o una letra empieza un comentario de una línea.</p>
+<hr />
+<h2 id="es-3-variables-y-almacenamiento">3. Variables y almacenamiento</h2>
+<h3 id="es-declaracion">Declaración</h3>
+<p>Hay dos formas equivalentes, ambas soportadas por el parser:</p>
+<pre><code class="language-altair">define &lt;tipo&gt; &lt;nombre&gt; [almacenamiento] [cualificadores] [= expresión]
+&lt;tipo&gt; &lt;nombre&gt; [= expresión] [almacenamiento] [cualificadores]
+</code></pre>
+<p>La palabra <code>define</code> es <strong>opcional</strong>; el compilador reconoce igualmente una
+declaración que empieza directamente por el tipo.</p>
+<p><strong>Ejemplos:</strong></p>
+<pre><code class="language-altair">define numeric count = 0
+numeric count2 = 0
 
-<!-- ──────────────────────────────────────────── -->
-<h2 id="variables">4. Variables y almacenamiento</h2>
-<h3>Declaración</h3>
-<pre><code>define &lt;tipo&gt; &lt;nombre&gt; [storage] [calificadores] [= expresión]</code></pre>
-<p>La palabra clave <code>define</code> es <strong>opcional</strong>:</p>
-<pre><code>/ Con define:
-define numeric contador = 0 ram
-
-/ Sin define (equivalente):
-numeric contador = 0 ram
-text mensaje = "Hola" ram
-bool activo = true ram</code></pre>
-
-<h3>Tiers de almacenamiento</h3>
+define text name = &quot;world&quot;
+define bool ready = true
+define list items
+define object user
+</code></pre>
+<h3 id="es-niveles-de-almacenamiento">Niveles de almacenamiento</h3>
 <table>
-  <tr><th>Keyword</th><th>Comportamiento</th></tr>
-  <tr><td><code>ram</code></td><td>Memoria del proceso, bloqueada con <code>mlock</code>. Rápida; se pierde al salir.</td></tr>
-  <tr><td><code>disk</code></td><td>Persiste en <code>~/.altair/&lt;app&gt;/disk/&lt;var&gt;.altv</code>. Sobrevive reinicios.</td></tr>
-  <tr><td><code>cache</code></td><td>Persiste con TTL opcional. Se auto-expira cuando expira el TTL.</td></tr>
-  <tr><td><code>temp</code></td><td>Se pone a cero en <code>release</code>. Para datos sensibles.</td></tr>
-  <tr><td><code>auto</code></td><td>El runtime elige el tier (equivale a <code>ram</code> por defecto).</td></tr>
+<thead>
+<tr>
+<th>Palabra clave</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ram</code></td>
+<td>Memoria del proceso (por defecto). Rápido; se pierde al salir.</td>
+</tr>
+<tr>
+<td><code>disk</code></td>
+<td>Almacenamiento persistente en fichero. Sobrevive a reinicios.</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td>Persistente con TTL opcional. Se auto-expira.</td>
+</tr>
+<tr>
+<td><code>temp</code></td>
+<td>Se pone a cero al liberarse; para datos sensibles.</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>El runtime elige el mejor nivel.</td>
+</tr>
+</tbody>
 </table>
-
-<pre><code>define text usuario disk                      / persiste entre ejecuciones
-define text token_sesion temp                 / se borra al liberar
-define text respuesta cache expire=30m        / expira en 30 minutos</code></pre>
-
-<h3>Calificadores</h3>
+<pre><code class="language-altair">define text username disk
+define text session_token temp
+define text api_response cache expire=30m
+</code></pre>
+<h3 id="es-cualificadores">Cualificadores</h3>
 <table>
-  <tr><th>Calificador</th><th>Ejemplo</th><th>Efecto</th></tr>
-  <tr><td><code>const</code></td><td><code>define numeric PI const = 3.14159</code></td><td>No se puede reasignar (lanza ALT0007)</td></tr>
-  <tr><td><code>expire=&lt;dur&gt;</code></td><td><code>cache expire=5m</code></td><td>Auto-expira tras la duración</td></tr>
-  <tr><td><code>weight=&lt;n&gt;</code></td><td><code>weight=5</code></td><td>Hint de prioridad (entero ≥ 0)</td></tr>
+<thead>
+<tr>
+<th>Cualificador</th>
+<th>Ejemplo</th>
+<th>Efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>const</code></td>
+<td><code>define numeric pi const = 3.14159</code></td>
+<td>No se puede reasignar</td>
+</tr>
+<tr>
+<td><code>expire=&lt;dur&gt;</code></td>
+<td><code>expire=5m</code></td>
+<td>Se auto-expira tras un tiempo</td>
+</tr>
+<tr>
+<td><code>weight=&lt;n&gt;</code></td>
+<td><code>weight=5</code></td>
+<td>Pista de prioridad (0–100)</td>
+</tr>
+</tbody>
 </table>
 <p><strong>Duraciones:</strong> <code>30s</code> (segundos), <code>5m</code> (minutos), <code>2h</code> (horas).</p>
-
-<h3>Asignación</h3>
-<pre><code>nombre = "Alicia"
-contador += 10
-contador -= 3
-contador *= 2
-contador /= 4
-contador %= 3
-lista[0] = "nuevo"</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="tipos">5. Tipos</h2>
+<h3 id="es-asignacion">Asignación</h3>
+<pre><code class="language-altair">name = &quot;Alice&quot;
+count = count + 1
+count += 10
+count -= 3
+count *= 2
+count /= 4
+count %= 7
+</code></pre>
+<h3 id="es-liberar-release">Liberar (<code>release</code>)</h3>
+<p>Libera explícitamente una variable y su memoria:</p>
+<pre><code class="language-altair">define text buffer ram = &quot;large data&quot;
+/ ... usar buffer ...
+release buffer
+</code></pre>
+<p><code>release</code> es seguro de llamar sobre variables que ya no existen (no hace nada).</p>
+<hr />
+<h2 id="es-4-tipos-de-datos">4. Tipos de datos</h2>
+<h3 id="es-numeric"><code>numeric</code></h3>
+<p>Un número de coma flotante de 64 bits (<code>double</code> en C internamente).</p>
+<pre><code class="language-altair">define numeric x = 42
+define numeric pi = 3.14159
+</code></pre>
+<h3 id="es-text"><code>text</code></h3>
+<p>Una cadena UTF-8.</p>
+<pre><code class="language-altair">define text greeting = &quot;Hello!&quot;
+define text multi = &quot;Línea 1\nLínea 2&quot;
+</code></pre>
+<p>La concatenación usa <code>+</code>:</p>
+<pre><code class="language-altair">define text full = &quot;Hola, &quot; + name + &quot;!&quot;
+</code></pre>
+<h3 id="es-bool"><code>bool</code></h3>
+<pre><code class="language-altair">define bool active = true
+define bool done = false
+</code></pre>
+<h3 id="es-list"><code>list</code></h3>
+<p>Colección ordenada de tamaño dinámico.</p>
+<pre><code class="language-altair">define list scores = [10, 20, 30]
+scores.append(40)
+scores.remove(0)      / elimina el índice 0
+scores.clear()        / vacía la lista
+define numeric n = scores.length()
+define numeric v = scores[1]
+scores[0] = 99
+</code></pre>
+<p><code>.length</code> funciona con o sin paréntesis.</p>
+<h3 id="es-object"><code>object</code></h3>
+<p>Ver <a href="#es-8-clases-y-objetos">§8 Clases y objetos</a>.</p>
+<h3 id="es-token"><code>token</code></h3>
+<p>Un valor de un solo uso: se consume la primera vez que se lee, y una segunda
+lectura lanza <code>ALT0004</code>.</p>
+<pre><code class="language-altair">define token invite_code = &quot;XXXX-YYYY&quot;
+define text used = invite_code    / consume el token
+define text again = invite_code   / ERROR: ALT0004, token ya consumido
+</code></pre>
+<h3 id="es-char-texto-de-un-caracter-anadido-para-self-hosting-31"><code>char</code> — texto de un carácter <em>(añadido para self-hosting, §31)</em></h3>
+<h3 id="es-file-manejador-de-fichero-anadido-para-self-hosting-3132"><code>file</code> — manejador de fichero <em>(añadido para self-hosting, §31–32)</em></h3>
+<h3 id="es-pointtipo-puntero-crudo-anadido-para-self-hosting-31-33"><code>point@Tipo</code> — puntero crudo <em>(añadido para self-hosting, §31, §33)</em></h3>
+<hr />
+<h2 id="es-5-operadores-y-expresiones">5. Operadores y expresiones</h2>
+<h3 id="es-aritmeticos">Aritméticos</h3>
 <table>
-  <tr><th>Tipo</th><th>Descripción</th><th>Por defecto</th></tr>
-  <tr><td><code>numeric</code></td><td>Número de punto flotante doble</td><td><code>0</code></td></tr>
-  <tr><td><code>text</code></td><td>Cadena de texto</td><td><code>""</code></td></tr>
-  <tr><td><code>bool</code></td><td>Booleano (<code>true</code> / <code>false</code>)</td><td><code>false</code></td></tr>
-  <tr><td><code>list</code></td><td>Lista dinámica de valores</td><td><code>[]</code></td></tr>
-  <tr><td><code>object</code></td><td>Instancia de clase</td><td><code>null</code></td></tr>
-  <tr><td><code>token</code></td><td>Valor de un solo uso (se consume al leer)</td><td>—</td></tr>
+<thead>
+<tr>
+<th>Op</th>
+<th>Descripción</th>
+<th>Ejemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+</code></td>
+<td>Suma / concatena texto</td>
+<td><code>1 + 2</code>, <code>"a" + "b"</code></td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>Resta</td>
+<td><code>10 - 3</code></td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>Multiplica</td>
+<td><code>4 * 5</code></td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>Divide</td>
+<td><code>10 / 3</code></td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td>Módulo</td>
+<td><code>10 % 3</code></td>
+</tr>
+<tr>
+<td><code>-x</code></td>
+<td>Negación</td>
+<td><code>-count</code></td>
+</tr>
+</tbody>
 </table>
-<pre><code>numeric n = 42
-numeric pi = 3.14159
-text s = "Hola, mundo!"
-bool ok = true
-list items = ["uno", "dos", "tres"]
-list vacia = []
-
-/ Literales de duración (se convierten a segundos):
-numeric ttl = 30m    / = 1800.0
-numeric delay = 2h   / = 7200.0</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="operadores">6. Operadores y expresiones</h2>
-<table>
-  <tr><th>Operador</th><th>Significado</th></tr>
-  <tr><td><code>+</code></td><td>Suma (numeric) o concatenación (text / listas)</td></tr>
-  <tr><td><code>- * / %</code></td><td>Resta, multiplicación, división, módulo</td></tr>
-  <tr><td><code>== != &lt; &gt; &lt;= &gt;=</code></td><td>Comparación</td></tr>
-  <tr><td><code>and</code> / <code>or</code> / <code>!</code></td><td>Lógicos (también <code>&amp;&amp;</code> / <code>||</code>)</td></tr>
-  <tr><td><code>objeto.campo</code></td><td>Acceso a campo</td></tr>
-  <tr><td><code>objeto.metodo(args)</code></td><td>Llamada a método</td></tr>
-  <tr><td><code>lista[i]</code></td><td>Acceso por índice</td></tr>
-</table>
-<p><strong>Precedencia</strong> (mayor a menor): unarios → <code>* / %</code> → <code>+ -</code> → <code>&lt; &gt; &lt;= &gt;=</code> → <code>== !=</code> → <code>and</code> → <code>or</code></p>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="control">7. Control de flujo</h2>
-<p>Todos los bloques se cierran con <code>break</code>. La cadena <code>if/elif/else</code> comparte <strong>un único <code>break</code> final</strong>.</p>
-
-<h3>if / elif / else</h3>
-<pre><code>if puntuacion > 90;
-    log "Excelente"
-elif puntuacion > 70;
-    log "Bien"
+<h3 id="es-comparacion">Comparación</h3>
+<p><code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> — funcionan sobre <code>numeric</code> y <code>text</code>
+(lexicográfica para texto).</p>
+<h3 id="es-logicos">Lógicos</h3>
+<p><code>&amp;&amp;</code> (y), <code>||</code> (o), <code>!</code> (no). <em>(En la fuente del propio compilador solo
+existen estas formas simbólicas — no hay palabras "and"/"or"/"not"; esas
+palabras sí las usa, por su cuenta, el lenguaje "Altair-Core" del compilador
+auto-hospedado, ver §36).</em></p>
+<pre><code class="language-altair">if x &gt; 0 &amp;&amp; x &lt; 100;
+    log &quot;en rango&quot;
+break
+</code></pre>
+<h3 id="es-a-nivel-de-bit-anadido-315">A nivel de bit <em>(añadido, §31.5)</em></h3>
+<p><code>&amp; | ^ ~ &lt;&lt; &gt;&gt;</code> — solo válidos sobre <code>numeric</code> (internamente se convierten a
+entero de 64 bits, se opera, y se vuelve a <code>double</code>).</p>
+<h3 id="es-precedencia-de-mayor-a-menor">Precedencia (de mayor a menor)</h3>
+<ol>
+<li>Unarios: <code>!</code>, <code>-</code>, <code>~</code></li>
+<li><code>*</code>, <code>/</code>, <code>%</code></li>
+<li><code>+</code>, <code>-</code></li>
+<li><code>&lt;&lt;</code>, <code>&gt;&gt;</code></li>
+<li><code>&amp;</code></li>
+<li><code>^</code></li>
+<li><code>|</code></li>
+<li><code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></li>
+<li><code>==</code>, <code>!=</code></li>
+<li><code>&amp;&amp;</code></li>
+<li><code>||</code></li>
+</ol>
+<hr />
+<h2 id="es-6-control-de-flujo">6. Control de flujo</h2>
+<p>Casi todos los bloques en Altair terminan con la palabra <code>break</code> (no usan
+llaves <code>{}</code>).</p>
+<h3 id="es-if-elif-else">if / elif / else</h3>
+<pre><code class="language-altair">if score &gt; 90;
+    log &quot;Excelente&quot;
+break
+elif score &gt; 70;
+    log &quot;Bien&quot;
+break
 else;
-    log "Necesita mejorar"
-break</code></pre>
-
-<h3>while</h3>
-<pre><code>numeric n = 1
-while n <= 10;
+    log &quot;Necesita mejorar&quot;
+break
+</code></pre>
+<h3 id="es-while">while</h3>
+<pre><code class="language-altair">define numeric n = 1
+while n &lt;= 10;
     log n
     n += 1
-break</code></pre>
-
-<h3>repeat</h3>
-<pre><code>repeat 5 times;
-    log "tick"
+break
+</code></pre>
+<h3 id="es-repeat">repeat</h3>
+<pre><code class="language-altair">repeat 5 times;
+    log &quot;hola&quot;
 break
 
-/ La palabra 'times' es opcional:
-repeat contador;
-    log "iteracion"
-break</code></pre>
-
-<h3>forever</h3>
-<pre><code>forever;
-    / bucle infinito
-    if condicion_salida;
-        exit
+/ o con una expresión:
+repeat count;
+    log &quot;tick&quot;
+break
+</code></pre>
+<h3 id="es-forever">forever</h3>
+<pre><code class="language-altair">forever;
+    log &quot;corriendo...&quot;
+    wait 1s
+break
+</code></pre>
+<h3 id="es-foreach">foreach</h3>
+<pre><code class="language-altair">define list fruits = [&quot;manzana&quot;, &quot;plátano&quot;, &quot;cereza&quot;]
+foreach fruit in fruits;
+    log fruit
+break
+</code></pre>
+<h3 id="es-exit">exit</h3>
+<p>Sale del bucle actual, o termina el programa si no hay bucle:</p>
+<pre><code class="language-altair">while true;
+    if done == true;
+        exit        / sale del while
     break
-break</code></pre>
-
-<h3>foreach</h3>
-<pre><code>list colores = ["rojo", "verde", "azul"]
-foreach color in colores;
-    log color
-break</code></pre>
-<p>La variable iteradora se crea automáticamente y se libera al salir del bucle.</p>
-
-<h3>exit / wait</h3>
-<pre><code>/ Dentro de un bucle: rompe el bucle
-/ Fuera de un bucle: termina el programa
-exit
-
-/ Pausa la ejecución
-wait 2s
-wait 500    / sin sufijo = segundos</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="funciones">8. Funciones</h2>
-<pre><code>/ Función sin retorno:
-fun saludar text nombre;
-    log "Hola, " + nombre
 break
 
-/ Función con retorno (tipo antes de los parámetros):
-fun sumar -> numeric numeric a, numeric b;
-    return a + b
+exit        / termina el programa (fuera de un bucle)
+</code></pre>
+<h3 id="es-wait">wait</h3>
+<pre><code class="language-altair">wait 2s     / espera 2 segundos
+wait 500ms  / (usar 0.5s para fracciones de segundo)
+</code></pre>
+<hr />
+<h2 id="es-7-funciones">7. Funciones</h2>
+<pre><code class="language-altair">fun greet name text;
+    define text msg = &quot;Hola, &quot; + name + &quot;!&quot;
+    log msg
+    return msg
 break
-
-/ Función recursiva:
-fun factorial -> numeric numeric n;
-    if n <= 1;
+</code></pre>
+<p><strong>Con tipo de retorno:</strong></p>
+<pre><code class="language-altair">fun add -&gt; numeric numeric x, numeric y;
+    return x + y
+break
+</code></pre>
+<p><strong>Llamada:</strong></p>
+<pre><code class="language-altair">greet(&quot;Alice&quot;)
+define numeric result = add(10, 20)
+</code></pre>
+<p>Las funciones pueden leer y escribir variables globales, y sus parámetros se
+liberan correctamente al terminar (sin fugas de memoria).</p>
+<p><strong>Funciones recursivas:</strong></p>
+<pre><code class="language-altair">fun factorial -&gt; numeric numeric n;
+    if n &lt;= 1;
         return 1
     break
     return n * factorial(n - 1)
-break</code></pre>
+break
+</code></pre>
+<hr />
+<h2 id="es-8-clases-y-objetos">8. Clases y objetos</h2>
+<pre><code class="language-altair">class Point;
+    define numeric x = 0
+    define numeric y = 0
 
-<h3>Llamada</h3>
-<pre><code>saludar("Alicia")
-numeric resultado = sumar(3, 4)
-
-/ Sin paréntesis (un argumento):
-saludar "Alicia"</code></pre>
-
-<blockquote>Las variables globales son accesibles y modificables desde dentro de las funciones. El codegen las busca vía <code>altair_var_lookup</code> si no están declaradas localmente.</blockquote>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="clases">9. Clases y objetos</h2>
-<pre><code>class Jugador;
-    text nombre = "" disk
-    numeric puntos = 0 ram
-    bool activo = true ram
-
-    fun sumarPuntos numeric cantidad;
-        puntos += cantidad
+    fun distance;
+        define numeric dx = x * x
+        define numeric dy = y * y
+        return dx + dy
     break
+break
 
-    fun obtenerPuntos -> numeric;
-        return puntos
-    break
-create class
+create object Point as p
+p.x = 3
+p.y = 4
+log p.distance()
+log p.x
+</code></pre>
+<p><strong>Llamadas a métodos:</strong></p>
+<pre><code class="language-altair">define text result = myObj.methodName(arg1, arg2)
+</code></pre>
+<p>Los objetos usan arrays dinámicos de campos/métodos internamente (muy poco
+overhead por instancia), así que crear muchos objetos es viable.</p>
+<hr />
+<h2 id="es-9-listas">9. Listas</h2>
+<pre><code class="language-altair">define list items = [1, 2, 3]
 
-/ Instanciar:
-object jugador = Jugador() ram
+/ Añadir
+items.append(4)
+items.append(&quot;hola&quot;)
 
-/ Usar:
-jugador.nombre = "Alicia"
-jugador.sumarPuntos(10)
-numeric pts = jugador.obtenerPuntos()
-log jugador.nombre + " tiene " + pts + " puntos"</code></pre>
+/ Acceso por índice (base 0)
+define numeric first = items[0]
 
-<!-- ──────────────────────────────────────────── -->
-<h2 id="listas">10. Listas</h2>
-<pre><code>list items = ["a", "b", "c"]
+/ Modificar por índice
+items[0] = 99
 
-log items[0]          / "a"
-items[1] = "X"        / asignación por índice
+/ Eliminar por índice
+items.remove(2)
 
-items.append("d")     / añade al final
-items.remove(0)       / elimina por índice (devuelve bool)
-items.clear()         / vacía la lista
-log items.length      / número de elementos (sin () también funciona)
+/ Vaciar
+items.clear()
 
-/ Concatenar dos listas:
-list total = lista1 + lista2
+/ Longitud (con o sin paréntesis)
+define numeric n = items.length
+define numeric m = items.length()
 
-/ Iterar:
+/ Iterar
 foreach item in items;
     log item
-break</code></pre>
-<p>Los índices fuera de rango lanzan <strong>ALT0013</strong>.</p>
+break
 
-<!-- ──────────────────────────────────────────── -->
-<h2 id="errores">11. Manejo de errores</h2>
-<pre><code>try;
-    numeric resultado = 10 / 0
+/ Concatenar dos listas
+define list all = listA + listB
+</code></pre>
+<hr />
+<h2 id="es-10-manejo-de-errores">10. Manejo de errores</h2>
+<pre><code class="language-altair">try;
+    / código que puede fallar
+    define numeric result = 10 / 0
 break
 catch as err;
-    / Variables disponibles: err_code, err_message, err_line
-    log "Error " + err_code + ": " + err_message
-    log "Línea: " + err_line
-break</code></pre>
-<p>Los bloques try/catch pueden anidarse hasta <strong>128 niveles</strong>.</p>
+    log err.code
+    log err.message
+    log err.line
+break
+</code></pre>
+<p>El runtime lanza errores en: división por cero, índice fuera de rango, acceso
+a objeto nulo, doble consumo de token, reasignación de <code>const</code>.</p>
+<p><strong>Anidar try/catch:</strong></p>
+<pre><code class="language-altair">try;
+    try;
+        / interno
+    break
+    catch as inner_err;
+        log inner_err.message
+    break
+break
+catch as outer_err;
+    log outer_err.message
+break
+</code></pre>
+<hr />
+<h2 id="es-11-snapshots">11. Snapshots</h2>
+<p>Los snapshots guardan todas las variables registradas en disco de forma
+atómica (con checksum CRC32).</p>
+<pre><code class="language-altair">/ Guardar el estado actual
+snapshot create &quot;checkpoint1&quot;
 
-<!-- ──────────────────────────────────────────── -->
-<h2 id="snapshots">12. Snapshots</h2>
-<p>Un snapshot serializa todas las variables <code>disk</code> y <code>cache</code> activas a un archivo en <code>~/.altair/&lt;app&gt;/snap/</code>.</p>
-<pre><code>snapshot create "partida_1"
-snapshot restore "partida_1"
-snapshot delete "partida_1"</code></pre>
+/ Restaurar un estado anterior
+snapshot restore &quot;checkpoint1&quot;
 
-<!-- ──────────────────────────────────────────── -->
-<h2 id="choose">13. Choose (aleatorio ponderado)</h2>
-<p>Selecciona un valor aleatoriamente según pesos porcentuales. Deben sumar 100.</p>
-<pre><code>choose resultado;
-    50% = opcionA
-    30% = opcionB
-    20% = opcionC
-define
+/ Borrar un snapshot
+snapshot delete &quot;checkpoint1&quot;
+</code></pre>
+<p>Se guardan en <code>~/.altair/&lt;nombre_programa&gt;/snap/</code>.</p>
+<hr />
+<h2 id="es-12-choose-aleatoriedad-ponderada">12. Choose (aleatoriedad ponderada)</h2>
+<pre><code class="language-altair">choose outcome;
+    &quot;win&quot;  70
+    &quot;draw&quot; 20
+    &quot;lose&quot; 10
+break
 
-log resultado    / tipo text: nombre de la opción elegida</code></pre>
+log outcome
+</code></pre>
+<p>Los pesos son proporcionales — no hace falta que sumen 100.</p>
+<hr />
+<h2 id="es-13-introspeccion">13. Introspección</h2>
+<p>Consultas de metadatos del runtime y del compilador, mediante la sintaxis
+<code>namespace@clave</code>:</p>
+<pre><code class="language-altair">/ Consultas de sistema
+log system@time        / timestamp Unix
+log system@random      / float 0.0–1.0 aleatorio
+log system@pid         / PID del proceso
+log system@hostname    / nombre de la máquina
+log system@username    / usuario actual
+log system@os          / &quot;linux&quot;, &quot;macos&quot; o &quot;windows&quot;
+log system@memory      / RAM usada (bytes)
+log system@diskfree    / espacio libre en disco (bytes)
 
-<!-- ──────────────────────────────────────────── -->
-<h2 id="introspect">14. Introspección</h2>
-<pre><code>/ Sistema:
-log system@os          / "windows" | "linux" | "macos"
-log system@memory      / memoria disponible en bytes
-log system@cpu         / número de CPUs
+/ Introspección de variables
+define disk numeric counter
+log system@storage(counter)  / &quot;disk&quot;
+log system@weight(counter)   / 0
+log system@type(counter)     / &quot;numeric&quot;
+log system@size(counter)     / tamaño serializado
 
-/ Tier actual de una variable:
-log system@locate(miVariable)   / "ram" | "disk" | "cache" | "temp"
+/ Info del compilador
+log compiler@version
+log compiler@name        / &quot;altairc&quot;
+log compiler@build       / fecha de compilación
+log compiler@architecture  / &quot;x86_64&quot; o &quot;arm64&quot;
 
-/ Compilador:
-log compiler@version   / "1.6.5vC"
-log compiler@name      / "altairc"
-
-/ Programa (valores de altair.doc):
+/ Metadatos del programa (de la cabecera altair.doc)
 log program@name
 log program@version
-log program@author</code></pre>
+log program@author
+</code></pre>
+<hr />
+<h2 id="es-14-variables-token">14. Variables token</h2>
+<p>Un <code>token</code> solo se puede consumir una vez. Leerlo una segunda vez lanza
+<code>ALT0004</code>.</p>
+<pre><code class="language-altair">define token api_key temp = &quot;secret-api-key-abc123&quot;
 
-<!-- ──────────────────────────────────────────── -->
-<h2 id="token">15. Token (valor de un solo uso)</h2>
-<p>Un <code>token</code> envuelve un valor y solo puede leerse una vez. Tras la primera lectura queda marcado como consumido.</p>
-<pre><code>define token secreto = "clave-efimera" temp
+/ La primera lectura consume el token
+define text key = api_key
+log &quot;Clave usada: &quot; + key
 
-log secreto    / devuelve "clave-efimera" y lo marca consumed
-log secreto    / devuelve [token:consumed]</code></pre>
+/ La segunda lectura lanza error
+define text key2 = api_key   / ERROR: Token already consumed
+</code></pre>
+<p>Útil para contraseñas de un solo uso, códigos de invitación, tokens CSRF, etc.</p>
+<hr />
+<h2 id="es-15-orbit-y-prefer">15. Orbit y prefer</h2>
+<h3 id="es-orbit-migracion-entre-varios-niveles"><code>orbit</code> — migración entre varios niveles</h3>
+<p>Declara una variable con estados de almacenamiento nombrados entre los que
+puede migrar:</p>
+<pre><code class="language-altair">define numeric data orbit 1 &quot;hot&quot; ram, 2 &quot;warm&quot; disk, 3 &quot;cold&quot; cache expire=1h = 0
 
-<!-- ──────────────────────────────────────────── -->
-<h2 id="orbit">16. Orbit y Prefer</h2>
-<h3>Orbit</h3>
-<p>Define una variable con varios estados de almacenamiento, cada uno mapeado a un tier diferente.</p>
-<pre><code>numeric sessionScore = 0 orbit;
-    1 = create temp      / estado 1: temporal (inicio)
-    2 = active ram       / estado 2: en memoria (activo)
-    3 = inactive cache   / estado 3: en caché (pausa)
-    4 = finish disk      / estado 4: en disco (fin)
-break
-
-/ Migrar por número:
-sessionScore migrate 2
-
-/ Migrar por nombre:
-sessionScore migrate active</code></pre>
-<p>Los números de estado deben ser únicos (ALT0009). La variable comienza en el primer estado declarado.</p>
-
-<h3>Prefer</h3>
-<p>Define un orden de preferencia de tiers. El runtime elige el primero disponible.</p>
-<pre><code>define text datos prefer ram, cache, disk;</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="release">17. Release</h2>
-<p>Libera explícitamente la memoria de una variable. Para <code>temp</code>, pone a cero la memoria antes de liberar.</p>
-<pre><code>define numeric temporal = 42 ram
-/ ... uso ...
-release temporal    / seguro aunque ya se haya liberado antes</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="input">18. Entrada del usuario</h2>
-<pre><code>/ Con prompt y tipo:
-text nombre = user input "¿Cómo te llamas?" as text
-numeric edad = user input "¿Cuántos años tienes?" as numeric
-
-/ Sin tipo (inferido como text):
-text entrada = user input "¿Algo más?"
-
-/ Sin prompt:
-text resp = input as text</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="servidor">19. Servidor HTTP <span class="new">v1.6.5vB+</span></h2>
-<p>El servidor HTTP está implementado en el runtime de Altair usando sockets POSIX directamente (sin frameworks externos). Es de <strong>un solo hilo</strong>; las conexiones se atienden secuencialmente.</p>
-<pre><code>listen 8080;
-    / rutas y configuración aquí
-break
-
-/ O con variable:
-numeric PUERTO = 3000 ram
-listen PUERTO;
-    / ...
-break</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="rutas">20. Rutas y handlers</h2>
-<pre><code>listen 8080;
-    route "GET" "/hola";
-        respond.json("{\"msg\":\"hola\"}")
+/ Mover a otro estado
+migrate data as &quot;warm&quot;
+migrate data as 3
+</code></pre>
+<h3 id="es-prefer-almacenamiento-por-orden-de-preferencia"><code>prefer</code> — almacenamiento por orden de preferencia</h3>
+<p>Prueba niveles de almacenamiento en un orden de preferencia:</p>
+<pre><code class="language-altair">define text session prefer ram, cache expire=30m, disk = &quot;&quot;
+</code></pre>
+<p>El runtime usa el primer nivel disponible.</p>
+<hr />
+<h2 id="es-16-servidor-http">16. Servidor HTTP</h2>
+<p>Arranca un servidor HTTP en un puerto. El bloque <code>listen</code> contiene
+declaraciones de rutas, middleware, health, métricas y apagado.</p>
+<pre><code class="language-altair">listen 8080;
+    route &quot;GET&quot; &quot;/hello&quot;;
+        respond.text(&quot;Hello, World!&quot;)
     break
-
-    route "POST" "/datos";
-        text cuerpo = body()
-        text usuario = header("X-User")
-        text id = param("id")
-        respond.status(201)
-        respond.json(cuerpo)
+break
+</code></pre>
+<p>El servidor corre hasta que se termina. Las señales (<code>SIGTERM</code>, <code>Ctrl+C</code>)
+disparan un apagado ordenado.</p>
+<p><strong>Cómo funciona:</strong> el servidor HTTP integrado de Altair usa sockets TCP
+POSIX (sin librerías externas). Es de un solo hilo pero usa un modelo de
+conexión por petición.</p>
+<hr />
+<h2 id="es-17-rutas-y-handlers">17. Rutas y handlers</h2>
+<pre><code class="language-altair">route &quot;METHOD&quot; &quot;/path&quot;;
+    / cuerpo del handler
+break
+</code></pre>
+<p><strong>Métodos soportados:</strong> <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>, <code>PATCH</code>, <code>*</code> (cualquiera)</p>
+<h3 id="es-parametros-de-ruta">Parámetros de ruta</h3>
+<p>Sintaxis <code>:param</code> en las rutas:</p>
+<pre><code class="language-altair">route &quot;GET&quot; &quot;/users/:id&quot;;
+    define text user_id = param(&quot;id&quot;)
+    respond.json(&quot;found user &quot; + user_id)
+break
+</code></pre>
+<h3 id="es-acceso-a-la-peticion">Acceso a la petición</h3>
+<p>Dentro de un handler:</p>
+<pre><code class="language-altair">define text body_data = body()                / cuerpo crudo de la petición
+define text auth = header(&quot;Authorization&quot;)     / cabecera de la petición
+define text id = param(&quot;id&quot;)                   / parámetro de ruta
+</code></pre>
+<h3 id="es-respuesta">Respuesta</h3>
+<pre><code class="language-altair">respond.text(&quot;respuesta en texto plano&quot;)
+respond.json(&quot;cadena o valor json&quot;)
+respond.status(201)
+respond.status(404)
+respond.status(500)
+</code></pre>
+<p><strong>Ejemplo:</strong></p>
+<pre><code class="language-altair">route &quot;POST&quot; &quot;/users&quot;;
+    define text payload = body()
+    if payload == &quot;&quot;;
+        respond.status(400)
+        respond.json(&quot;missing body&quot;)
     break
-break</code></pre>
-
-<h3>Métodos disponibles en el handler</h3>
-<table>
-  <tr><th>Función</th><th>Descripción</th></tr>
-  <tr><td><code>body()</code></td><td>Cuerpo crudo de la petición (text)</td></tr>
-  <tr><td><code>header("nombre")</code></td><td>Valor de una cabecera HTTP</td></tr>
-  <tr><td><code>param("nombre")</code></td><td>Parámetro de query string</td></tr>
-  <tr><td><code>respond.json(expr)</code></td><td>Responde con <code>Content-Type: application/json</code></td></tr>
-  <tr><td><code>respond.text(expr)</code></td><td>Responde con <code>Content-Type: text/plain</code></td></tr>
-  <tr><td><code>respond.status(n)</code></td><td>Establece el código de estado HTTP</td></tr>
-  <tr><td><code>stop</code></td><td>Detiene el procesamiento (útil en middleware)</td></tr>
-</table>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="middleware">21. Middleware</h2>
-<p>Se ejecuta antes de cada ruta. Si llama a <code>stop</code>, la petición no llega al handler.</p>
-<pre><code>middleware autenticacion;
-    text clave = header("X-API-Key")
-    if clave != "mi-secreto";
+    respond.status(201)
+    respond.json(&quot;user created&quot;)
+break
+</code></pre>
+<hr />
+<h2 id="es-18-middleware">18. Middleware</h2>
+<p>El middleware se ejecuta antes de cada handler de ruta. Si el middleware
+llama a <code>stop</code>, se detiene la cadena de la petición.</p>
+<pre><code class="language-altair">middleware auth;
+    define text token = header(&quot;Authorization&quot;)
+    if token == &quot;&quot;;
         respond.status(401)
-        respond.json("{\"error\":\"no autorizado\"}")
+        respond.json(&quot;unauthorized&quot;)
         stop
     break
-break</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="ratelimit">22. Rate limiting</h2>
-<pre><code>route "POST" "/api" rate_limit 60 per_minute;
-    respond.json("ok")
+break
+</code></pre>
+<p>Varios <code>middleware</code> se encadenan en orden:</p>
+<pre><code class="language-altair">listen 8080;
+    middleware logger;
+        log &quot;petición recibida&quot;
+    break
+    middleware auth;
+        define text tok = header(&quot;X-API-Key&quot;)
+        if tok != &quot;secret&quot;;
+            respond.status(401)
+            respond.json(&quot;bad key&quot;)
+            stop
+        break
+    break
+    route &quot;GET&quot; &quot;/data&quot;;
+        respond.json(&quot;protected data&quot;)
+    break
+break
+</code></pre>
+<hr />
+<h2 id="es-19-limite-de-tasa-rate-limiting">19. Límite de tasa (rate limiting)</h2>
+<p>Se puede añadir a cualquier ruta:</p>
+<pre><code class="language-altair">route &quot;POST&quot; &quot;/login&quot; rate_limit 10 per_minute;
+    respond.json(&quot;ok&quot;)
+break
+</code></pre>
+<p>Al superar el límite, el runtime devuelve automáticamente HTTP 429 con
+<code>{"error":"rate limit exceeded"}</code>.</p>
+<p><strong>Sintaxis:</strong></p>
+<pre><code class="language-altair">route &quot;METHOD&quot; &quot;/path&quot; rate_limit N per_minute;
+</code></pre>
+<p>o</p>
+<pre><code class="language-altair">rate_limit N per_second
+</code></pre>
+<hr />
+<h2 id="es-20-health-checks">20. Health checks</h2>
+<p>La declaración <code>health</code> registra una ruta <code>GET</code> que responde con estado JSON:</p>
+<pre><code class="language-altair">health &quot;/health&quot;;
+    check &quot;database&quot; -&gt; true
+    check &quot;cache&quot;    -&gt; true
+break
+</code></pre>
+<p><strong>Formato de respuesta:</strong></p>
+<pre><code class="language-json">{&quot;status&quot;:&quot;ok&quot;,&quot;checks&quot;:{&quot;database&quot;:&quot;ok&quot;,&quot;cache&quot;:&quot;ok&quot;}}
+</code></pre>
+<p>Si algún <code>check</code> devuelve <code>false</code>, el estado HTTP es <code>503 Service
+Unavailable</code>. El lado derecho de <code>-&gt;</code> es una expresión (numérica o
+booleana); cualquier valor distinto de cero se considera saludable.</p>
+<hr />
+<h2 id="es-21-metricas">21. Métricas</h2>
+<p>Registra un endpoint de métricas compatible con Prometheus:</p>
+<pre><code class="language-altair">metrics &quot;/metrics&quot;;
+</code></pre>
+<p>Expone un <code>GET /metrics</code> en formato Prometheus de texto plano.</p>
+<p>El endpoint produce algo como:</p>
+<pre><code># TYPE events_total counter
+events_total 42
+</code></pre>
+<hr />
+<h2 id="es-22-apagado-ordenado-graceful-shutdown">22. Apagado ordenado (graceful shutdown)</h2>
+<p>Registra lógica de limpieza que se ejecuta al recibir <code>SIGTERM</code> o al llamar a
+<code>altair_server_stop()</code>:</p>
+<pre><code class="language-altair">on_shutdown;
+    log &quot;Servidor apagándose, guardando datos...&quot;
+    snapshot create &quot;shutdown_checkpoint&quot;
+break
+</code></pre>
+<p><strong>Ejemplo con ciclo de vida completo:</strong></p>
+<pre><code class="language-altair">listen 8080;
+    route &quot;GET&quot; &quot;/&quot;;
+        respond.text(&quot;running&quot;)
+    break
+    on_shutdown;
+        log &quot;adiós!&quot;
+    break
+break
+</code></pre>
+<hr />
+<h2 id="es-23-sesiones">23. Sesiones</h2>
+<p>Declara variables de sesión con TTL opcional:</p>
+<pre><code class="language-altair">session user_token expires 30m;
+</code></pre>
+<p>Las sesiones se guardan en memoria del proceso en un almacén clave-valor
+indexado por un ID de sesión. Usa <code>header("X-Session-ID")</code> para recuperar el
+ID de sesión del cliente.</p>
+<p><strong>Dentro de handlers de ruta:</strong></p>
+<pre><code class="language-altair">route &quot;GET&quot; &quot;/profile&quot;;
+    define text sid = header(&quot;X-Session-ID&quot;)
+    define text username = session_get(sid, &quot;username&quot;)
+    if username == &quot;&quot;;
+        respond.status(401)
+        respond.json(&quot;not logged in&quot;)
+    break
+    respond.json(&quot;Hello &quot; + username)
 break
 
-route "GET" "/buscar" rate_limit 10 per_second;
-    respond.json("resultados")
-break</code></pre>
-<p>Si se supera el límite, el runtime devuelve automáticamente <code>429 Too Many Requests</code>.</p>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="health">23. Health checks</h2>
-<pre><code>health "/health";
-    check "base_datos" -> 1      / 1 = OK, 0 = fallo
-    check "almacenamiento" -> 1
-break</code></pre>
-<p>Devuelve JSON con el estado de cada check y un <code>status</code> global (<code>ok</code> o <code>degraded</code>).</p>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="metricas">24. Métricas</h2>
-<pre><code>metrics "/metrics";</code></pre>
-<p>Expone un endpoint compatible con <strong>Prometheus</strong> con métricas del runtime (peticiones totales, errores, tiempos de respuesta).</p>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="shutdown">25. Graceful shutdown</h2>
-<pre><code>on_shutdown;
-    log "Servidor deteniendo..."
-    / limpiar recursos, cerrar conexiones...
-break</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="sesiones">26. Sesiones</h2>
-<pre><code>session usuario_sesion expires 30m;</code></pre>
-<p>Las sesiones se almacenan en memoria del runtime, indexadas por ID de sesión que el cliente proporciona.</p>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="config">27. Config y variables de entorno</h2>
-<pre><code>config;
-    env("PORT") default "8080"
-    env("API_SECRET") required
-    env("LOG_LEVEL") default "info"
-break</code></pre>
+route &quot;POST&quot; &quot;/login&quot;;
+    define text user = body()
+    session_set(&quot;my-session-id&quot;, &quot;username&quot;, user, 1800)
+    respond.json(&quot;logged in&quot;)
+break
+</code></pre>
+<hr />
+<h2 id="es-24-configuracion-y-variables-de-entorno">24. Configuración y variables de entorno</h2>
+<p>Usa el bloque <code>config</code> para declarar configuración respaldada por variables
+de entorno:</p>
+<pre><code class="language-altair">config;
+    env(&quot;DATABASE_URL&quot;) default &quot;postgres://localhost/mydb&quot;
+    env(&quot;PORT&quot;) default &quot;8080&quot;
+    env(&quot;API_SECRET&quot;) required
+break
+</code></pre>
 <ul>
-  <li><code>default "valor"</code>: usa ese valor si la variable no está definida.</li>
-  <li><code>required</code>: el programa falla al arrancar si la variable no está definida.</li>
+<li><code>default "valor"</code> — valor de respaldo si la variable de entorno no está definida</li>
+<li><code>required</code> — lanza <code>ALT0015</code> al arrancar si la variable falta</li>
 </ul>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="dbpool">28. Pool de base de datos</h2>
-<pre><code>db_pool conexion = connect("postgresql://usuario:pass@host:5432/db") max 10</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="jobs">29. Jobs programados</h2>
-<p>Funciones que se ejecutan periódicamente mientras el servidor está en marcha. Se ejecutan en el hilo principal entre peticiones.</p>
-<pre><code>job limpieza every 5m;
-    log "Limpieza ejecutada"
+<p><strong>Acceder a los valores:</strong></p>
+<p>La declaración <code>env(...)</code> crea variables en el ámbito, nombradas según la
+clave:</p>
+<pre><code class="language-altair">config;
+    env(&quot;PORT&quot;) default &quot;8080&quot;
 break
 
-job heartbeat every 30s;
-    log "Servidor activo"
-break</code></pre>
+define numeric port = PORT
+listen port;
+    route &quot;GET&quot; &quot;/&quot;;
+        respond.text(&quot;ok&quot;)
+    break
+break
+</code></pre>
+<hr />
+<h2 id="es-25-pool-de-base-de-datos">25. Pool de base de datos</h2>
+<p>Declara un pool de conexiones para una URL de base de datos:</p>
+<pre><code class="language-altair">db_pool db = connect(&quot;postgres://user:pass@localhost/mydb&quot;) max 20
+</code></pre>
+<p>Esto crea una variable <code>db</code> que guarda la cadena de conexión. Hay que
+conectar tu propia librería cliente de base de datos en el C generado, o usar
+el stub para prototipar. <code>max</code> fija el tamaño del pool (10 por defecto).</p>
+<blockquote>
+<p>Altair da la sintaxis de declaración y el stub de pooling; el soporte
+completo de consultas SQL requiere enlazar tu propia librería cliente
+(PostgreSQL/MySQL/SQLite) en el C generado.</p>
+</blockquote>
+<hr />
+<h2 id="es-26-planificador-de-tareas-job-scheduler">26. Planificador de tareas (job scheduler)</h2>
+<p>Registra tareas periódicas en segundo plano con <code>job</code>:</p>
+<pre><code class="language-altair">job cleanup every 5m;
+    log &quot;ejecutando tarea de limpieza&quot;
+break
+</code></pre>
+<p><strong>Sintaxis:</strong></p>
+<pre><code class="language-altair">job &lt;nombre&gt; every &lt;duración&gt;;
+    / cuerpo de la tarea
+break
+</code></pre>
+<p><code>schedule</code> es un alias de <code>job</code>:</p>
+<pre><code class="language-altair">schedule heartbeat every 30s;
+    log &quot;heartbeat&quot;
+break
+</code></pre>
+<p><strong>Cómo funciona:</strong> las tareas se comprueban en cada petición
+(<code>altair_jobs_tick()</code> se llama por conexión). En escenarios de poco tráfico,
+usa <code>wait</code> dentro de un <code>forever</code> para temporización precisa en su lugar.</p>
+<hr />
+<h2 id="es-27-graficos-raylib">27. Gráficos (raylib)</h2>
+<p>Altair puede producir programas gráficos con ventana sobre raylib. Requiere
+tener raylib disponible en tiempo de compilación (empaquetado en
+<code>libs/raylib/&lt;os&gt;/</code> o instalado en el sistema).</p>
+<h3 id="es-activar-el-modo-grafico">Activar el modo gráfico</h3>
+<pre><code class="language-altair">link graphics raylib
+</code></pre>
+<p>Debe aparecer una vez, antes de cualquier sentencia de ventana/loop/draw.
+Indica al compilador que enlace <code>-lraylib</code> (más las librerías de ventaneo de
+la plataforma) en el binario final.</p>
+<h3 id="es-ventana">Ventana</h3>
+<pre><code class="language-altair">window
+    title = &quot;Mi Ventana&quot;
+    width = 800
+    height = 600
+    fps = 60
+create window
+</code></pre>
+<h3 id="es-bucle-principal">Bucle principal</h3>
+<pre><code class="language-altair">loop
+    clear skyblue
+    / sentencias en cada frame
+break
+</code></pre>
+<p><code>clear &lt;color&gt;</code> limpia el frame. <code>break</code> cierra la definición del bloque
+<code>loop</code> (no sale del programa — el <code>while</code> generado corre hasta que se cierra
+la ventana).</p>
+<h3 id="es-draw">draw</h3>
+<pre><code class="language-altair">draw &lt;tipo&gt;
+    x = 100
+    y = 100
+    ...
+create draw
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>tipo</th>
+<th>props requeridas</th>
+<th>notas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td><code>content</code>/<code>text</code>, <code>x</code>, <code>y</code>, <code>size</code>, <code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>rect</code> / <code>rectangle</code></td>
+<td><code>x</code>, <code>y</code>, <code>width</code>/<code>w</code>, <code>height</code>/<code>h</code>, <code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>circle</code></td>
+<td><code>x</code>, <code>y</code>, <code>radius</code>/<code>r</code>, <code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>line</code></td>
+<td><code>x</code>, <code>y</code>, <code>x2</code>, <code>y2</code>, <code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>line_thick</code> / <code>thick_line</code></td>
+<td>añade <code>thick</code>/<code>thickness</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>triangle</code></td>
+<td><code>x</code>,<code>y</code>,<code>x2</code>,<code>y2</code>,<code>x3</code>,<code>y3</code>,<code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>pixel</code></td>
+<td><code>x</code>, <code>y</code>, <code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>image</code> / <code>texture</code></td>
+<td><code>image</code>/<code>src</code> (variable de textura), <code>x</code>, <code>y</code>, <code>color</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Los colores aceptan nombres de raylib (<code>red</code>, <code>gold</code>, <code>skyblue</code>, <code>white</code>,
+...) o una declaración de bloque <code>color</code>.</p>
+<h3 id="es-ejemplo-completo">Ejemplo completo</h3>
+<pre><code class="language-altair">link graphics raylib
 
-<!-- ──────────────────────────────────────────── -->
-<h2 id="graficos">30. Gráficos y UI con Raylib <span class="new">v1.6.5vC</span></h2>
-<p>La versión 1.6.5vC añade soporte de gráficos 2D y UI mediante <a href="https://www.raylib.com/" target="_blank">Raylib</a>. El compilador detecta automáticamente el uso de <code>link * raylib</code> y enlaza la librería.</p>
-
-<h3>Activar y estructura básica</h3>
-<pre><code>link * raylib
-
-window;
-    title = "Mi Juego"
+window
+    title = &quot;Paint Test&quot;
     width = 800
     height = 600
     fps = 60
 create window
 
-loop;
-    clear black
-
-    draw text;
-        text = "Hola desde Altair!"
-        x = 100
-        y = 100
+loop
+    clear skyblue
+    draw text
+        content = &quot;Altair Graphics&quot;
+        x = 10
+        y = 10
         size = 24
         color = white
     create draw
+    draw rect
+        x = 100
+        y = 100
+        width = 200
+        height = 120
+        color = red
+    create draw
+    draw circle
+        x = 500
+        y = 200
+        radius = 60
+        color = gold
+    create draw
+break
+</code></pre>
+<p>Compilar y ejecutar:</p>
+<pre><code class="language-bash">altairc test/paint.at -o paint
+./paint
+</code></pre>
+<hr />
+<h2 id="es-28-consultas-de-sistema-integradas">28. Consultas de sistema integradas</h2>
+<table>
+<thead>
+<tr>
+<th>Consulta</th>
+<th>Devuelve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>system@time</code></td>
+<td>Timestamp Unix (numeric)</td>
+</tr>
+<tr>
+<td><code>system@random</code></td>
+<td>Aleatorio 0.0–1.0 (numeric)</td>
+</tr>
+<tr>
+<td><code>system@pid</code></td>
+<td>PID del proceso (numeric)</td>
+</tr>
+<tr>
+<td><code>system@hostname</code></td>
+<td>Nombre de la máquina (text)</td>
+</tr>
+<tr>
+<td><code>system@username</code></td>
+<td>Usuario del SO (text)</td>
+</tr>
+<tr>
+<td><code>system@os</code></td>
+<td>"linux" / "macos" / "windows" (text)</td>
+</tr>
+<tr>
+<td><code>system@memory</code></td>
+<td>RAM usada en bytes (numeric)</td>
+</tr>
+<tr>
+<td><code>system@diskfree</code></td>
+<td>Bytes libres en disco (numeric)</td>
+</tr>
+<tr>
+<td><code>compiler@version</code></td>
+<td>Versión del compilador</td>
+</tr>
+<tr>
+<td><code>compiler@name</code></td>
+<td>"altairc"</td>
+</tr>
+<tr>
+<td><code>compiler@build</code></td>
+<td>Fecha de compilación</td>
+</tr>
+<tr>
+<td><code>compiler@architecture</code></td>
+<td>"x86_64" / "arm64"</td>
+</tr>
+<tr>
+<td><code>program@name</code></td>
+<td>De la cabecera altair.doc</td>
+</tr>
+<tr>
+<td><code>program@version</code></td>
+<td>De la cabecera altair.doc</td>
+</tr>
+<tr>
+<td><code>program@author</code></td>
+<td>De la cabecera altair.doc</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="es-29-referencia-de-la-cli-altairc">29. Referencia de la CLI <code>altairc</code></h2>
+<pre><code>altairc &lt;source.at&gt; [opciones]   Compila un programa Altair
+altairc guide                    Escribe ALTAIR_GUIDE.md en el directorio actual
+altairc guide --stdout           Imprime la guía por stdout
+altairc --version                Imprime la versión del compilador
+altairc --help                   Muestra la ayuda
+</code></pre>
+<p><strong>Opciones:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-o &lt;file&gt;</code></td>
+<td>Nombre del binario de salida (por defecto: <code>a.out</code>)</td>
+</tr>
+<tr>
+<td><code>--emit-c</code></td>
+<td>Imprime el código C generado por stdout</td>
+</tr>
+<tr>
+<td><code>--emit-ast</code></td>
+<td>Imprime un resumen de nodos del AST</td>
+</tr>
+<tr>
+<td><code>--no-sema</code></td>
+<td>Salta el análisis semántico (compila más rápido)</td>
+</tr>
+<tr>
+<td><code>-v</code></td>
+<td>Número de versión</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ejemplos:</strong></p>
+<pre><code class="language-bash"># Compilar un programa
+altairc hello.at -o hello
 
-    if key "SPACE";
-        log "Espacio pulsado"
+# Compilar un servidor
+altairc server.at -o myserver
+
+# Depurar: ver qué C se genera
+altairc server.at --emit-c | head -200
+
+# Generar la guía del lenguaje
+altairc guide
+</code></pre>
+<hr />
+<h2 id="es-30-codigos-de-error">30. Códigos de error</h2>
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ALT0001</code></td>
+<td>Variable desconocida o acceso a objeto nulo</td>
+</tr>
+<tr>
+<td><code>ALT0002</code></td>
+<td>Tipos incompatibles en aritmética o comparación</td>
+</tr>
+<tr>
+<td><code>ALT0003</code></td>
+<td>Error de parseo / sintaxis</td>
+</tr>
+<tr>
+<td><code>ALT0004</code></td>
+<td>Token ya consumido</td>
+</tr>
+<tr>
+<td><code>ALT0005</code></td>
+<td>Error de snapshot (crear/restaurar/borrar)</td>
+</tr>
+<tr>
+<td><code>ALT0006</code></td>
+<td>Bloque <code>prefer</code> sin entradas de almacenamiento</td>
+</tr>
+<tr>
+<td><code>ALT0007</code></td>
+<td>Asignación a una variable <code>const</code></td>
+</tr>
+<tr>
+<td><code>ALT0008</code></td>
+<td><code>weight</code> debe ser un entero no negativo</td>
+</tr>
+<tr>
+<td><code>ALT0009</code></td>
+<td><code>orbit</code> tiene números de estado duplicados</td>
+</tr>
+<tr>
+<td><code>ALT0010</code></td>
+<td>División o módulo por cero</td>
+</tr>
+<tr>
+<td><code>ALT0011</code></td>
+<td>Clave o namespace de introspección desconocido</td>
+</tr>
+<tr>
+<td><code>ALT0012</code></td>
+<td>Estado de <code>orbit</code> no encontrado / variable sin orbit</td>
+</tr>
+<tr>
+<td><code>ALT0013</code></td>
+<td>Índice de lista (o de texto) fuera de rango</td>
+</tr>
+<tr>
+<td><code>ALT0014</code></td>
+<td>Campo de objeto no encontrado</td>
+</tr>
+<tr>
+<td><code>ALT0015</code></td>
+<td>Variable de entorno requerida no definida</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="es-31-char-file-pointtipo-y-operadores-a-nivel-de-bit">31. <code>char</code>, <code>file</code>, <code>point@Tipo</code> y operadores a nivel de bit</h2>
+<blockquote>
+<p>Añadidos para dar soporte a <strong>self-hosting</strong> (que un compilador de Altair
+pueda algún día escribirse en el propio Altair). Tocan las cuatro etapas
+del compilador: <code>lexer.c/h</code> (tokens nuevos), <code>parser.c</code> (gramática nueva),
+<code>ast.h</code> (<code>VTYPE_FILE</code>, <code>VTYPE_POINTER</code>), <code>codegen.c</code> (nuevos casos de
+emisión) y <code>altair_rt.c/h</code> (nuevas etiquetas <code>ALT_FILE</code>/<code>ALT_POINTER</code> y
+nuevas funciones C integradas).</p>
+</blockquote>
+<h3 id="es-311-char-texto-de-un-caracter">31.1 <code>char</code> — texto de un carácter</h3>
+<p><code>char</code> es un <strong>alias de tipo</strong>, no un tipo de runtime nuevo. El parser mapea
+el token <code>char</code> directamente a <code>VTYPE_TEXT</code> (<code>tok_to_vtype()</code> en
+<code>parser.c</code>), así que una variable <code>char</code> es, a nivel de C/runtime, un valor
+<code>ALT_TEXT</code> normal que contiene un solo carácter. Por eso toda operación de
+texto (<code>+</code>, comparaciones, <code>length()</code>) ya funciona sobre <code>char</code> sin necesitar
+codegen nuevo.</p>
+<pre><code class="language-altair">text code = &quot;hola&quot;
+char c = code[0]
+log c
+</code></pre>
+<h3 id="es-312-indexar-texto-textindice">31.2 Indexar texto: <code>text[índice]</code></h3>
+<p>Antes de este cambio, el indexado <code>[i]</code> (<code>ND_INDEX_ACCESS</code>) solo funcionaba
+sobre <code>ALT_LIST</code>. La función de runtime <code>altair_list_get()</code> ahora también
+maneja <code>ALT_TEXT</code>: comprueba límites contra <code>strlen()</code> y devuelve una nueva
+cadena de un carácter. Acceder fuera de rango lanza <code>ALT0013</code>, el mismo
+código que usan las listas.</p>
+<pre><code class="language-altair">text s = &quot;abc&quot;
+log s[0]      / &quot;a&quot;
+log length(s) / 3   (length() ahora también acepta text, no solo listas)
+</code></pre>
+<h3 id="es-313-file-un-tipo-manejador-de-fichero">31.3 <code>file</code> — un tipo manejador de fichero</h3>
+<p><code>file</code> es un tipo de valor genuinamente nuevo: <code>VTYPE_FILE</code> en el AST mapea
+a <code>ALT_FILE</code> en runtime. <code>AltairVal</code> recibió un campo <code>void *ptr</code> (union)
+compartido entre <code>ALT_FILE</code> (guarda un <code>FILE*</code> de C) y <code>ALT_POINTER</code> (ver
+más abajo). Copiar un valor <code>file</code> (<code>altair_val_copy</code>) es una copia
+<strong>superficial</strong>: el <code>FILE*</code> subyacente se comparte, igual que al asignar un
+puntero en C.</p>
+<pre><code class="language-altair">file f = open(&quot;data.txt&quot;)
+text contents = read(f)
+close(f)
+</code></pre>
+<h3 id="es-314-pointtipo-punteros-crudos">31.4 <code>point@Tipo</code> — punteros crudos</h3>
+<p>Forma de declaración nueva, parseada como su propia rama en <code>parser.c</code>,
+antes del camino genérico de declaración de tipos:</p>
+<pre><code class="language-altair">point@Tipo nombre [= expresión]
+</code></pre>
+<p><code>point@Tipo</code> declara una variable de <code>VTYPE_POINTER</code> (<code>ALT_POINTER</code> en
+runtime). El <code>Tipo</code> tras la <code>@</code> se guarda solo a efectos de documentación /
+un futuro chequeo de tipos — el valor subyacente es un <code>void*</code> opaco (típicamente
+de <code>ptr_alloc</code>), así que Altair todavía no obliga a que el puntero apunte
+siempre a valores de <code>Tipo</code>. Es el bloque de construcción que describía la
+propuesta original para construir ASTs, listas enlazadas y grafos.</p>
+<pre><code class="language-altair">point@node current = ptr_alloc(64)
+if ptr_is_null(current);
+    log &quot;sin memoria&quot;
+break
+ptr_free(current)
+</code></pre>
+<h3 id="es-315-operadores-a-nivel-de-bit">31.5 Operadores a nivel de bit</h3>
+<p>Tokens nuevos <code>&amp; | ^ ~ &lt;&lt; &gt;&gt;</code>, distinguidos correctamente de <code>&amp;&amp;</code>/<code>||</code> (el
+lexer comprueba primero las formas de dos caracteres). Se insertaron nuevos
+niveles de precedencia en la gramática de expresiones, del más flojo al más
+fuerte, igual que en C:</p>
+<pre><code>comparación  ( == != &lt; &gt; &lt;= &gt;= )
+      |
+   bitor    ( | )
+      |
+   bitxor   ( ^ )
+      |
+   bitand   ( &amp; )
+      |
+   shift    ( &lt;&lt; &gt;&gt; )
+      |
+   suma/resta ( + - )
+</code></pre>
+<p>Cada operador compila a un pequeño helper de runtime (<code>altair_band</code>,
+<code>altair_bor</code>, <code>altair_bxor</code>, <code>altair_bnot</code>, <code>altair_shl</code>, <code>altair_shr</code> en
+<code>altair_rt.c</code>) que exige que ambos operandos sean <code>numeric</code> — los números de
+Altair son <code>double</code> internamente, así que las operaciones a nivel de bit
+convierten a <code>long long</code> antes de aplicar el operador de C y vuelven a
+<code>double</code> al devolver. Pasar un operando que no sea numérico lanza <code>ALT0002</code>.</p>
+<pre><code class="language-altair">numeric flags = 6 &amp; 3   / 2
+numeric merged = 6 | 3  / 7
+numeric x = 1 &lt;&lt; 4      / 16
+numeric inv = ~0        / -1
+</code></pre>
+<hr />
+<h2 id="es-32-es-de-ficheros-y-ejecucion-de-procesos">32. E/S de ficheros y ejecución de procesos</h2>
+<p>Son llamadas a función normales (<code>ND_FUNC_CALL</code>) — no hizo falta gramática
+nueva, porque el compilador ya tenía un mecanismo genérico: cualquier
+llamada <code>nombre(args)</code> que no sea un método conocido de lista/texto compila
+directo a una llamada en C <code>_fn_nombre(args)</code>. Cada builtin de abajo es
+simplemente una función de C llamada <code>_fn_&lt;nombre&gt;</code> implementada en
+<code>altair_rt.c</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Función</th>
+<th>Firma</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>open(path)</code></td>
+<td><code>file</code></td>
+<td>Abre para lectura (modo <code>"r"</code>).</td>
+</tr>
+<tr>
+<td><code>open_write(path)</code></td>
+<td><code>file</code></td>
+<td>Abre para escritura, truncando (modo <code>"w"</code>).</td>
+</tr>
+<tr>
+<td><code>open_append(path)</code></td>
+<td><code>file</code></td>
+<td>Abre para añadir (modo <code>"a"</code>).</td>
+</tr>
+<tr>
+<td><code>read(f)</code></td>
+<td><code>text</code></td>
+<td>Lee todo el contenido restante de <code>f</code>.</td>
+</tr>
+<tr>
+<td><code>read_line(f)</code></td>
+<td><code>text</code></td>
+<td>Lee una línea (sin el <code>\n</code>/<code>\r</code> final).</td>
+</tr>
+<tr>
+<td><code>write(f, texto)</code></td>
+<td><code>bool</code></td>
+<td>Escribe <code>texto</code> en <code>f</code>.</td>
+</tr>
+<tr>
+<td><code>close(f)</code></td>
+<td><code>bool</code></td>
+<td>Cierra <code>f</code>. Se puede llamar dos veces sin problema.</td>
+</tr>
+<tr>
+<td><code>create_file(path)</code></td>
+<td><code>bool</code></td>
+<td>Crea un fichero vacío si no existe.</td>
+</tr>
+<tr>
+<td><code>delete_file(path)</code></td>
+<td><code>bool</code></td>
+<td>Borra un fichero.</td>
+</tr>
+<tr>
+<td><code>mkdir(path)</code></td>
+<td><code>bool</code></td>
+<td>Crea un directorio (éxito si ya existe).</td>
+</tr>
+<tr>
+<td><code>file_exists(path)</code></td>
+<td><code>bool</code></td>
+<td>Comprueba existencia vía <code>stat()</code>.</td>
+</tr>
+<tr>
+<td><code>list_dir(path)</code></td>
+<td><code>list</code></td>
+<td>Lista los nombres de un directorio (excluye <code>.</code>/<code>..</code>).</td>
+</tr>
+<tr>
+<td><code>exec(cmd)</code></td>
+<td><code>numeric</code></td>
+<td>Ejecuta <code>cmd</code> con <code>system()</code>; devuelve el código de salida.</td>
+</tr>
+<tr>
+<td><code>exec_capture(cmd)</code></td>
+<td><code>text</code></td>
+<td>Ejecuta <code>cmd</code> con <code>popen()</code>; devuelve el stdout capturado.</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-altair">create_file(&quot;build/out.txt&quot;)
+file f = open_write(&quot;build/out.txt&quot;)
+write(f, &quot;gcc invoked here&quot;)
+close(f)
+
+numeric rc = exec(&quot;gcc build/main.c -o programa.exe&quot;)
+if rc == 0;
+    log &quot;build ok&quot;
+break
+</code></pre>
+<p><strong>Resolución de rutas:</strong> las rutas se pasan tal cual a la librería estándar de
+C (<code>fopen</code>, <code>stat</code>, <code>opendir</code>...) relativas al directorio de trabajo del
+proceso — no hay ninguna resolución automática hacia una carpeta de
+proyecto para <code>file</code>/<code>open</code>/etc. (Esa carpeta de "carpeta propia por
+proyecto" descrita para las <em>variables persistentes</em> sí se implementó, ver
+§35, pero es un mecanismo aparte, no parte de <code>file</code>/<code>open</code>.)</p>
+<hr />
+<h2 id="es-33-punteros-crudos">33. Punteros crudos</h2>
+<p>Builtins que acompañan a <code>point@Tipo</code> (§31.4):</p>
+<table>
+<thead>
+<tr>
+<th>Función</th>
+<th>Firma</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ptr_alloc(n)</code></td>
+<td><code>point</code></td>
+<td>Reserva <code>n</code> bytes a cero (<code>calloc</code>) y devuelve un puntero.</td>
+</tr>
+<tr>
+<td><code>ptr_free(p)</code></td>
+<td><code>bool</code></td>
+<td>Libera la memoria y pone a <code>NULL</code> el puntero de <code>p</code>.</td>
+</tr>
+<tr>
+<td><code>ptr_is_null(p)</code></td>
+<td><code>bool</code></td>
+<td>Verdadero si <code>p</code> no es un puntero o apunta a <code>NULL</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Los punteros <strong>no</strong> tienen recolector de basura y <strong>no</strong> se liberan
+automáticamente — es gestión manual de memoria intencionadamente cruda, al
+estilo de C, coherente con el objetivo original de que Altair pueda
+construir ASTs, listas enlazadas y grafos a mano.</p>
+<pre><code class="language-altair">point@byte buf = ptr_alloc(256)
+/ ... usar buf ...
+ptr_free(buf)
+</code></pre>
+<hr />
+<h2 id="es-34-argumentos-de-linea-de-comandos">34. Argumentos de línea de comandos</h2>
+<p>Antes de este cambio, un binario Altair compilado no tenía forma de leer su
+propio <code>argv</code>. Como un compilador auto-hospedado necesita aceptar una ruta
+de fichero fuente por línea de comandos, el <code>main(int argc, char **argv)</code>
+generado ahora llama a <code>altair_set_args(argc, argv)</code> antes de ejecutar el
+cuerpo del programa.</p>
+<table>
+<thead>
+<tr>
+<th>Función</th>
+<th>Firma</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>argc()</code></td>
+<td><code>numeric</code></td>
+<td>Número de argumentos de línea de comandos (incluye argv[0]).</td>
+</tr>
+<tr>
+<td><code>arg(i)</code></td>
+<td><code>text</code></td>
+<td>El argumento <code>i</code>-ésimo (base 0; <code>arg(0)</code> es la ruta del binario).</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-altair">numeric n = argc()
+if n &lt; 2;
+    log &quot;uso: programa &lt;archivo&gt;&quot;
+else;
+    log &quot;archivo: &quot; + arg(1)
+break
+</code></pre>
+<hr />
+<h2 id="es-35-variables-persistentes-con-archivo-propio">35. Variables persistentes con archivo propio</h2>
+<p>Sintaxis: tras la declaración normal de una variable, un identificador
+punteado a modo de "nombre de fichero" (por ejemplo <code>player.coins</code>):</p>
+<pre><code class="language-altair">numeric coins = 120 player.coins
+text playerName = &quot;Victor&quot; player.name
+</code></pre>
+<p><strong>Cómo funciona internamente:</strong></p>
+<ul>
+<li><strong>Parser:</strong> tras parsear los cualificadores de almacenamiento en la
+  declaración genérica de variable, si sigue un identificador de la forma
+  <code>algo.algo</code>, se guarda como <code>n-&gt;persist_file</code> en el nodo AST (usa una
+  instantánea/restauración del lexer para poder "mirar hacia delante" sin
+  romper el resto del parseo si no hay patrón <code>ident.ident</code>).</li>
+<li><strong>Codegen — al declarar:</strong> si <code>persist_file</code> está presente, se emite una
+  llamada a <code>altair_persist_load("player.coins")</code>. Si el fichero ya existe,
+  su valor <strong>sobreescribe</strong> el de la expresión inicial (esto permite que el
+  valor sobreviva entre ejecuciones). Si no existe, se usa el valor inicial
+  y se escribe inmediatamente al fichero. La variable además se registra
+  en un listado global para volcarse también al apagar el programa.</li>
+<li><strong>Codegen — en cada asignación:</strong> cualquier asignación posterior a esa
+  variable (<code>coins = coins + 10</code>) dispara automáticamente un
+  <code>altair_persist_save(...)</code> con el nuevo valor.</li>
+<li><strong>Formato en disco:</strong> cada fichero de <code>variables/</code> tiene dos líneas: una
+  etiqueta de tipo (<code>N</code> numeric, <code>T</code> text, <code>B</code> bool) y el valor serializado.
+  Esto permite auto-describir el tipo al recargar sin que el compilador
+  necesite conocerlo de antemano.</li>
+<li><strong>Ubicación:</strong> todos estos ficheros se guardan automáticamente en la
+  carpeta <code>variables/</code> (relativa al directorio de trabajo del binario
+  compilado). La carpeta se crea sola si no existe.</li>
+</ul>
+<pre><code class="language-altair">altair.doc;
+    name = &quot;PersistTest&quot;
+    version = &quot;1.0&quot;
+    author = &quot;a&quot;
+create altair.doc
+
+numeric coins = 120 player.coins
+text playerName = &quot;Victor&quot; player.name
+
+log &quot;coins=&quot; + coins
+coins = coins + 10
+log &quot;coins tras sumar=&quot; + coins
+</code></pre>
+<p>Primera ejecución → imprime <code>coins=120</code>, luego <code>coins tras sumar=130</code>, y dentro
+de <code>variables/</code> quedan <code>player.coins</code> (<code>N</code> / <code>130</code>) y <code>player.name</code>
+(<code>T</code> / <code>Victor</code>). Segunda ejecución → el <code>120</code> inicial es ignorado porque ya
+existe <code>variables/player.coins</code>; arranca directamente con <code>coins=130</code>.</p>
+<p><strong>Limitación conocida:</strong> de momento solo <code>numeric</code>, <code>text</code> y <code>bool</code> se
+serializan; declarar una variable <code>list</code> con nombre punteado no falla, pero
+su contenido no se persiste entre ejecuciones.</p>
+<hr />
+<h2 id="es-36-el-compilador-auto-hospedado-altair-core">36. El compilador auto-hospedado (Altair-Core)</h2>
+<p><code>selfhost/altair.at</code> es un compilador escrito <strong>enteramente en Altair</strong> (usa
+<code>file</code>, indexado de texto, <code>char</code>, y el control de flujo / funciones que
+Altair ya tenía) que compila un subconjunto deliberadamente más pequeño del
+lenguaje, llamado <strong>Altair-Core</strong>, directamente a C.</p>
+<pre><code>                 (bootstrap, una sola vez)
+ altair.at  ──────────────────────────▶  altairc-selfhost
+ (Altair real)      altairc (en C)        (binario nativo)
+
+                 (repetible, sin necesitar inventar un compilador C)
+ programa.atc ─────────────────────────▶ programa.gen.c ──▶ gcc ──▶ binario
+              altairc-selfhost
+</code></pre>
+<p>Compilarlo:</p>
+<pre><code class="language-bash">./altairc selfhost/altair.at -o selfhost/altairc-selfhost
+</code></pre>
+<p>Usarlo:</p>
+<pre><code class="language-bash">./altairc-selfhost fib.atc fib.gen.c
+gcc fib.gen.c -o fib_bin -lm   # -lm hace falta: numeric % compila a fmod()
+./fib_bin
+</code></pre>
+<h3 id="es-361-gramatica-de-altair-core">36.1 Gramática de Altair-Core</h3>
+<p>Altair-Core conserva la forma <code>if/elif/else...break</code>, <code>while...break</code> y
+<code>fun nombre -&gt; tipo ... break</code> de Altair, pero no tiene análisis semántico
+propio — los errores de tipos aparecen como <strong>errores de gcc</strong> sobre el C
+generado, no como errores de Altair. Los <code>;</code> tras las cabeceras son
+opcionales: el lexer de Altair-Core los trata igual que un espacio en
+blanco.</p>
+<pre><code>programa  := stmt*
+stmt      := vardecl | assign | log | return | if | while | fun-call
+vardecl   := (&quot;numeric&quot;|&quot;text&quot;|&quot;bool&quot;) IDENT &quot;=&quot; expr
+assign    := IDENT &quot;=&quot; expr
+log       := &quot;log&quot; expr
+if        := &quot;if&quot; expr stmt* (&quot;elif&quot; expr stmt*)* (&quot;else&quot; stmt*)? &quot;break&quot;
+while     := &quot;while&quot; expr stmt* &quot;break&quot;
+fun       := &quot;fun&quot; IDENT (&quot;-&gt;&quot; tipo)? (tipo IDENT (&quot;,&quot; tipo IDENT)*)? stmt* &quot;break&quot;
+return    := &quot;return&quot; expr?
+</code></pre>
+<p>Y expresiones con precedencia clásica (<code>or</code> → <code>and</code> → <code>not</code> → comparación →
+suma/resta → mult/div/mod → unario → primario), donde <code>primario</code> incluye
+número, cadena, <code>true</code>/<code>false</code>, identificador, llamada <code>nombre(args)</code> y
+<code>(expr)</code>.</p>
+<h3 id="es-362-mapeo-de-tipos-altair-core-c">36.2 Mapeo de tipos (Altair-Core → C)</h3>
+<table>
+<thead>
+<tr>
+<th>Altair-Core</th>
+<th>C generado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>numeric</code></td>
+<td><code>double</code></td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td><code>char*</code></td>
+</tr>
+<tr>
+<td><code>bool</code></td>
+<td><code>int</code></td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td><code>fmod(a, b)</code> (el <code>%</code> nativo de C no aplica a <code>double</code>)</td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td><code>+</code> nativo — <strong>solo aritmético</strong>, no concatena texto</td>
+</tr>
+</tbody>
+</table>
+<h3 id="es-363-runtime-integrado-se-emite-una-vez-por-fichero-de-salida">36.3 Runtime integrado (se emite una vez por fichero de salida)</h3>
+<table>
+<thead>
+<tr>
+<th>Función</th>
+<th>Propósito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>concat(a, b)</code></td>
+<td>Concatenación de texto (no hay <code>+</code> para texto).</td>
+</tr>
+<tr>
+<td><code>streq(a, b)</code></td>
+<td>Igualdad de texto (<code>==</code>/<code>!=</code> sobre <code>char*</code> compararía punteros, no contenido).</td>
+</tr>
+<tr>
+<td><code>numstr(n)</code></td>
+<td><code>numeric → text</code>, para usar con <code>log</code>.</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-altair">fun fib -&gt; numeric numeric n;
+    if n &lt; 2;
+        return n
     break
-break</code></pre>
+    return fib(n - 1) + fib(n - 2)
+break
 
-<h3>Primitivas de dibujo</h3>
-<pre><code>draw rectangle;
-    x = 50
-    y = 50
-    width = 200
-    height = 100
-    color = red
-create draw
+numeric i = 0
+while i &lt; 10;
+    log numstr(fib(i))
+    i = i + 1
+break
 
-draw circle;
-    x = 400
-    y = 300
-    radius = 50
-    color = blue
-create draw
+log concat(&quot;hola, &quot;, &quot;mundo&quot;)
+</code></pre>
+<h3 id="es-364-que-significa-y-que-no-significa-self-hosting-aqui">36.4 Qué significa y qué no significa "self-hosting" aquí</h3>
+<p><code>altairc-selfhost</code> compila programas Altair-Core, pero <strong>todavía no puede
+compilar su propio código fuente</strong> (<code>altair.at</code>), porque <code>altair.at</code> usa
+funcionalidades que Altair-Core no soporta: <code>list</code>, <code>file</code>/<code>open</code>/<code>read</code>/
+<code>close</code>, indexado de texto, y declaraciones con más de un parámetro
+tipado. Cerrar ese círculo — reescribir <code>altair.at</code> usando <em>solo</em>
+Altair-Core, tras ampliar Altair-Core con listas y E/S de ficheros — es el
+siguiente paso natural y no está hecho todavía.</p>
+<p>Lo que <strong>sí</strong> está probado de punta a punta:
+- <code>altairc</code> (en C) compila con éxito <code>altair.at</code> (Altair real) →
+  <code>altairc-selfhost</code>.
+- <code>altairc-selfhost</code> compila con éxito programas Altair-Core (recursión,
+  <code>if/elif/else</code>, <code>while</code>, concatenación de texto, <code>%</code>, comparación de
+  texto) → C.
+- El C generado compila limpio con <code>gcc</code> y produce el resultado correcto.</p>
+<hr />
+<p><em>Guía generada a partir de la implementación real del compilador y el
+runtime de Altair. No cubre <code>async</code>, <code>safe block</code> ni <code>data ... save data</code>:
+no están implementados todavía.</em></p>
+</div>
 
-draw line;
-    x1 = 0
-    y1 = 0
-    x2 = 800
-    y2 = 600
-    color = green
-create draw
+<div id="pane-en" class="lang-pane">
+<h1 id="en-altair-language-reference-v165vb">Altair Language Reference - v1.6.5vB</h1>
+<blockquote>
+<p><strong>altairc guide</strong> - complete language reference for the Altair programming language.
+Generated by: <code>altairc guide</code></p>
+</blockquote>
+<hr />
+<h2 id="en-table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#en-1-overview">Overview</a></li>
+<li><a href="#en-2-program-structure">Program Structure</a></li>
+<li><a href="#en-3-variables--storage">Variables &amp; Storage</a></li>
+<li><a href="#en-4-types">Types</a></li>
+<li><a href="#en-5-operators--expressions">Operators &amp; Expressions</a></li>
+<li><a href="#en-6-control-flow">Control Flow</a></li>
+<li><a href="#en-7-functions">Functions</a></li>
+<li><a href="#en-8-classes--objects">Classes &amp; Objects</a></li>
+<li><a href="#en-9-lists">Lists</a></li>
+<li><a href="#en-10-error-handling">Error Handling</a></li>
+<li><a href="#en-11-snapshots">Snapshots</a></li>
+<li><a href="#en-12-choose-weighted-random">Choose (Weighted Random)</a></li>
+<li><a href="#en-13-introspection">Introspection</a></li>
+<li><a href="#en-14-token-variables">Token Variables</a></li>
+<li><a href="#en-15-orbit--prefer-storage">Orbit &amp; Prefer Storage</a></li>
+<li><a href="#en-16-http-server-v165vb">HTTP Server (v1.6.5vB)</a></li>
+<li><a href="#en-17-routes--handlers-v165vb">Routes &amp; Handlers (v1.6.5vB)</a></li>
+<li><a href="#en-18-middleware-v165vb">Middleware (v1.6.5vB)</a></li>
+<li><a href="#en-19-rate-limiting-v165vb">Rate Limiting (v1.6.5vB)</a></li>
+<li><a href="#en-20-health-checks-v165vb">Health Checks (v1.6.5vB)</a></li>
+<li><a href="#en-21-metrics-v165vb">Metrics (v1.6.5vB)</a></li>
+<li><a href="#en-22-graceful-shutdown-v165vb">Graceful Shutdown (v1.6.5vB)</a></li>
+<li><a href="#en-23-session-management-v165vb">Session Management (v1.6.5vB)</a></li>
+<li><a href="#en-24-configuration--env-v165vb">Configuration &amp; Env (v1.6.5vB)</a></li>
+<li><a href="#en-25-database-pool-v165vb">Database Pool (v1.6.5vB)</a></li>
+<li><a href="#en-26-job-scheduler-v165vb">Job Scheduler (v1.6.5vB)</a></li>
+<li><a href="#en-27-graphics-raylib">Graphics (raylib)</a></li>
+<li><a href="#en-28-built-in-system-queries">Built-in System Queries</a></li>
+<li><a href="#en-29-altairc-cli-reference">altairc CLI Reference</a></li>
+<li><a href="#en-30-error-codes">Error Codes</a></li>
+<li><a href="#en-31-self-hosting-extensions-char-file-point-bitwise">Self-Hosting Extensions: char, file, point, bitwise</a></li>
+<li><a href="#en-32-file-system--process-builtins">File System &amp; Process Builtins</a></li>
+<li><a href="#en-33-raw-pointers">Raw Pointers</a></li>
+<li><a href="#en-34-cli-arguments-in-compiled-programs">CLI Arguments in Compiled Programs</a></li>
+<li><a href="#en-35-the-self-hosted-compiler-altair-core">The Self-Hosted Compiler (Altair-Core)</a></li>
+<li><a href="#en-36-complete-server-example">Complete Server Example</a></li>
+</ol>
+<hr />
+<h2 id="en-1-overview">1. Overview</h2>
+<p>Altair is a statically compiled, expression-oriented language that transpiles to C via <strong>altairc</strong>. Every program compiles to a single native binary with no runtime dependencies. v1.6.5vB adds a complete HTTP server layer, job scheduling, session management, and configuration management built directly into the language syntax.</p>
+<p><strong>Compiler pipeline:</strong></p>
+<pre><code>.at source → lexer → parser → sema → codegen → .c → gcc → binary
+</code></pre>
+<p><strong>Key properties:</strong>
+- Every variable has a declared <em>storage tier</em> (ram/disk/cache/temp)
+- Variables can migrate between storage tiers at runtime via <code>orbit</code>
+- Strings, lists, objects, and tokens are first-class values
+- All memory is managed by the runtime (no manual malloc/free)
+- HTTP servers are declared with <code>listen</code>; routes are declared with <code>route</code></p>
+<hr />
+<h2 id="en-2-program-structure">2. Program Structure</h2>
+<p>Every Altair program has an optional header and a body. The header provides program metadata; the body contains all statements.</p>
+<pre><code>altair.doc;
+name = MyApp
+version = 1.0.0
+author = &quot;Jane Smith&quot;
+create altair.doc
 
-draw image;
-    image = miImagen
+/ This is a comment (line starting with /)
+
+define text greeting = &quot;Hello, world!&quot;
+log greeting
+</code></pre>
+<p><strong>Header fields:</strong> <code>name</code>, <code>version</code>, <code>author</code></p>
+<p>The header is parsed from <code>altair.doc;</code> to <code>create altair.doc</code>. Everything else is the program body.</p>
+<p><strong>Comments:</strong> A <code>/</code> at the start of a line (or after whitespace) followed by a space or letter begins a single-line comment.</p>
+<hr />
+<h2 id="en-3-variables-storage">3. Variables &amp; Storage</h2>
+<h3 id="en-declaration">Declaration</h3>
+<pre><code>define &lt;type&gt; &lt;name&gt; [storage] [qualifiers] [= expression]
+</code></pre>
+<p><strong>Examples:</strong></p>
+<pre><code>define numeric count = 0
+define text    name  = &quot;world&quot;
+define bool    ready = true
+define list    items
+define object  user
+</code></pre>
+<h3 id="en-storage-tiers">Storage Tiers</h3>
+<table>
+<thead>
+<tr>
+<th>Keyword</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ram</code></td>
+<td>In-process memory (default). Fast; lost on exit.</td>
+</tr>
+<tr>
+<td><code>disk</code></td>
+<td>Persistent file storage. Survives restarts.</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td>Persistent with optional TTL. Auto-expired.</td>
+</tr>
+<tr>
+<td><code>temp</code></td>
+<td>Zeroed on release; for sensitive data.</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>Runtime chooses best tier.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>define text username disk
+define text session_token temp
+define text api_response cache expire=30m
+</code></pre>
+<h3 id="en-qualifiers">Qualifiers</h3>
+<table>
+<thead>
+<tr>
+<th>Qualifier</th>
+<th>Example</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>const</code></td>
+<td><code>define numeric pi const = 3.14159</code></td>
+<td>Cannot be reassigned</td>
+</tr>
+<tr>
+<td><code>expire=&lt;dur&gt;</code></td>
+<td><code>expire=5m</code></td>
+<td>Auto-expires after duration</td>
+</tr>
+<tr>
+<td><code>weight=&lt;n&gt;</code></td>
+<td><code>weight=5</code></td>
+<td>Priority hint (0–100)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Durations:</strong> <code>30s</code> (seconds), <code>5m</code> (minutes), <code>2h</code> (hours).</p>
+<h3 id="en-assignment">Assignment</h3>
+<pre><code>name = &quot;Alice&quot;
+count = count + 1
+count += 10
+count -= 3
+count *= 2
+count /= 4
+count %= 7
+</code></pre>
+<h3 id="en-release">Release</h3>
+<p>Explicitly release a variable and free its memory:</p>
+<pre><code>define text buffer ram = &quot;large data&quot;
+/ ... use buffer ...
+release buffer
+</code></pre>
+<blockquote>
+<p><strong>v1.6.5vB:</strong> <code>release</code> is safe to call on variables that no longer exist - it is a no-op.</p>
+</blockquote>
+<hr />
+<h2 id="en-4-types">4. Types</h2>
+<h3 id="en-numeric">numeric</h3>
+<p>Stores a 64-bit floating-point number.</p>
+<pre><code>define numeric x = 42
+define numeric pi = 3.14159
+define numeric big = 1000000
+</code></pre>
+<h3 id="en-text">text</h3>
+<p>A UTF-8 string.</p>
+<pre><code>define text greeting = &quot;Hello!&quot;
+define text multi = &quot;Line 1\nLine 2&quot;
+</code></pre>
+<p>String concatenation uses <code>+</code>:</p>
+<pre><code>define text full = &quot;Hello, &quot; + name + &quot;!&quot;
+</code></pre>
+<h3 id="en-bool">bool</h3>
+<pre><code>define bool active = true
+define bool done   = false
+</code></pre>
+<h3 id="en-list">list</h3>
+<p>A dynamically sized ordered collection.</p>
+<pre><code>define list scores = [10, 20, 30]
+scores.append(40)
+scores.remove(0)       / remove index 0
+scores.clear()         / remove all
+define numeric n = scores.length()
+define numeric v = scores[1]
+scores[0] = 99
+</code></pre>
+<blockquote>
+<p><strong>v1.6.5vB Bug #7 fix:</strong> <code>list.length()</code> with parentheses now works correctly.</p>
+</blockquote>
+<h3 id="en-object">object</h3>
+<p>See <a href="#en-8-classes--objects">Section 8: Classes &amp; Objects</a>.</p>
+<h3 id="en-token">token</h3>
+<p>A single-use value - consumed once, then marked as consumed.</p>
+<pre><code>define token invite_code = &quot;XXXX-YYYY&quot;
+define text  used = invite_code   / consumes the token
+define text  again = invite_code  / throws ALT0004 &quot;Token already consumed&quot;
+</code></pre>
+<hr />
+<h2 id="en-5-operators-expressions">5. Operators &amp; Expressions</h2>
+<h3 id="en-arithmetic">Arithmetic</h3>
+<table>
+<thead>
+<tr>
+<th>Op</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+</code></td>
+<td>Add / concatenate strings</td>
+<td><code>1 + 2</code>, <code>"a" + "b"</code></td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>Subtract</td>
+<td><code>10 - 3</code></td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>Multiply</td>
+<td><code>4 * 5</code></td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>Divide</td>
+<td><code>10 / 3</code></td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td>Modulo</td>
+<td><code>10 % 3</code></td>
+</tr>
+<tr>
+<td><code>-x</code></td>
+<td>Negate</td>
+<td><code>-count</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>v1.6.5vB Bug #3 fix:</strong> String concatenation no longer O(n²). Long repeated concat in loops no longer causes OOM.</p>
+</blockquote>
+<h3 id="en-comparison">Comparison</h3>
+<p><code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> - work on numerics and text (lexicographic for text).</p>
+<h3 id="en-logical">Logical</h3>
+<p><code>and</code>, <code>or</code>, <code>!</code></p>
+<pre><code>if x &gt; 0 and x &lt; 100;
+    log &quot;in range&quot;
+break
+</code></pre>
+<h3 id="en-precedence-high-low">Precedence (high → low)</h3>
+<ol>
+<li>Unary: <code>!</code>, <code>-</code></li>
+<li><code>*</code>, <code>/</code>, <code>%</code></li>
+<li><code>+</code>, <code>-</code></li>
+<li><code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></li>
+<li><code>==</code>, <code>!=</code></li>
+<li><code>and</code></li>
+<li><code>or</code></li>
+</ol>
+<hr />
+<h2 id="en-6-control-flow">6. Control Flow</h2>
+<h3 id="en-if-elif-else">if / elif / else</h3>
+<pre><code>if score &gt; 90;
+    log &quot;Excellent&quot;
+break
+elif score &gt; 70;
+    log &quot;Good&quot;
+break
+else;
+    log &quot;Needs improvement&quot;
+break
+</code></pre>
+<h3 id="en-while">while</h3>
+<pre><code>define numeric n = 1
+while n &lt;= 10;
+    log n
+    n += 1
+break
+</code></pre>
+<h3 id="en-repeat">repeat</h3>
+<pre><code>repeat 5 times;
+    log &quot;hello&quot;
+break
+
+/ Or with an expression:
+repeat count;
+    log &quot;tick&quot;
+break
+</code></pre>
+<h3 id="en-forever">forever</h3>
+<pre><code>forever;
+    log &quot;running...&quot;
+    wait 1s
+break
+</code></pre>
+<h3 id="en-foreach">foreach</h3>
+<pre><code>define list fruits = [&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;]
+foreach fruit in fruits;
+    log fruit
+break
+</code></pre>
+<h3 id="en-exit">exit</h3>
+<p>Exits the current loop or terminates the program:</p>
+<pre><code>while true;
+    if done == true;
+        exit        / exits the while loop
+    break
+break
+
+exit        / terminates the program (outside a loop)
+</code></pre>
+<h3 id="en-wait">wait</h3>
+<pre><code>wait 2s     / wait 2 seconds
+wait 500ms  / (use 0.5s for sub-second waits)
+</code></pre>
+<hr />
+<h2 id="en-7-functions">7. Functions</h2>
+<pre><code>fun greet name text;
+    define text msg = &quot;Hello, &quot; + name + &quot;!&quot;
+    log msg
+    return msg
+break
+</code></pre>
+<p><strong>Return type annotation:</strong></p>
+<pre><code>fun add numeric x numeric, y numeric;
+    return x + y
+break
+</code></pre>
+<p><strong>Calling functions:</strong></p>
+<pre><code>greet(&quot;Alice&quot;)
+define numeric result = add(10, 20)
+</code></pre>
+<blockquote>
+<p><strong>v1.6.5vB Bug #4 fix:</strong> Functions can now read and write global variables. Previously, globals were inaccessible inside function bodies.</p>
+<p><strong>v1.6.5vB Bug #5 fix:</strong> Function parameters are properly freed when the function returns, eliminating a per-call memory leak.</p>
+</blockquote>
+<p><strong>Recursive functions</strong> work correctly:</p>
+<pre><code>fun factorial numeric n numeric;
+    if n &lt;= 1;
+        return 1
+    break
+    return n * factorial(n - 1)
+break
+</code></pre>
+<hr />
+<h2 id="en-8-classes-objects">8. Classes &amp; Objects</h2>
+<pre><code>class Point;
+    define numeric x = 0
+    define numeric y = 0
+
+    fun distance;
+        define numeric dx = x * x
+        define numeric dy = y * y
+        return dx + dy
+    break
+break
+
+create object Point as p
+p.x = 3
+p.y = 4
+log p.distance()
+log p.x
+</code></pre>
+<p><strong>Method calls:</strong></p>
+<pre><code>define text result = myObj.methodName(arg1, arg2)
+</code></pre>
+<blockquote>
+<p><strong>v1.6.5vB Bug #6 fix:</strong> Objects now use dynamic field/method arrays (~50 bytes/instance vs ~10 KB previously). This makes creating large numbers of objects viable.</p>
+</blockquote>
+<hr />
+<h2 id="en-9-lists">9. Lists</h2>
+<pre><code>define list items = [1, 2, 3]
+
+/ Append
+items.append(4)
+items.append(&quot;hello&quot;)
+
+/ Access by index (0-based)
+define numeric first = items[0]
+
+/ Modify by index
+items[0] = 99
+
+/ Remove by index
+items.remove(2)
+
+/ Clear
+items.clear()
+
+/ Length (with or without parentheses)
+define numeric n = items.length
+define numeric m = items.length()   / v1.6.5vB: both forms work
+
+/ Iterate
+foreach item in items;
+    log item
+break
+
+/ Concatenate two lists
+define list all = listA + listB
+</code></pre>
+<hr />
+<h2 id="en-10-error-handling">10. Error Handling</h2>
+<pre><code>try;
+    / code that might fail
+    define numeric result = 10 / 0
+break
+catch as err;
+    log err.code
+    log err.message
+    log err.line
+break
+</code></pre>
+<p><strong>Throwing errors:</strong> (from user code, not directly, but via runtime operations)</p>
+<p>The runtime throws on: division by zero, index out of bounds, null object access, token double-consume, const reassignment.</p>
+<blockquote>
+<p><strong>v1.6.5vB Bug #1 fix:</strong> Sequential <code>try/catch</code> blocks no longer crash after ~34 uses. The try-depth counter is now always restored correctly - both on success and on error paths.</p>
+</blockquote>
+<p><strong>Nesting try/catch:</strong></p>
+<pre><code>try;
+    try;
+        / inner
+    break
+    catch as inner_err;
+        log inner_err.message
+    break
+break
+catch as outer_err;
+    log outer_err.message
+break
+</code></pre>
+<hr />
+<h2 id="en-11-snapshots">11. Snapshots</h2>
+<p>Snapshots save all registered variables to disk atomically (with CRC32 checksum).</p>
+<pre><code>/ Save current state
+snapshot create &quot;checkpoint1&quot;
+
+/ Restore previous state
+snapshot restore &quot;checkpoint1&quot;
+
+/ Delete a snapshot
+snapshot delete &quot;checkpoint1&quot;
+</code></pre>
+<p>Snapshots are stored in <code>~/.altair/&lt;program_name&gt;/snap/</code>.</p>
+<hr />
+<h2 id="en-12-choose-weighted-random">12. Choose (Weighted Random)</h2>
+<pre><code>choose outcome;
+    &quot;win&quot;  70
+    &quot;draw&quot; 20
+    &quot;lose&quot; 10
+break
+
+log outcome
+</code></pre>
+<p>Weights are proportional - they don't need to add to 100.</p>
+<hr />
+<h2 id="en-13-introspection">13. Introspection</h2>
+<p>Query runtime and compiler metadata:</p>
+<pre><code>/ System queries
+log system@time        / Unix timestamp
+log system@random      / 0.0–1.0 random float
+log system@pid         / Process ID
+log system@hostname    / Machine hostname
+log system@username    / Current user
+log system@os          / &quot;linux&quot;, &quot;macos&quot;, or &quot;windows&quot;
+log system@memory      / RAM used (bytes)
+log system@diskfree    / Free disk space (bytes)
+
+/ Variable introspection
+define disk numeric counter
+log system@storage(counter)  / &quot;disk&quot;
+log system@weight(counter)   / 0
+log system@type(counter)     / &quot;numeric&quot;
+log system@size(counter)     / serialized size
+
+/ Compiler info
+log compiler@version     / &quot;1.6.5vB&quot;
+log compiler@name        / &quot;altairc&quot;
+log compiler@build       / build date
+log compiler@architecture  / &quot;x86_64&quot; or &quot;arm64&quot;
+
+/ Program metadata (from altair.doc header)
+log program@name
+log program@version
+log program@author
+</code></pre>
+<hr />
+<h2 id="en-14-token-variables">14. Token Variables</h2>
+<p>A <code>token</code> can only be consumed once. Attempting to read it a second time throws <code>ALT0004</code>.</p>
+<pre><code>define token api_key temp = &quot;secret-api-key-abc123&quot;
+
+/ First read consumes the token
+define text key = api_key
+log &quot;Key used: &quot; + key
+
+/ Second read throws
+define text key2 = api_key   / ERROR: Token already consumed
+</code></pre>
+<p>Use tokens for one-time passwords, invite codes, CSRF tokens, etc.</p>
+<hr />
+<h2 id="en-15-orbit-prefer-storage">15. Orbit &amp; Prefer Storage</h2>
+<h3 id="en-orbit-multi-tier-migration">orbit - multi-tier migration</h3>
+<p>Declare a variable with named storage states it can migrate between:</p>
+<pre><code>define numeric data orbit 1 &quot;hot&quot; ram, 2 &quot;warm&quot; disk, 3 &quot;cold&quot; cache expire=1h = 0
+
+/ Move to a different state
+migrate data as &quot;warm&quot;
+migrate data as 3
+</code></pre>
+<h3 id="en-prefer-priority-ordered-storage">prefer - priority-ordered storage</h3>
+<p>Try storage tiers in preference order:</p>
+<pre><code>define text session prefer ram, cache expire=30m, disk = &quot;&quot;
+</code></pre>
+<p>The runtime uses the first available tier.</p>
+<hr />
+<h2 id="en-16-http-server-v165vb">16. HTTP Server (v1.6.5vB)</h2>
+<p>Start an HTTP server on a port. The <code>listen</code> block contains route, middleware, health, metrics, and shutdown declarations.</p>
+<pre><code>listen 8080;
+    route &quot;GET&quot; &quot;/hello&quot;;
+        respond.text(&quot;Hello, World!&quot;)
+    break
+break
+</code></pre>
+<p>The server runs until terminated. Signals (<code>SIGTERM</code>, <code>Ctrl+C</code>) trigger graceful shutdown.</p>
+<p><strong>How it works:</strong> Altair's built-in HTTP server uses POSIX TCP sockets (no external libraries required). The server is single-threaded but uses a connection-per-request model.</p>
+<hr />
+<h2 id="en-17-routes-handlers-v165vb">17. Routes &amp; Handlers (v1.6.5vB)</h2>
+<pre><code>route &quot;METHOD&quot; &quot;/path&quot;;
+    / handler body
+break
+</code></pre>
+<p><strong>Supported methods:</strong> <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>, <code>PATCH</code>, <code>*</code> (any)</p>
+<h3 id="en-path-parameters">Path Parameters</h3>
+<p>Use <code>:param</code> syntax in paths:</p>
+<pre><code>route &quot;GET&quot; &quot;/users/:id&quot;;
+    define text user_id = param(&quot;id&quot;)
+    respond.json(&quot;found user &quot; + user_id)
+break
+</code></pre>
+<h3 id="en-request-access">Request Access</h3>
+<p>Inside a route handler:</p>
+<pre><code>define text body_data = body()                / raw request body
+define text auth = header(&quot;Authorization&quot;)   / request header
+define text id   = param(&quot;id&quot;)               / path parameter
+</code></pre>
+<h3 id="en-response">Response</h3>
+<pre><code>respond.text(&quot;plain text response&quot;)
+respond.json(&quot;json string or value&quot;)
+respond.status(201)          / set status code
+respond.status(404)
+respond.status(500)
+</code></pre>
+<p><strong>Example:</strong></p>
+<pre><code>route &quot;POST&quot; &quot;/users&quot;;
+    define text payload = body()
+    if payload == &quot;&quot;;
+        respond.status(400)
+        respond.json(&quot;missing body&quot;)
+    break
+    respond.status(201)
+    respond.json(&quot;user created&quot;)
+break
+</code></pre>
+<hr />
+<h2 id="en-18-middleware-v165vb">18. Middleware (v1.6.5vB)</h2>
+<p>Middleware runs before every route handler. If the middleware calls <code>stop</code>, the request chain is halted.</p>
+<pre><code>middleware auth;
+    define text token = header(&quot;Authorization&quot;)
+    if token == &quot;&quot;;
+        respond.status(401)
+        respond.json(&quot;unauthorized&quot;)
+        stop
+    break
+break
+</code></pre>
+<p>Multiple middleware declarations are chained in order:</p>
+<pre><code>listen 8080;
+    middleware logger;
+        log &quot;request received&quot;
+    break
+    middleware auth;
+        define text tok = header(&quot;X-API-Key&quot;)
+        if tok != &quot;secret&quot;;
+            respond.status(401)
+            respond.json(&quot;bad key&quot;)
+            stop
+        break
+    break
+    route &quot;GET&quot; &quot;/data&quot;;
+        respond.json(&quot;protected data&quot;)
+    break
+break
+</code></pre>
+<hr />
+<h2 id="en-19-rate-limiting-v165vb">19. Rate Limiting (v1.6.5vB)</h2>
+<p>Attach a rate limit to any route:</p>
+<pre><code>route &quot;POST&quot; &quot;/login&quot; rate_limit 10 per_minute;
+    / handle login
+    respond.json(&quot;ok&quot;)
+break
+</code></pre>
+<p>When the limit is exceeded the runtime automatically returns HTTP 429 with <code>{"error":"rate limit exceeded"}</code>.</p>
+<p><strong>Syntax:</strong></p>
+<pre><code>route &quot;METHOD&quot; &quot;/path&quot; rate_limit N per_minute;
+</code></pre>
+<p>or</p>
+<pre><code>rate_limit N per_second
+</code></pre>
+<hr />
+<h2 id="en-20-health-checks-v165vb">20. Health Checks (v1.6.5vB)</h2>
+<p>The <code>health</code> declaration registers a <code>GET</code> route that responds with JSON status:</p>
+<pre><code>health &quot;/health&quot;;
+    check &quot;database&quot; -&gt; true
+    check &quot;cache&quot;    -&gt; true
+break
+</code></pre>
+<p><strong>Response format:</strong></p>
+<pre><code class="language-json">{&quot;status&quot;:&quot;ok&quot;,&quot;checks&quot;:{&quot;database&quot;:&quot;ok&quot;,&quot;cache&quot;:&quot;ok&quot;}}
+</code></pre>
+<p>If any check returns <code>false</code>, the HTTP status is <code>503 Service Unavailable</code>.</p>
+<p>The right-hand side of <code>-&gt;</code> is an expression (numeric or bool). Any non-zero value is considered healthy.</p>
+<hr />
+<h2 id="en-21-metrics-v165vb">21. Metrics (v1.6.5vB)</h2>
+<p>Register a Prometheus-compatible metrics endpoint:</p>
+<pre><code>metrics &quot;/metrics&quot;;
+</code></pre>
+<p>This exposes a <code>GET /metrics</code> endpoint in plain-text Prometheus format.</p>
+<p><strong>Incrementing metrics from code:</strong></p>
+<p>Use the built-in metric functions (callable from route handlers via expressions):</p>
+<pre><code>route &quot;POST&quot; &quot;/events&quot;;
+    / metric_inc(&quot;events_total&quot;) - emitted in generated C
+    respond.json(&quot;recorded&quot;)
+break
+</code></pre>
+<p>The metrics endpoint will output:</p>
+<pre><code># TYPE events_total counter
+events_total 42
+</code></pre>
+<hr />
+<h2 id="en-22-graceful-shutdown-v165vb">22. Graceful Shutdown (v1.6.5vB)</h2>
+<p>Register cleanup logic to run when the server receives <code>SIGTERM</code> or calls <code>altair_server_stop()</code>:</p>
+<pre><code>on_shutdown;
+    log &quot;Server shutting down, flushing data...&quot;
+    snapshot create &quot;shutdown_checkpoint&quot;
+break
+</code></pre>
+<p><strong>Example with full lifecycle:</strong></p>
+<pre><code>listen 8080;
+    route &quot;GET&quot; &quot;/&quot;;
+        respond.text(&quot;running&quot;)
+    break
+    on_shutdown;
+        log &quot;bye!&quot;
+    break
+break
+</code></pre>
+<hr />
+<h2 id="en-23-session-management-v165vb">23. Session Management (v1.6.5vB)</h2>
+<p>Declare session variables with optional TTL:</p>
+<pre><code>session user_token expires 30m;
+</code></pre>
+<p>This declares a session variable. Sessions are stored in-process in a key-value store keyed by a session ID. Use <code>header("X-Session-ID")</code> to retrieve the session ID from the client.</p>
+<p><strong>Inside route handlers:</strong></p>
+<pre><code>route &quot;GET&quot; &quot;/profile&quot;;
+    define text sid = header(&quot;X-Session-ID&quot;)
+    define text username = session_get(sid, &quot;username&quot;)
+    if username == &quot;&quot;;
+        respond.status(401)
+        respond.json(&quot;not logged in&quot;)
+    break
+    respond.json(&quot;Hello &quot; + username)
+break
+
+route &quot;POST&quot; &quot;/login&quot;;
+    define text user = body()
+    / store username in session for 30 minutes
+    session_set(&quot;my-session-id&quot;, &quot;username&quot;, user, 1800)
+    respond.json(&quot;logged in&quot;)
+break
+</code></pre>
+<hr />
+<h2 id="en-24-configuration-env-v165vb">24. Configuration &amp; Env (v1.6.5vB)</h2>
+<p>Use the <code>config</code> block to declare environment-variable-backed configuration:</p>
+<pre><code>config;
+    env(&quot;DATABASE_URL&quot;) default &quot;postgres://localhost/mydb&quot;
+    env(&quot;PORT&quot;) default &quot;8080&quot;
+    env(&quot;API_SECRET&quot;) required
+break
+</code></pre>
+<ul>
+<li><code>default "value"</code> - fallback when the env var is not set</li>
+<li><code>required</code> - throws <code>ALT0015</code> at startup if the env var is missing</li>
+</ul>
+<p><strong>Accessing env values:</strong></p>
+<p>The <code>env(...)</code> declaration creates variables in scope named after the key:</p>
+<pre><code>config;
+    env(&quot;PORT&quot;) default &quot;8080&quot;
+break
+
+define numeric port = PORT
+listen port;
+    route &quot;GET&quot; &quot;/&quot;;
+        respond.text(&quot;ok&quot;)
+    break
+break
+</code></pre>
+<hr />
+<h2 id="en-25-database-pool-v165vb">25. Database Pool (v1.6.5vB)</h2>
+<p>Declare a connection pool for a database URL:</p>
+<pre><code>db_pool db = connect(&quot;postgres://user:pass@localhost/mydb&quot;) max 20
+</code></pre>
+<p>This creates a variable <code>db</code> that holds the connection string. Connect your own database client library in the generated C code, or use the stub for prototyping.</p>
+<p><strong>The <code>max</code> qualifier</strong> sets the pool size (default 10).</p>
+<blockquote>
+<p><strong>Note:</strong> Altair v1.6.5vB provides the declaration syntax and connection pooling stub. Full SQL query support requires linking your PostgreSQL/MySQL/SQLite client library in the generated C.</p>
+</blockquote>
+<hr />
+<h2 id="en-26-job-scheduler-v165vb">26. Job Scheduler (v1.6.5vB)</h2>
+<p>Register recurring background jobs using <code>job</code>:</p>
+<pre><code>job cleanup every 5m;
+    log &quot;running cleanup job&quot;
+    / ... cleanup logic ...
+break
+</code></pre>
+<p><strong>Syntax:</strong></p>
+<pre><code>job &lt;name&gt; every &lt;duration&gt;;
+    / job body
+break
+</code></pre>
+<p><code>schedule</code> is an alias for <code>job</code>:</p>
+<pre><code>schedule heartbeat every 30s;
+    log &quot;heartbeat&quot;
+break
+</code></pre>
+<p><strong>How it works:</strong> Jobs are checked on every request (<code>altair_jobs_tick()</code> is called per connection). In low-traffic scenarios, use <code>wait</code> inside a <code>forever</code> loop for precise timing instead.</p>
+<hr />
+<h2 id="en-27-graphics-raylib">27. Graphics (raylib)</h2>
+<p>Altair can produce windowed graphical programs on top of raylib. This requires raylib to be available at compile time (vendored in <code>libs/raylib/&lt;os&gt;/</code> or installed system-wide — see <code>libs/raylib/README.md</code>).</p>
+<h3 id="en-enabling-graphics-mode">Enabling graphics mode</h3>
+<pre><code class="language-altair">link graphics raylib
+</code></pre>
+<p>This must appear once, before any window/loop/draw statements. It tells the compiler to link <code>-lraylib</code> (plus the platform windowing libraries) into the final binary.</p>
+<h3 id="en-window">Window</h3>
+<pre><code class="language-altair">window
+    title = &quot;My Window&quot;
+    width = 800
+    height = 600
+    fps = 60
+create window
+</code></pre>
+<h3 id="en-main-loop">Main loop</h3>
+<pre><code class="language-altair">loop
+    clear skyblue
+    / statements each frame
+break
+</code></pre>
+<p><code>clear &lt;color&gt;</code> clears the frame. <code>break</code> ends the <code>loop</code> block (it does not exit the program — it closes the frame loop definition itself; the generated <code>while</code> runs until the window is closed).</p>
+<h3 id="en-draw">draw</h3>
+<pre><code class="language-altair">draw &lt;kind&gt;
     x = 100
     y = 100
-create draw</code></pre>
-
-<h3>Imágenes</h3>
-<pre><code>image fondo = "fondo.png" disk
-image sprite = "personaje.png" ram</code></pre>
-
-<h3>Audio</h3>
-<pre><code>sound disparo = "disparo.wav"
-music musica_fondo = "musica.mp3"
-
-play musica_fondo
-pause musica_fondo
-stop musica_fondo
-play disparo</code></pre>
-
-<h3>Teclado</h3>
-<pre><code>/ Teclas: SPACE, ENTER, ESCAPE, A-Z, 0-9, F1-F12, UP, DOWN, LEFT, RIGHT...
-if key "LEFT";
-    jugador_x -= velocidad
-break
-if key "RIGHT";
-    jugador_x += velocidad
-break</code></pre>
-
-<h3>Colores predefinidos</h3>
-<p><code>white</code>, <code>black</code>, <code>red</code>, <code>green</code>, <code>blue</code>, <code>yellow</code>, <code>orange</code>, <code>purple</code>, <code>pink</code>, <code>gray</code>, <code>lightgray</code>, <code>darkgray</code>, <code>brown</code>, <code>skyblue</code>, <code>darkblue</code>, <code>maroon</code>, <code>darkgreen</code>, <code>lime</code>, <code>gold</code>, <code>beige</code>, <code>magenta</code>, <code>violet</code>, <code>darkpurple</code>, <code>darkbrown</code>, <code>raywhite</code>, <code>transparent</code>.</p>
-<pre><code>/ Color personalizado:
-color miColor = rgb(255, 128, 0)
-color miColorHex = "#FF8000"</code></pre>
-
-<h3>Escenas</h3>
-<pre><code>scene menu;
-scene juego;
-scene fin;
-
-goto menu
-goto juego</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="cli">31. CLI de altairc</h2>
-<pre><code>Altair Compiler v1.6.5vC
-
-Uso:
-  altairc &lt;archivo.at&gt; [opciones]
-  altairc guide              Escribe ALTAIR_GUIDE.md en el directorio actual
-  altairc guide --stdout     Imprime la guía en stdout
-
-Opciones:
-  -o &lt;salida&gt;       Nombre del binario de salida (por defecto: a.out / a.exe)
-  -icon &lt;file.ico&gt;  Incrusta un icono .ico en el .exe (solo Windows)
-  --emit-c          Imprime el C generado en stdout (no compila)
-  --emit-ast        Imprime el número de nodos del AST
-  --no-sema         Omite el análisis semántico
-  -v, --version     Muestra la versión del compilador
-  -h, --help        Muestra esta ayuda</code></pre>
-
-<h3>Ejemplos de uso</h3>
-<pre><code>/ Compilar y ejecutar (Linux/macOS):
-altairc programa.at -o programa
-./programa
-
-/ Compilar y ejecutar (Windows):
-altairc programa.at -o programa.exe
-programa.exe
-
-/ Depurar el C generado:
-altairc programa.at --emit-c | head -100
-
-/ Generar la guía en el directorio actual:
-altairc guide
-
-/ Instalar (desde el fuente, Linux/macOS):
-make
-make install    / instala en ~/.local/bin/altairc</code></pre>
-
-<!-- ──────────────────────────────────────────── -->
-<h2 id="errorcodes">32. Códigos de error</h2>
+    ...
+create draw
+</code></pre>
 <table>
-  <tr><th>Código</th><th>Significado</th></tr>
-  <tr><td><code>ALT0001</code></td><td>Variable desconocida</td></tr>
-  <tr><td><code>ALT0002</code></td><td>Operación con tipos incompatibles</td></tr>
-  <tr><td><code>ALT0003</code></td><td>Error de sintaxis (token inesperado)</td></tr>
-  <tr><td><code>ALT0006</code></td><td>Bloque <code>prefer</code> sin ningún tier</td></tr>
-  <tr><td><code>ALT0007</code></td><td>Reasignación de variable <code>const</code></td></tr>
-  <tr><td><code>ALT0008</code></td><td><code>weight</code> negativo</td></tr>
-  <tr><td><code>ALT0009</code></td><td>Estados <code>orbit</code> duplicados</td></tr>
-  <tr><td><code>ALT0010</code></td><td>División o módulo por cero</td></tr>
-  <tr><td><code>ALT0011</code></td><td>Namespace de introspección desconocido</td></tr>
-  <tr><td><code>ALT0012</code></td><td>Estado <code>orbit</code> no encontrado, o variable sin orbit</td></tr>
-  <tr><td><code>ALT0013</code></td><td>Índice de lista fuera de rango</td></tr>
+<thead>
+<tr>
+<th>kind</th>
+<th>required props</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td><code>content</code>/<code>text</code>, <code>x</code>, <code>y</code>, <code>size</code>, <code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>rect</code> / <code>rectangle</code></td>
+<td><code>x</code>, <code>y</code>, <code>width</code>/<code>w</code>, <code>height</code>/<code>h</code>, <code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>circle</code></td>
+<td><code>x</code>, <code>y</code>, <code>radius</code>/<code>r</code>, <code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>line</code></td>
+<td><code>x</code>, <code>y</code>, <code>x2</code>, <code>y2</code>, <code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>line_thick</code> / <code>thick_line</code></td>
+<td>adds <code>thick</code>/<code>thickness</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>triangle</code></td>
+<td><code>x</code>,<code>y</code>,<code>x2</code>,<code>y2</code>,<code>x3</code>,<code>y3</code>,<code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>pixel</code></td>
+<td><code>x</code>, <code>y</code>, <code>color</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>image</code> / <code>texture</code></td>
+<td><code>image</code>/<code>src</code> (a texture variable), <code>x</code>, <code>y</code>, <code>color</code></td>
+<td></td>
+</tr>
+</tbody>
 </table>
+<p>Colors accept raylib color names (<code>red</code>, <code>gold</code>, <code>skyblue</code>, <code>white</code>, ...) or a <code>color</code> block declaration.</p>
+<h3 id="en-full-example">Full example</h3>
+<pre><code class="language-altair">link graphics raylib
+
+window
+    title = &quot;Paint Test&quot;
+    width = 800
+    height = 600
+    fps = 60
+create window
+
+loop
+    clear skyblue
+    draw text
+        content = &quot;Altair Graphics&quot;
+        x = 10
+        y = 10
+        size = 24
+        color = white
+    create draw
+    draw rect
+        x = 100
+        y = 100
+        width = 200
+        height = 120
+        color = red
+    create draw
+    draw circle
+        x = 500
+        y = 200
+        radius = 60
+        color = gold
+    create draw
+break
+</code></pre>
+<p>Compile and run:</p>
+<pre><code class="language-bash">altairc test/paint.at -o paint
+./paint
+</code></pre>
+<hr />
+<h2 id="en-28-built-in-system-queries">28. Built-in System Queries</h2>
+<table>
+<thead>
+<tr>
+<th>Query</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>system@time</code></td>
+<td>Unix timestamp (numeric)</td>
+</tr>
+<tr>
+<td><code>system@random</code></td>
+<td>Random 0.0–1.0 (numeric)</td>
+</tr>
+<tr>
+<td><code>system@pid</code></td>
+<td>Process ID (numeric)</td>
+</tr>
+<tr>
+<td><code>system@hostname</code></td>
+<td>Machine hostname (text)</td>
+</tr>
+<tr>
+<td><code>system@username</code></td>
+<td>OS username (text)</td>
+</tr>
+<tr>
+<td><code>system@os</code></td>
+<td>"linux" / "macos" / "windows" (text)</td>
+</tr>
+<tr>
+<td><code>system@memory</code></td>
+<td>RAM used in bytes (numeric)</td>
+</tr>
+<tr>
+<td><code>system@diskfree</code></td>
+<td>Free disk bytes (numeric)</td>
+</tr>
+<tr>
+<td><code>compiler@version</code></td>
+<td>"1.6.5vB"</td>
+</tr>
+<tr>
+<td><code>compiler@name</code></td>
+<td>"altairc"</td>
+</tr>
+<tr>
+<td><code>compiler@build</code></td>
+<td>Build date</td>
+</tr>
+<tr>
+<td><code>compiler@architecture</code></td>
+<td>"x86_64" / "arm64"</td>
+</tr>
+<tr>
+<td><code>program@name</code></td>
+<td>From altair.doc header</td>
+</tr>
+<tr>
+<td><code>program@version</code></td>
+<td>From altair.doc header</td>
+</tr>
+<tr>
+<td><code>program@author</code></td>
+<td>From altair.doc header</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="en-29-altairc-cli-reference">29. altairc CLI Reference</h2>
+<pre><code>altairc &lt;source.at&gt; [options]   Compile an Altair program
+altairc guide                   Write ALTAIR_GUIDE.md to the current directory
+altairc guide --stdout          Print guide to stdout
+altairc --version               Print compiler version
+altairc --help                  Show usage
+</code></pre>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-o &lt;file&gt;</code></td>
+<td>Output binary name (default: <code>a.out</code>)</td>
+</tr>
+<tr>
+<td><code>--emit-c</code></td>
+<td>Print the generated C source to stdout</td>
+</tr>
+<tr>
+<td><code>--emit-ast</code></td>
+<td>Print AST node summary</td>
+</tr>
+<tr>
+<td><code>--no-sema</code></td>
+<td>Skip semantic analysis (faster compile)</td>
+</tr>
+<tr>
+<td><code>-v</code></td>
+<td>Version number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-bash"># Compile a program
+altairc hello.at -o hello
+
+# Compile a server
+altairc server.at -o myserver
+
+# Debug: see what C is generated
+altairc server.at --emit-c | head -200
+
+# Generate the language guide
+altairc guide
+</code></pre>
+<hr />
+<h2 id="en-30-error-codes">30. Error Codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ALT0001</code></td>
+<td>Unknown variable or null object access</td>
+</tr>
+<tr>
+<td><code>ALT0002</code></td>
+<td>Type mismatch in arithmetic or comparison</td>
+</tr>
+<tr>
+<td><code>ALT0003</code></td>
+<td>Parse / syntax error</td>
+</tr>
+<tr>
+<td><code>ALT0004</code></td>
+<td>Token already consumed</td>
+</tr>
+<tr>
+<td><code>ALT0005</code></td>
+<td>Snapshot error (create/restore/delete)</td>
+</tr>
+<tr>
+<td><code>ALT0006</code></td>
+<td>Prefer block has no storage entries</td>
+</tr>
+<tr>
+<td><code>ALT0007</code></td>
+<td>Assignment to a <code>const</code> variable</td>
+</tr>
+<tr>
+<td><code>ALT0008</code></td>
+<td>Weight must be a non-negative integer</td>
+</tr>
+<tr>
+<td><code>ALT0009</code></td>
+<td>Orbit has duplicate state numbers</td>
+</tr>
+<tr>
+<td><code>ALT0010</code></td>
+<td>Division or modulo by zero</td>
+</tr>
+<tr>
+<td><code>ALT0011</code></td>
+<td>Unknown introspection key or namespace</td>
+</tr>
+<tr>
+<td><code>ALT0012</code></td>
+<td>Orbit state not found / variable has no orbit</td>
+</tr>
+<tr>
+<td><code>ALT0013</code></td>
+<td>List index out of bounds</td>
+</tr>
+<tr>
+<td><code>ALT0014</code></td>
+<td>Object field not found</td>
+</tr>
+<tr>
+<td><code>ALT0015</code></td>
+<td>Required env var not set</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="en-31-self-hosting-extensions-char-file-point-bitwise">31. Self-Hosting Extensions: char, file, point, bitwise</h2>
+<blockquote>
+<p>Added to support <strong>self-hosting</strong> — i.e. so a compiler for Altair can eventually
+be written in Altair itself. These are low-level, "systems" features layered on
+top of the existing type system. Internally they touch every stage of the
+pipeline: <code>lexer.c/h</code> (new tokens), <code>parser.c</code> (new grammar), <code>ast.h</code>
+(<code>VTYPE_FILE</code>, <code>VTYPE_POINTER</code>), <code>codegen.c</code> (new emission cases), and
+<code>altair_rt.c/h</code> (new <code>AltVType</code> tags <code>ALT_FILE</code>/<code>ALT_POINTER</code> and new builtin
+C functions).</p>
+</blockquote>
+<h3 id="en-311-char-single-character-text">31.1 <code>char</code> — single-character text</h3>
+<p><code>char</code> is a <strong>type alias</strong>, not a new runtime type. The parser maps the <code>char</code>
+token straight onto <code>VTYPE_TEXT</code> (see <code>tok_to_vtype()</code> in <code>parser.c</code>), so a
+<code>char</code> variable is, at the C/runtime level, an ordinary <code>ALT_TEXT</code> value that
+happens to hold one character. This means every text operation (<code>+</code>,
+comparisons, <code>length()</code>) already works on <code>char</code> for free — no new codegen was
+needed.</p>
+<pre><code class="language-altair">text code = &quot;hola&quot;
+char c = code[0]
+log c
+</code></pre>
+<h3 id="en-312-indexing-text-textindex">31.2 Indexing text: <code>text[index]</code></h3>
+<p>Before this change, <code>[i]</code> indexing (<code>ND_INDEX_ACCESS</code>) only worked on
+<code>ALT_LIST</code>. The runtime function <code>altair_list_get()</code> now also handles
+<code>ALT_TEXT</code>: it bounds-checks against <code>strlen()</code> and returns a freshly
+allocated one-character string. Out-of-range access raises <code>ALT0013</code>, the same
+error code used for list bounds.</p>
+<pre><code class="language-altair">text s = &quot;abc&quot;
+log s[0]      / &quot;a&quot;
+log length(s) / 3  (length() now also accepts text, not just lists)
+</code></pre>
+<h3 id="en-313-file-a-file-handle-type">31.3 <code>file</code> — a file handle type</h3>
+<p><code>file</code> is a genuinely new value type: <code>VTYPE_FILE</code> in the AST maps to
+<code>ALT_FILE</code> at runtime. Internally, <code>AltairVal</code> gained a <code>void *ptr</code> union
+member shared between <code>ALT_FILE</code> (holds a C <code>FILE*</code>) and <code>ALT_POINTER</code> (see
+below). Copying a <code>file</code> value (<code>altair_val_copy</code>) is a <strong>shallow</strong> copy — the
+underlying <code>FILE*</code> is shared, exactly like assigning a pointer in C.</p>
+<pre><code class="language-altair">file f = open(&quot;data.txt&quot;)
+text contents = read(f)
+close(f)
+</code></pre>
+<h3 id="en-314-pointtype-raw-pointers">31.4 <code>point@Type</code> — raw pointers</h3>
+<p>New declaration form, parsed as its own branch in <code>parser.c</code> before the
+generic type-declaration path:</p>
+<pre><code class="language-altair">point@Type name [= expr]
+</code></pre>
+<p><code>point@Type</code> declares a variable of <code>VTYPE_POINTER</code> (<code>ALT_POINTER</code> at
+runtime). The <code>Type</code> after <code>@</code> is stored only for documentation / future
+type-checking — the underlying value is an opaque <code>void*</code> (from <code>ptr_alloc</code>,
+typically), so Altair does not currently enforce that the pointer only ever
+points at values of <code>Type</code>. This is the building block the language docs
+describe for constructing ASTs, linked lists, and graphs.</p>
+<pre><code class="language-altair">point@node current = ptr_alloc(64)
+if ptr_is_null(current);
+    log &quot;sin memoria&quot;
+break
+ptr_free(current)
+</code></pre>
+<h3 id="en-315-bitwise-operators">31.5 Bitwise operators</h3>
+<p>New tokens <code>&amp; | ^ ~ &lt;&lt; &gt;&gt;</code>, lexed distinctly from <code>&amp;&amp;</code>/<code>||</code> (the lexer checks
+the two-character forms first). New precedence levels were inserted into the
+expression grammar, from loosest to tightest, matching C's convention:</p>
+<pre><code>comparison  ( == != &lt; &gt; &lt;= &gt;= )
+      |
+   bitor   ( | )
+      |
+   bitxor  ( ^ )
+      |
+   bitand  ( &amp; )
+      |
+   shift   ( &lt;&lt; &gt;&gt; )
+      |
+   add/sub ( + - )
+</code></pre>
+<p>Each operator compiles to a small runtime helper (<code>altair_band</code>, <code>altair_bor</code>,
+<code>altair_bxor</code>, <code>altair_bnot</code>, <code>altair_shl</code>, <code>altair_shr</code> in <code>altair_rt.c</code>)
+that requires both operands to be <code>numeric</code> — Altair numbers are <code>double</code>
+internally, so bitwise ops cast to <code>long long</code> before applying the C operator
+and cast back to <code>double</code> on return. Passing a non-numeric operand raises
+<code>ALT0002</code> (type mismatch).</p>
+<pre><code class="language-altair">numeric flags = 6 &amp; 3   / 2
+numeric merged = 6 | 3  / 7
+numeric x = 1 &lt;&lt; 4      / 16
+numeric inv = ~0        / -1
+</code></pre>
+<hr />
+<h2 id="en-32-file-system-process-builtins">32. File System &amp; Process Builtins</h2>
+<p>These are ordinary function calls (<code>ND_FUNC_CALL</code>) — no new grammar was
+needed, because the compiler already had a generic fallback: any call
+<code>name(args)</code> that isn't a known list/string method compiles straight to a C
+call <code>_fn_name(args)</code>. Each builtin below is simply a C function named
+<code>_fn_&lt;name&gt;</code> implemented in <code>altair_rt.c</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>open(path)</code></td>
+<td><code>file</code></td>
+<td>Open for reading (<code>"r"</code> mode).</td>
+</tr>
+<tr>
+<td><code>open_write(path)</code></td>
+<td><code>file</code></td>
+<td>Open for writing, truncating (<code>"w"</code> mode).</td>
+</tr>
+<tr>
+<td><code>open_append(path)</code></td>
+<td><code>file</code></td>
+<td>Open for appending (<code>"a"</code> mode).</td>
+</tr>
+<tr>
+<td><code>read(f)</code></td>
+<td><code>text</code></td>
+<td>Read the entire remaining contents of <code>f</code>.</td>
+</tr>
+<tr>
+<td><code>read_line(f)</code></td>
+<td><code>text</code></td>
+<td>Read one line (strips the trailing <code>\n</code>/<code>\r</code>).</td>
+</tr>
+<tr>
+<td><code>write(f, text)</code></td>
+<td><code>bool</code></td>
+<td>Write <code>text</code> to <code>f</code>. Always returns <code>true</code> unless <code>f</code> is invalid.</td>
+</tr>
+<tr>
+<td><code>close(f)</code></td>
+<td><code>bool</code></td>
+<td>Close <code>f</code>. Safe to call twice.</td>
+</tr>
+<tr>
+<td><code>create_file(path)</code></td>
+<td><code>bool</code></td>
+<td>Create an empty file if it doesn't already exist.</td>
+</tr>
+<tr>
+<td><code>delete_file(path)</code></td>
+<td><code>bool</code></td>
+<td>Delete a file.</td>
+</tr>
+<tr>
+<td><code>mkdir(path)</code></td>
+<td><code>bool</code></td>
+<td>Create a directory (succeeds if it already exists).</td>
+</tr>
+<tr>
+<td><code>file_exists(path)</code></td>
+<td><code>bool</code></td>
+<td>Check for existence via <code>stat()</code>.</td>
+</tr>
+<tr>
+<td><code>list_dir(path)</code></td>
+<td><code>list</code></td>
+<td>List entry names in a directory (excludes <code>.</code>/<code>..</code>).</td>
+</tr>
+<tr>
+<td><code>exec(cmd)</code></td>
+<td><code>numeric</code></td>
+<td>Run <code>cmd</code> via <code>system()</code>; returns the exit code.</td>
+</tr>
+<tr>
+<td><code>exec_capture(cmd)</code></td>
+<td><code>text</code></td>
+<td>Run <code>cmd</code> via <code>popen()</code>; returns captured stdout.</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-altair">create_file(&quot;build/out.txt&quot;)
+file f = open_write(&quot;build/out.txt&quot;)
+write(f, &quot;gcc invoked here&quot;)
+close(f)
+
+numeric rc = exec(&quot;gcc build/main.c -o programa.exe&quot;)
+if rc == 0;
+    log &quot;build ok&quot;
+break
+</code></pre>
+<p><strong>Path resolution:</strong> paths are passed straight to the C standard library
+(<code>fopen</code>, <code>stat</code>, <code>opendir</code>, ...) relative to the process's current working
+directory — there is no automatic "resolve into a project folder" behavior
+for <code>file</code>/<code>open</code>/etc.</p>
+<blockquote>
+<p><strong>Not yet implemented:</strong> the <code>variables/</code> auto-persistence folder,
+<code>data ... save data</code> blocks, <code>async</code>/<code>safe block</code>, and persistent variables
+bound to a file (e.g. <code>numeric coins = 120 player.coins</code>) described in the
+original self-hosting proposal are <strong>not</strong> part of this build. Everything
+in sections 31–35 covers only what was actually implemented: file I/O,
+<code>char</code>, raw pointers, bitwise ops, <code>exec</code>, CLI args, and the bootstrap
+self-hosted compiler.</p>
+</blockquote>
+<hr />
+<h2 id="en-33-raw-pointers">33. Raw Pointers</h2>
+<p>Companion builtins to <code>point@Type</code> (§31.4):</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ptr_alloc(n)</code></td>
+<td><code>point</code></td>
+<td><code>calloc</code>s <code>n</code> zeroed bytes, returns a pointer to them.</td>
+</tr>
+<tr>
+<td><code>ptr_free(p)</code></td>
+<td><code>bool</code></td>
+<td>Frees the memory and nulls out <code>p</code>'s pointer field.</td>
+</tr>
+<tr>
+<td><code>ptr_is_null(p)</code></td>
+<td><code>bool</code></td>
+<td>True if <code>p</code> is not a pointer or points at <code>NULL</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Pointers are <strong>not</strong> garbage collected and are <strong>not</strong> automatically freed —
+this is intentionally raw, C-style manual memory management, matching the
+original design goal of letting Altair build ASTs, linked lists, and graphs
+by hand.</p>
+<pre><code class="language-altair">point@byte buf = ptr_alloc(256)
+/ ... use buf via future pointer-dereference builtins ...
+ptr_free(buf)
+</code></pre>
+<hr />
+<h2 id="en-34-cli-arguments-in-compiled-programs">34. CLI Arguments in Compiled Programs</h2>
+<p>Previously, a compiled Altair binary had no way to read its own <code>argv</code>. Since
+a self-hosted compiler needs to accept a source file path on the command
+line, the generated <code>main(int argc, char **argv)</code> now calls
+<code>altair_set_args(argc, argv)</code> before running the program body.</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>argc()</code></td>
+<td><code>numeric</code></td>
+<td>Number of command-line arguments (argv[0] included).</td>
+</tr>
+<tr>
+<td><code>arg(i)</code></td>
+<td><code>text</code></td>
+<td>The <code>i</code>-th argument (0-indexed; <code>arg(0)</code> is the binary path).</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-altair">numeric n = argc()
+if n &lt; 2;
+    log &quot;uso: programa &lt;archivo&gt;&quot;
+else;
+    log &quot;archivo: &quot; + arg(1)
+break
+</code></pre>
+<hr />
+<h2 id="en-35-the-self-hosted-compiler-altair-core">35. The Self-Hosted Compiler (Altair-Core)</h2>
+<p><code>selfhost/altair.at</code> is a compiler <strong>written entirely in Altair</strong> (using the
+features from §31–34: <code>file</code>, text indexing, <code>char</code>, and the ordinary control
+flow / functions Altair already had). It compiles a deliberately smaller
+subset of the language — called <strong>Altair-Core</strong> — directly to C.</p>
+<pre><code>                 (bootstrap, one-time)
+ altair.at  ──────────────────────────▶  altairc-selfhost
+ (real Altair)      altairc (C)          (native binary)
+
+                 (repeatable, no C compiler needed to invent)
+ program.atc ─────────────────────────▶ program.gen.c ──▶ gcc ──▶ binary
+              altairc-selfhost
+</code></pre>
+<p>Build it:</p>
+<pre><code class="language-bash">./altairc selfhost/altair.at -o selfhost/altairc-selfhost
+</code></pre>
+<p>Use it:</p>
+<pre><code class="language-bash">./altairc-selfhost fib.atc fib.gen.c
+gcc fib.gen.c -o fib_bin -lm   # -lm needed: numeric % compiles to fmod()
+./fib_bin
+</code></pre>
+<h3 id="en-351-altair-core-grammar">35.1 Altair-Core grammar</h3>
+<p>Altair-Core keeps Altair's <code>if/elif/else...break</code>, <code>while...break</code>, and
+<code>fun name -&gt; type ... break</code> shape, but is untyped at the compiler level (no
+semantic analysis pass — type errors surface as <strong>gcc errors</strong> on the
+generated C, not as Altair errors). Semicolons after headers are optional:
+the Altair-Core lexer treats <code>;</code> exactly like whitespace.</p>
+<pre><code>program   := stmt*
+stmt      := vardecl | assign | log | return | if | while | fun-call
+vardecl   := (&quot;numeric&quot;|&quot;text&quot;|&quot;bool&quot;) IDENT &quot;=&quot; expr
+assign    := IDENT &quot;=&quot; expr
+log       := &quot;log&quot; expr
+if        := &quot;if&quot; expr stmt* (&quot;elif&quot; expr stmt*)* (&quot;else&quot; stmt*)? &quot;break&quot;
+while     := &quot;while&quot; expr stmt* &quot;break&quot;
+fun       := &quot;fun&quot; IDENT (&quot;-&gt;&quot; type)? (type IDENT (&quot;,&quot; type IDENT)*)? stmt* &quot;break&quot;
+return    := &quot;return&quot; expr?
+expr      := or ; or := and (&quot;or&quot; and)* ; and := not (&quot;and&quot; not)*
+not       := &quot;not&quot; not | cmp
+cmp       := add ((&quot;==&quot;|&quot;!=&quot;|&quot;&lt;&quot;|&quot;&gt;&quot;|&quot;&lt;=&quot;|&quot;&gt;=&quot;) add)?
+add       := mul ((&quot;+&quot;|&quot;-&quot;) mul)*
+mul       := unary ((&quot;*&quot;|&quot;/&quot;|&quot;%&quot;) unary)*
+unary     := &quot;-&quot; unary | primary
+primary   := NUMBER | STRING | &quot;true&quot; | &quot;false&quot; | IDENT | IDENT&quot;(&quot;args&quot;)&quot; | &quot;(&quot;expr&quot;)&quot;
+</code></pre>
+<h3 id="en-352-type-mapping-altair-core-c">35.2 Type mapping (Altair-Core → C)</h3>
+<table>
+<thead>
+<tr>
+<th>Altair-Core</th>
+<th>Emitted C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>numeric</code></td>
+<td><code>double</code></td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td><code>char*</code></td>
+</tr>
+<tr>
+<td><code>bool</code></td>
+<td><code>int</code></td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td><code>fmod(a, b)</code> (native C <code>%</code> doesn't apply to <code>double</code>)</td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td>native <code>+</code> — <strong>arithmetic only</strong>, does <em>not</em> concatenate text</td>
+</tr>
+</tbody>
+</table>
+<h3 id="en-353-built-in-runtime-emitted-once-per-output-file">35.3 Built-in runtime (emitted once per output file)</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>concat(a, b)</code></td>
+<td>Text concatenation (there is no <code>+</code> overload for text).</td>
+</tr>
+<tr>
+<td><code>streq(a, b)</code></td>
+<td>Text equality (<code>==</code>/<code>!=</code> on <code>char*</code> would compare pointers, not content).</td>
+</tr>
+<tr>
+<td><code>numstr(n)</code></td>
+<td><code>numeric → text</code>, for use with <code>log</code>.</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-altair">fun fib -&gt; numeric numeric n;
+    if n &lt; 2;
+        return n
+    break
+    return fib(n - 1) + fib(n - 2)
+break
+
+numeric i = 0
+while i &lt; 10;
+    log numstr(fib(i))
+    i = i + 1
+break
+
+log concat(&quot;hola, &quot;, &quot;mundo&quot;)
+</code></pre>
+<h3 id="en-354-known-limitations-what-self-hosting-does-not-mean-yet">35.4 Known limitations — what "self-hosting" does <em>not</em> mean yet</h3>
+<p><code>altairc-selfhost</code> can compile Altair-Core programs, but <strong>cannot yet compile
+its own source</strong> (<code>altair.at</code>), because <code>altair.at</code> itself uses features
+Altair-Core doesn't support: <code>list</code>, <code>file</code>/<code>open</code>/<code>read</code>/<code>close</code>, text
+indexing, and multi-parameter-type declarations beyond simple scalars. Closing
+that loop — rewriting <code>altair.at</code> using <em>only</em> Altair-Core, after extending
+Altair-Core with lists and file I/O — is the natural next step and is not
+done in this build.</p>
+<p>What <strong>is</strong> proven to work end-to-end, and was tested:
+- <code>altairc</code> (C) successfully compiles <code>altair.at</code> (real Altair) → <code>altairc-selfhost</code>.
+- <code>altairc-selfhost</code> successfully compiles Altair-Core programs (recursion,
+  <code>if/elif/else</code>, <code>while</code>, string concatenation, <code>%</code>, text comparison) → C.
+- The generated C compiles cleanly with <code>gcc</code> and produces correct output.</p>
+<hr />
+<h2 id="en-36-complete-server-example">36. Complete Server Example</h2>
+<pre><code>altair.doc;
+name = TodoAPI
+version = 1.6.5vB
+author = &quot;Altair Team&quot;
+create altair.doc
+
+/ Configuration
+config;
+    env(&quot;PORT&quot;) default &quot;8080&quot;
+    env(&quot;API_SECRET&quot;) required
+break
+
+/ In-memory todo list
+define list todos disk = []
+define numeric next_id = 1
+
+/ Auth middleware
+middleware auth;
+    define text key = header(&quot;X-API-Key&quot;)
+    define text secret = API_SECRET
+    if key != secret;
+        respond.status(401)
+        respond.json(&quot;{\&quot;error\&quot;:\&quot;unauthorized\&quot;}&quot;)
+        stop
+    break
+break
+
+/ Jobs
+job persist every 5m;
+    snapshot create &quot;todos_checkpoint&quot;
+    log &quot;todos saved&quot;
+break
+
+/ Health
+health &quot;/health&quot;;
+    check &quot;storage&quot; -&gt; 1
+break
+
+/ Metrics
+metrics &quot;/metrics&quot;;
+
+/ Graceful shutdown
+on_shutdown;
+    snapshot create &quot;shutdown&quot;
+    log &quot;shutting down, saved state&quot;
+break
+
+/ Routes
+listen PORT;
+    route &quot;GET&quot; &quot;/todos&quot;;
+        respond.json(todos)
+    break
+
+    route &quot;POST&quot; &quot;/todos&quot; rate_limit 60 per_minute;
+        define text title = body()
+        if title == &quot;&quot;;
+            respond.status(400)
+            respond.json(&quot;{\&quot;error\&quot;:\&quot;title required\&quot;}&quot;)
+        break
+        todos.append(title)
+        respond.status(201)
+        respond.json(&quot;{\&quot;created\&quot;:true}&quot;)
+    break
+
+    route &quot;DELETE&quot; &quot;/todos/:idx&quot;;
+        define text idx_str = param(&quot;idx&quot;)
+        todos.remove(0)
+        respond.json(&quot;{\&quot;deleted\&quot;:true}&quot;)
+    break
+
+    route &quot;GET&quot; &quot;/&quot;;
+        respond.text(&quot;TodoAPI v1.6.5vB running&quot;)
+    break
+break
+</code></pre>
+<p><strong>Run:</strong></p>
+<pre><code class="language-bash">altairc todo.at -o todo
+API_SECRET=mysecret PORT=3000 ./todo
+</code></pre>
+<p><strong>Test:</strong></p>
+<pre><code class="language-bash">curl http://localhost:3000/
+curl -H &quot;X-API-Key: mysecret&quot; http://localhost:3000/todos
+curl -H &quot;X-API-Key: mysecret&quot; -X POST -d &quot;Buy milk&quot; http://localhost:3000/todos
+curl http://localhost:3000/health
+curl http://localhost:3000/metrics
+</code></pre>
+<hr />
+<p><em>Altair Language Reference - v1.6.5vB - Generated by <code>altairc guide</code></em>
+<em>Compiler: altairc 1.7 | License: MIT</em></p>
+</div>
 
 <hr>
 
 <footer>
   <span>Altair Community — <a href="https://github.com/victios7/Altair" target="_blank">github.com/victios7/Altair</a></span>
-  <span>Documentación generada del código fuente real de <code>altairc v1.6.5vC</code></span>
+  <span id="footer-text">Documentación generada del código fuente real de <code>altairc</code></span>
 </footer>
 
 </div>
+
+<script>
+function setLang(lang){
+  document.getElementById('pane-es').classList.toggle('active', lang === 'es');
+  document.getElementById('pane-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.documentElement.lang = lang;
+
+  if(lang === 'es'){
+    document.getElementById('eyebrow-text').textContent = 'Referencia del lenguaje';
+    document.getElementById('subtitle-text').innerHTML = 'Documentación generada a partir del compilador real <code>altairc</code>.';
+    document.getElementById('footer-text').innerHTML = 'Documentación generada del código fuente real de <code>altairc</code>';
+  } else {
+    document.getElementById('eyebrow-text').textContent = 'Language Reference';
+    document.getElementById('subtitle-text').innerHTML = 'Documentation generated from the actual <code>altairc</code> compiler.';
+    document.getElementById('footer-text').innerHTML = 'Documentation generated from the actual <code>altairc</code> source code';
+  }
+
+  try{ localStorage.setItem('altair_guide_lang', lang); }catch(e){}
+}
+
+// Restore last chosen language on load
+(function(){
+  var saved = null;
+  try{ saved = localStorage.getItem('altair_guide_lang'); }catch(e){}
+  if(saved === 'en'){ setLang('en'); }
+})();
+</script>
+
 </body>
 </html>
