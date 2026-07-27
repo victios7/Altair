@@ -1,264 +1,315 @@
-# Altair Language Reference — v1.6.5vC
+# Guía completa del lenguaje Altair
 
-> Referencia completa del lenguaje Altair. Generada a partir del compilador real `altairc v1.6.5vC`.
+> Basada en el funcionamiento interno real del compilador (`altairc`, escrito en C:
+> lexer → parser → sema → codegen → C → gcc → binario nativo) y del runtime
+> (`altair_rt.c`). No incluye las funcionalidades de `async`, `safe block` ni
+> `data ... save data`, que todavía no están implementadas.
 
----
-
-## Tabla de contenidos
+## Índice
 
 1. [Visión general](#1-visión-general)
-2. [Pipeline del compilador](#2-pipeline-del-compilador)
-3. [Estructura del programa](#3-estructura-del-programa)
-4. [Variables y almacenamiento](#4-variables-y-almacenamiento)
-5. [Tipos](#5-tipos)
-6. [Operadores y expresiones](#6-operadores-y-expresiones)
-7. [Control de flujo](#7-control-de-flujo)
-8. [Funciones](#8-funciones)
-9. [Clases y objetos](#9-clases-y-objetos)
-10. [Listas](#10-listas)
-11. [Manejo de errores](#11-manejo-de-errores)
-12. [Snapshots](#12-snapshots)
-13. [Choose (aleatorio ponderado)](#13-choose-aleatorio-ponderado)
-14. [Introspección](#14-introspección)
-15. [Token (valor de un solo uso)](#15-token-valor-de-un-solo-uso)
-16. [Orbit y Prefer](#16-orbit-y-prefer)
-17. [Release](#17-release)
-18. [Entrada del usuario](#18-entrada-del-usuario)
-19. [Servidor HTTP (v1.6.5vB+)](#19-servidor-http-v165vb)
-20. [Rutas y handlers](#20-rutas-y-handlers)
-21. [Middleware](#21-middleware)
-22. [Rate limiting](#22-rate-limiting)
-23. [Health checks](#23-health-checks)
-24. [Métricas](#24-métricas)
-25. [Graceful shutdown](#25-graceful-shutdown)
-26. [Sesiones](#26-sesiones)
-27. [Config y variables de entorno](#27-config-y-variables-de-entorno)
-28. [Pool de base de datos](#28-pool-de-base-de-datos)
-29. [Jobs programados](#29-jobs-programados)
-30. [Gráficos y UI con Raylib (v1.6.5vC)](#30-gráficos-y-ui-con-raylib-v165vc)
-31. [Referencia CLI de altairc](#31-referencia-cli-de-altairc)
-32. [Códigos de error](#32-códigos-de-error)
-33. [Ejemplo completo de servidor](#33-ejemplo-completo-de-servidor)
+2. [Estructura de un programa](#2-estructura-de-un-programa)
+3. [Variables y almacenamiento](#3-variables-y-almacenamiento)
+4. [Tipos de datos](#4-tipos-de-datos)
+5. [Operadores y expresiones](#5-operadores-y-expresiones)
+6. [Control de flujo](#6-control-de-flujo)
+7. [Funciones](#7-funciones)
+8. [Clases y objetos](#8-clases-y-objetos)
+9. [Listas](#9-listas)
+10. [Manejo de errores](#10-manejo-de-errores)
+11. [Snapshots](#11-snapshots)
+12. [Choose (aleatoriedad ponderada)](#12-choose-aleatoriedad-ponderada)
+13. [Introspección](#13-introspección)
+14. [Variables token](#14-variables-token)
+15. [Orbit y prefer](#15-orbit-y-prefer)
+16. [Servidor HTTP](#16-servidor-http)
+17. [Rutas y handlers](#17-rutas-y-handlers)
+18. [Middleware](#18-middleware)
+19. [Límite de tasa (rate limiting)](#19-límite-de-tasa-rate-limiting)
+20. [Health checks](#20-health-checks)
+21. [Métricas](#21-métricas)
+22. [Apagado ordenado (graceful shutdown)](#22-apagado-ordenado-graceful-shutdown)
+23. [Sesiones](#23-sesiones)
+24. [Configuración y variables de entorno](#24-configuración-y-variables-de-entorno)
+25. [Pool de base de datos](#25-pool-de-base-de-datos)
+26. [Planificador de tareas (job scheduler)](#26-planificador-de-tareas-job-scheduler)
+27. [Gráficos (raylib)](#27-gráficos-raylib)
+28. [Consultas de sistema integradas](#28-consultas-de-sistema-integradas)
+29. [Referencia de la CLI `altairc`](#29-referencia-de-la-cli-altairc)
+30. [Códigos de error](#30-códigos-de-error)
+31. [`char`, `file`, `point@Tipo` y operadores a nivel de bit](#31-char-file-pointtipo-y-operadores-a-nivel-de-bit)
+32. [E/S de ficheros y ejecución de procesos](#32-es-de-ficheros-y-ejecución-de-procesos)
+33. [Punteros crudos](#33-punteros-crudos)
+34. [Argumentos de línea de comandos](#34-argumentos-de-línea-de-comandos)
+35. [Variables persistentes con archivo propio](#35-variables-persistentes-con-archivo-propio)
+36. [El compilador auto-hospedado (Altair-Core)](#36-el-compilador-auto-hospedado-altair-core)
 
 ---
 
 ## 1. Visión general
 
-Altair es un lenguaje **compilado estáticamente y orientado a expresiones** que transpila a C mediante su compilador `altairc`. Cada programa `.at` se convierte en un binario nativo sin dependencias en tiempo de ejecución, salvo las librerías del sistema estándar (`libc`, `libm`, `libpthread`).
+Altair es un lenguaje **compilado estáticamente** y orientado a expresiones que
+se traduce a C mediante `altairc`. Cada programa termina siendo un único
+binario nativo, sin dependencias de runtime externas.
 
-**Características principales:**
-- Cada variable declara explícitamente dónde vive: `ram`, `disk`, `cache` o `temp`
-- Las variables pueden migrar entre tiers de almacenamiento en tiempo de ejecución (`orbit`)
-- Servidor HTTP declarado directamente en la sintaxis del lenguaje (`listen`, `route`)
-- Gráficos y UI vía Raylib (`link * raylib`, `window`, `loop`, `draw`)
-- Memoria gestionada por el runtime (sin `malloc`/`free` manual)
-- Soporte Windows, Linux y macOS
+**Pipeline del compilador:**
+```
+código .at → lexer → parser → sema → codegen → código .c → gcc → binario
+```
+
+**Propiedades clave:**
+- Cada variable tiene un *nivel de almacenamiento* declarado (`ram`/`disk`/`cache`/`temp`).
+- Las variables pueden migrar entre niveles de almacenamiento en tiempo de
+  ejecución mediante `orbit`.
+- Texto, listas, objetos y tokens son valores de primera clase.
+- Toda la memoria la gestiona el runtime (no hay que hacer `malloc`/`free`
+  manual, salvo con los punteros crudos nuevos, ver §33).
+- Los servidores HTTP se declaran con `listen`; las rutas con `route`.
 
 ---
 
-## 2. Pipeline del compilador
+## 2. Estructura de un programa
 
-```
-archivo.at
-  → lexer.c      (tokenización)
-  → parser.c     (parser recursivo descendente → AST)
-  → sema.c       (análisis semántico, verificación de scopes)
-  → codegen.c    (generación de código C)
-  → gcc -O2      (compilación a binario nativo)
-```
-
-El compilador escribe el C generado a un archivo temporal (`/tmp/altair_<pid>_gen.c`), invoca `gcc -O2` y elimina el temporal. En Windows usa el `mingw64` incluido en el instalador.
-
-Para ver el C generado sin compilar:
-```bash
-altairc programa.at --emit-c
-```
-
-Para ver el número de nodos del AST:
-```bash
-altairc programa.at --emit-ast
-```
-
----
-
-## 3. Estructura del programa
-
-Todo programa Altair tiene una cabecera opcional y un cuerpo de sentencias.
+Todo programa Altair tiene una cabecera opcional y un cuerpo. La cabecera da
+metadatos del programa; el cuerpo contiene todas las sentencias.
 
 ```altair
 altair.doc;
-    name = "MiApp"
-    version = "1.0"
-    author = "Tu Nombre"
+    name = MyApp
+    version = 1.0.0
+    author = "Jane Smith"
 create altair.doc
 
-/ Esto es un comentario (línea que empieza con /)
+/ Esto es un comentario (línea que empieza por /)
 
-log "Hola desde Altair!"
+define text greeting = "Hello, world!"
+log greeting
 ```
 
-**Campos de la cabecera:** `name`, `version`, `author`
+**Campos de cabecera:** `name`, `version`, `author`.
 
-La cabecera va desde `altair.doc;` hasta `create altair.doc`. Todo lo que sigue es el cuerpo del programa.
+El parser lee la cabecera desde `altair.doc;` hasta `create altair.doc`. Todo
+lo demás es el cuerpo del programa.
 
-**Comentarios:** Una `/` al inicio del token (o tras espacio), seguida de espacio o letra, inicia un comentario de línea. Si el token anterior era un valor (número, string, identificador, `)`, `]`), la `/` se interpreta como división.
-
-```altair
-/ Esto es un comentario
-numeric x = 10 / 2   / Aqui el / del medio es division, el segundo es comentario
-```
+**Comentarios:** un `/` al inicio de una línea (o tras espacios en blanco)
+seguido de un espacio o una letra empieza un comentario de una línea.
 
 ---
 
-## 4. Variables y almacenamiento
+## 3. Variables y almacenamiento
 
 ### Declaración
 
-```altair
-define <tipo> <nombre> [storage] [calificadores] [= expresión]
-```
-
-La palabra clave `define` es **opcional** — puede omitirse:
+Hay dos formas equivalentes, ambas soportadas por el parser:
 
 ```altair
-/ Con define (estilo completo):
-define numeric contador = 0 ram
-
-/ Sin define (estilo abreviado):
-numeric contador = 0 ram
-text mensaje = "Hola" ram
-bool activo = true ram
+define <tipo> <nombre> [almacenamiento] [cualificadores] [= expresión]
+<tipo> <nombre> [= expresión] [almacenamiento] [cualificadores]
 ```
 
-### Tiers de almacenamiento
+La palabra `define` es **opcional**; el compilador reconoce igualmente una
+declaración que empieza directamente por el tipo.
 
-| Keyword | Comportamiento en runtime |
-|---------|--------------------------|
-| `ram`   | Memoria del proceso, bloqueada con `mlock` (no swappable). Rápida; se pierde al salir. |
-| `disk`  | Almacenamiento persistente en `~/.altair/<nombre-app>/disk/<var>.altv`. Sobrevive reinicios. |
-| `cache` | Persiste en `~/.altair/<nombre-app>/cache/<var>.altv` con TTL opcional. Se auto-expira. |
-| `temp`  | Memoria del proceso, se pone a cero en `release`. Para datos sensibles. |
-| `auto`  | El runtime elige el tier. Equivalente a `ram` si no se especifica nada más. |
+**Ejemplos:**
+```altair
+define numeric count = 0
+numeric count2 = 0
+
+define text name = "world"
+define bool ready = true
+define list items
+define object user
+```
+
+### Niveles de almacenamiento
+
+| Palabra clave | Significado |
+|---|---|
+| `ram`   | Memoria del proceso (por defecto). Rápido; se pierde al salir. |
+| `disk`  | Almacenamiento persistente en fichero. Sobrevive a reinicios. |
+| `cache` | Persistente con TTL opcional. Se auto-expira. |
+| `temp`  | Se pone a cero al liberarse; para datos sensibles. |
+| `auto`  | El runtime elige el mejor nivel. |
 
 ```altair
-define text usuario disk           / persiste entre ejecuciones
-define text token_sesion temp      / se borra al liberar
-define text respuesta_api cache expire=30m  / expira en 30 minutos
+define text username disk
+define text session_token temp
+define text api_response cache expire=30m
 ```
 
-### Calificadores
+### Cualificadores
 
-| Calificador | Ejemplo | Efecto |
-|-------------|---------|--------|
-| `const` | `define numeric PI const = 3.14159` | No se puede reasignar (lanza ALT0007) |
-| `expire=<dur>` | `cache expire=5m` | Auto-expira tras la duración |
-| `weight=<n>` | `weight=5` | Hint de prioridad (entero ≥ 0) |
+| Cualificador | Ejemplo | Efecto |
+|---|---|---|
+| `const` | `define numeric pi const = 3.14159` | No se puede reasignar |
+| `expire=<dur>` | `expire=5m` | Se auto-expira tras un tiempo |
+| `weight=<n>` | `weight=5` | Pista de prioridad (0–100) |
 
 **Duraciones:** `30s` (segundos), `5m` (minutos), `2h` (horas).
 
-### Asignación y asignación compuesta
+### Asignación
 
 ```altair
-nombre = "Alicia"
-contador = contador + 1
-contador += 10
-contador -= 3
-contador *= 2
-contador /= 4
-contador %= 3
-lista[0] = "nuevo"
+name = "Alice"
+count = count + 1
+count += 10
+count -= 3
+count *= 2
+count /= 4
+count %= 7
 ```
+
+### Liberar (`release`)
+
+Libera explícitamente una variable y su memoria:
+
+```altair
+define text buffer ram = "large data"
+/ ... usar buffer ...
+release buffer
+```
+
+`release` es seguro de llamar sobre variables que ya no existen (no hace nada).
 
 ---
 
-## 5. Tipos
+## 4. Tipos de datos
 
-| Tipo | Descripción | Valor por defecto |
-|------|-------------|-------------------|
-| `numeric` | Número de punto flotante doble | `0` |
-| `text` | Cadena de texto | `""` |
-| `bool` | Booleano (`true` / `false`) | `false` |
-| `list` | Lista dinámica de valores | `[]` |
-| `object` | Instancia de clase | `null` |
-| `token` | Valor de un solo uso (se consume al leer) | — |
+### `numeric`
 
-**Literales:**
+Un número de coma flotante de 64 bits (`double` en C internamente).
+
 ```altair
-numeric n = 42
-numeric pi = 3.14159
-text s = "Hola, mundo!"
-bool ok = true
-list items = ["uno", "dos", "tres"]
-list vacia = []
+define numeric x = 42
+define numeric pi = 3.14159
 ```
 
-**Literales de duración** (se convierten a segundos automáticamente):
+### `text`
+
+Una cadena UTF-8.
+
 ```altair
-numeric ttl = 30m   / = 1800.0
-numeric delay = 2h  / = 7200.0
+define text greeting = "Hello!"
+define text multi = "Línea 1\nLínea 2"
 ```
+
+La concatenación usa `+`:
+```altair
+define text full = "Hola, " + name + "!"
+```
+
+### `bool`
+
+```altair
+define bool active = true
+define bool done = false
+```
+
+### `list`
+
+Colección ordenada de tamaño dinámico.
+
+```altair
+define list scores = [10, 20, 30]
+scores.append(40)
+scores.remove(0)      / elimina el índice 0
+scores.clear()        / vacía la lista
+define numeric n = scores.length()
+define numeric v = scores[1]
+scores[0] = 99
+```
+
+`.length` funciona con o sin paréntesis.
+
+### `object`
+
+Ver [§8 Clases y objetos](#8-clases-y-objetos).
+
+### `token`
+
+Un valor de un solo uso: se consume la primera vez que se lee, y una segunda
+lectura lanza `ALT0004`.
+
+```altair
+define token invite_code = "XXXX-YYYY"
+define text used = invite_code    / consume el token
+define text again = invite_code   / ERROR: ALT0004, token ya consumido
+```
+
+### `char` — texto de un carácter *(añadido para self-hosting, §31)*
+
+### `file` — manejador de fichero *(añadido para self-hosting, §31–32)*
+
+### `point@Tipo` — puntero crudo *(añadido para self-hosting, §31, §33)*
 
 ---
 
-## 6. Operadores y expresiones
+## 5. Operadores y expresiones
 
 ### Aritméticos
-| Operador | Operación |
-|----------|-----------|
-| `+` | Suma (numérico) o concatenación (texto / listas) |
-| `-` | Resta |
-| `*` | Multiplicación |
-| `/` | División (lanza ALT0010 si divisor es 0) |
-| `%` | Módulo (lanza ALT0010 si divisor es 0) |
-| `-x` | Negación unaria |
+
+| Op | Descripción | Ejemplo |
+|---|---|---|
+| `+` | Suma / concatena texto | `1 + 2`, `"a" + "b"` |
+| `-` | Resta | `10 - 3` |
+| `*` | Multiplica | `4 * 5` |
+| `/` | Divide | `10 / 3` |
+| `%` | Módulo | `10 % 3` |
+| `-x` | Negación | `-count` |
 
 ### Comparación
-| Operador | Significado |
-|----------|-------------|
-| `==` | Igualdad |
-| `!=` | Desigualdad |
-| `<` | Menor que |
-| `>` | Mayor que |
-| `<=` | Menor o igual |
-| `>=` | Mayor o igual |
+
+`==`, `!=`, `<`, `>`, `<=`, `>=` — funcionan sobre `numeric` y `text`
+(lexicográfica para texto).
 
 ### Lógicos
-| Operador | Significado |
-|----------|-------------|
-| `and` | Y lógico (también `&&`) |
-| `or` | O lógico (también `\|\|`) |
-| `!x` | Negación lógica |
 
-### Precedencia (mayor a menor)
-1. Unarios: `!`, `-`
+`&&` (y), `||` (o), `!` (no). *(En la fuente del propio compilador solo
+existen estas formas simbólicas — no hay palabras "and"/"or"/"not"; esas
+palabras sí las usa, por su cuenta, el lenguaje "Altair-Core" del compilador
+auto-hospedado, ver §36).*
+
+```altair
+if x > 0 && x < 100;
+    log "en rango"
+break
+```
+
+### A nivel de bit *(añadido, §31.5)*
+
+`& | ^ ~ << >>` — solo válidos sobre `numeric` (internamente se convierten a
+entero de 64 bits, se opera, y se vuelve a `double`).
+
+### Precedencia (de mayor a menor)
+
+1. Unarios: `!`, `-`, `~`
 2. `*`, `/`, `%`
 3. `+`, `-`
-4. `<`, `>`, `<=`, `>=`
-5. `==`, `!=`
-6. `and`
-7. `or`
-
-### Acceso a miembros e índices
-```altair
-objeto.campo
-objeto.metodo(args)
-lista[0]
-lista[i] = valor
-```
+4. `<<`, `>>`
+5. `&`
+6. `^`
+7. `|`
+8. `<`, `>`, `<=`, `>=`
+9. `==`, `!=`
+10. `&&`
+11. `||`
 
 ---
 
-## 7. Control de flujo
+## 6. Control de flujo
+
+Casi todos los bloques en Altair terminan con la palabra `break` (no usan
+llaves `{}`).
 
 ### if / elif / else
 
-Todos los bloques se cierran con `break`. La cadena `if/elif/else` comparte **un único `break` final**.
-
 ```altair
-if puntuacion > 90;
+if score > 90;
     log "Excelente"
-elif puntuacion > 70;
+break
+elif score > 70;
     log "Bien"
+break
 else;
     log "Necesita mejorar"
 break
@@ -278,90 +329,83 @@ break
 
 ```altair
 repeat 5 times;
-    log "tick"
+    log "hola"
 break
 
-/ O con una expresión:
-repeat contador;
-    log "iteracion"
+/ o con una expresión:
+repeat count;
+    log "tick"
 break
 ```
 
-La palabra `times` es opcional.
-
 ### forever
-
-Bucle infinito. Usa `exit` para salir.
 
 ```altair
 forever;
-    / hacer algo indefinidamente
-    if condicion_salida;
-        exit
-    break
+    log "corriendo..."
+    wait 1s
 break
 ```
 
 ### foreach
 
-Itera sobre los elementos de una lista.
-
 ```altair
-define list colores = ["rojo", "verde", "azul"]
-foreach color in colores;
-    log color
+define list fruits = ["manzana", "plátano", "cereza"]
+foreach fruit in fruits;
+    log fruit
 break
 ```
 
-La variable iteradora (`color`) se crea automáticamente y se libera al salir del bucle.
-
 ### exit
 
-Dentro de un bucle: rompe el bucle (equivale a `break` en C).
-Fuera de un bucle: termina el programa limpiamente.
-
+Sale del bucle actual, o termina el programa si no hay bucle:
 ```altair
-if error;
-    exit
+while true;
+    if done == true;
+        exit        / sale del while
+    break
 break
+
+exit        / termina el programa (fuera de un bucle)
 ```
 
 ### wait
 
-Pausa la ejecución durante una duración.
-
 ```altair
-wait 2s    / espera 2 segundos
-wait 500   / espera 500 segundos (número sin sufijo = segundos)
+wait 2s     / espera 2 segundos
+wait 500ms  / (usar 0.5s para fracciones de segundo)
 ```
 
 ---
 
-## 8. Funciones
-
-### Declaración
+## 7. Funciones
 
 ```altair
-fun nombre -> tipo_retorno param_tipo1 param1, param_tipo2 param2;
-    / cuerpo
-    return expresion
+fun greet name text;
+    define text msg = "Hola, " + name + "!"
+    log msg
+    return msg
 break
 ```
 
-La flecha `-> tipo_retorno` y los parámetros van en la misma línea que `fun`. El tipo de retorno es **opcional** (si se omite, la función devuelve `void`).
-
+**Con tipo de retorno:**
 ```altair
-/ Función sin retorno:
-fun saludar text nombre;
-    log "Hola, " + nombre
+fun add -> numeric numeric x, numeric y;
+    return x + y
 break
+```
 
-/ Función con retorno:
-fun sumar -> numeric numeric a, numeric b;
-    return a + b
-break
+**Llamada:**
+```altair
+greet("Alice")
+define numeric result = add(10, 20)
+```
 
-/ Función recursiva:
+Las funciones pueden leer y escribir variables globales, y sus parámetros se
+liberan correctamente al terminar (sin fugas de memoria).
+
+**Funciones recursivas:**
+```altair
 fun factorial -> numeric numeric n;
     if n <= 1;
         return 1
@@ -370,740 +414,1120 @@ fun factorial -> numeric numeric n;
 break
 ```
 
-### Llamada
+---
+
+## 8. Clases y objetos
 
 ```altair
-saludar("Alicia")
-define numeric resultado = sumar(3, 4)
+class Point;
+    define numeric x = 0
+    define numeric y = 0
 
-/ Llamada sin paréntesis (un argumento):
-saludar "Alicia"
+    fun distance;
+        define numeric dx = x * x
+        define numeric dy = y * y
+        return dx + dy
+    break
+break
+
+create object Point as p
+p.x = 3
+p.y = 4
+log p.distance()
+log p.x
 ```
 
-### Alcance de variables
+**Llamadas a métodos:**
+```altair
+define text result = myObj.methodName(arg1, arg2)
+```
 
-Las variables declaradas fuera de una función son **globales**. El codegen las busca via `altair_var_lookup` al acceder desde dentro de una función. Esto significa que una función puede leer y modificar variables globales.
+Los objetos usan arrays dinámicos de campos/métodos internamente (muy poco
+overhead por instancia), así que crear muchos objetos es viable.
 
 ---
 
-## 9. Clases y objetos
-
-### Declaración
+## 9. Listas
 
 ```altair
-class NombreClase;
-    / campos con tipo, storage y valor por defecto
-    text nombre = "" disk
-    numeric puntos = 0 ram
-    bool activo = true ram
+define list items = [1, 2, 3]
 
-    / métodos
-    fun metodo tipo_param param;
-        / aquí 'nombre', 'puntos', 'activo' son campos de la instancia
-        puntos += param
-    break
+/ Añadir
+items.append(4)
+items.append("hola")
 
-    fun obtener -> numeric;
-        return puntos
-    break
-create class
-```
+/ Acceso por índice (base 0)
+define numeric first = items[0]
 
-### Instanciación
+/ Modificar por índice
+items[0] = 99
 
-```altair
-object jugador = NombreClase() ram
-create object NombreClase as jugador   / sintaxis alternativa
-```
+/ Eliminar por índice
+items.remove(2)
 
-### Uso
+/ Vaciar
+items.clear()
 
-```altair
-jugador.nombre = "Alicia"
-jugador.metodo(10)
-define numeric pts = jugador.obtener()
-log jugador.nombre + " tiene " + pts + " puntos"
-```
+/ Longitud (con o sin paréntesis)
+define numeric n = items.length
+define numeric m = items.length()
 
----
-
-## 10. Listas
-
-```altair
-define list items = ["a", "b", "c"]
-
-/ Acceso por índice (base 0):
-log items[0]      / "a"
-items[1] = "X"
-
-/ Métodos:
-items.append("d")         / añade al final
-items.remove(0)           / elimina por índice (devuelve bool)
-items.clear()             / vacía la lista
-log items.length          / número de elementos (sin paréntesis también funciona)
-log items.length()        / igual
-
-/ Concatenación de listas:
-define list total = lista1 + lista2
-
-/ Iterar:
+/ Iterar
 foreach item in items;
     log item
 break
-```
 
-Los índices fuera de rango lanzan **ALT0013**.
+/ Concatenar dos listas
+define list all = listA + listB
+```
 
 ---
 
-## 11. Manejo de errores
+## 10. Manejo de errores
 
 ```altair
 try;
     / código que puede fallar
-    define numeric resultado = 10 / 0
+    define numeric result = 10 / 0
 break
 catch as err;
-    / err, err_code, err_message, err_line están disponibles aquí
-    log "Error " + err_code + ": " + err_message
-    log "Línea: " + err_line
+    log err.code
+    log err.message
+    log err.line
 break
 ```
 
-El nombre del catch (`err`) puede ser cualquier identificador. El runtime crea automáticamente las variables `<nombre>_code`, `<nombre>_message` y `<nombre>_line`.
+El runtime lanza errores en: división por cero, índice fuera de rango, acceso
+a objeto nulo, doble consumo de token, reasignación de `const`.
 
-**Importante:** Los try/catch se pueden anidar hasta 128 niveles.
-
----
-
-## 12. Snapshots
-
-Un snapshot serializa todas las variables `disk` y `cache` activas a un archivo en `~/.altair/<app>/snap/<nombre>.altsnap`.
-
+**Anidar try/catch:**
 ```altair
-snapshot create "nombre_snapshot"
-snapshot restore "nombre_snapshot"
-snapshot delete "nombre_snapshot"
-```
-
-Útil para guardar/restaurar el estado completo de la aplicación.
-
----
-
-## 13. Choose (aleatorio ponderado)
-
-Selecciona un valor aleatoriamente según pesos porcentuales. Los pesos deben sumar 100.
-
-```altair
-choose resultado;
-    50% = opcionA
-    30% = opcionB
-    20% = opcionC
-define
-
-log resultado
-```
-
-La variable resultante (`resultado`) es de tipo `text` y contiene el nombre de la opción elegida.
-
----
-
-## 14. Introspección
-
-Permite consultar información del sistema, del compilador y del programa en tiempo de ejecución.
-
-```altair
-/ Sistema:
-log system@os         / "windows" | "linux" | "macos"
-log system@arch       / "x64" | "x86" | ...
-log system@memory     / memoria disponible en bytes
-log system@cpu        / número de CPUs
-
-/ Info de una variable específica:
-log system@locate(miVariable)   / tier actual: "ram" | "disk" | "cache" | "temp"
-
-/ Compilador:
-log compiler@version  / "1.6.5vC"
-log compiler@name     / "altairc"
-
-/ Programa:
-log program@name      / valor de name en altair.doc
-log program@version   / valor de version en altair.doc
-log program@author    / valor de author en altair.doc
-```
-
----
-
-## 15. Token (valor de un solo uso)
-
-Un `token` envuelve un valor y sólo puede leerse una vez. Tras la primera lectura queda marcado como `consumed`.
-
-```altair
-define token secreto = "clave-efimera" temp
-
-/ Primera lectura: devuelve el valor y lo marca como consumido
-log secreto
-
-/ Segunda lectura: devuelve [token:consumed]
-log secreto
-```
-
-Útil para valores que sólo deben usarse una vez (OTP, nonces, claves temporales).
-
----
-
-## 16. Orbit y Prefer
-
-### Orbit
-
-Define una variable que puede migrar entre varios tiers de almacenamiento según un estado numerado o nombrado.
-
-```altair
-numeric sessionScore = 0 orbit;
-    1 = create temp      / estado 1: temporal (inicio de sesión)
-    2 = active ram       / estado 2: en memoria (durante el juego)
-    3 = inactive cache   / estado 3: en caché (pause)
-    4 = finish disk      / estado 4: en disco (fin)
-break
-
-/ Migrar por número:
-sessionScore migrate 2
-
-/ Migrar por nombre:
-sessionScore migrate active
-```
-
-**Reglas:** Los números de estado deben ser únicos. La variable comienza en el primer estado declarado.
-
-### Prefer
-
-Define un orden de preferencia de tiers. El runtime elige el primero disponible.
-
-```altair
-define text datos prefer ram, cache, disk;
-    / Altair intentará primero ram, luego cache, luego disk
-```
-
----
-
-## 17. Release
-
-Libera explícitamente la memoria de una variable y la desregistra del runtime.
-
-```altair
-define numeric temporal = 42 ram
-/ ... uso ...
-release temporal
-```
-
-Para variables `temp`, el runtime pone a cero la memoria antes de liberar. `release` es seguro si la variable ya fue liberada (no falla).
-
----
-
-## 18. Entrada del usuario
-
-Lee una línea de la entrada estándar con un prompt opcional.
-
-```altair
-/ Forma larga:
-define text nombre = user input "¿Cómo te llamas?" as text
-define numeric edad = user input "¿Cuántos años tienes?" as numeric
-
-/ Forma corta (sin define, tipo inferido como text):
-text nombre = user input "¿Cómo te llamas?"
-
-/ Forma mínima (sin prompt):
-text entrada = input as text
-```
-
----
-
-## 19. Servidor HTTP (v1.6.5vB+)
-
-El servidor HTTP está implementado directamente en el runtime de Altair usando sockets POSIX (sin frameworks externos). Es de **un solo hilo**; cada conexión se atiende secuencialmente.
-
-### Iniciar el servidor
-
-```altair
-listen 8080;
-    / rutas y configuración aquí
-break
-```
-
-El puerto puede ser un literal o una variable `numeric`.
-
-```altair
-define numeric PUERTO = 3000 ram
-listen PUERTO;
-    / ...
-break
-```
-
----
-
-## 20. Rutas y handlers
-
-```altair
-listen 8080;
-    route "GET" "/ruta";
-        / handler de la ruta
-        respond.json("ok")
+try;
+    try;
+        / interno
     break
+    catch as inner_err;
+        log inner_err.message
+    break
+break
+catch as outer_err;
+    log outer_err.message
+break
+```
 
-    route "POST" "/datos";
-        define text cuerpo = body()
-        define text usuario = header("X-User")
-        define text id = param("id")
-        respond.json(cuerpo)
+---
+
+## 11. Snapshots
+
+Los snapshots guardan todas las variables registradas en disco de forma
+atómica (con checksum CRC32).
+
+```altair
+/ Guardar el estado actual
+snapshot create "checkpoint1"
+
+/ Restaurar un estado anterior
+snapshot restore "checkpoint1"
+
+/ Borrar un snapshot
+snapshot delete "checkpoint1"
+```
+
+Se guardan en `~/.altair/<nombre_programa>/snap/`.
+
+---
+
+## 12. Choose (aleatoriedad ponderada)
+
+```altair
+choose outcome;
+    "win"  70
+    "draw" 20
+    "lose" 10
+break
+
+log outcome
+```
+
+Los pesos son proporcionales — no hace falta que sumen 100.
+
+---
+
+## 13. Introspección
+
+Consultas de metadatos del runtime y del compilador, mediante la sintaxis
+`namespace@clave`:
+
+```altair
+/ Consultas de sistema
+log system@time        / timestamp Unix
+log system@random      / float 0.0–1.0 aleatorio
+log system@pid         / PID del proceso
+log system@hostname    / nombre de la máquina
+log system@username    / usuario actual
+log system@os          / "linux", "macos" o "windows"
+log system@memory      / RAM usada (bytes)
+log system@diskfree    / espacio libre en disco (bytes)
+
+/ Introspección de variables
+define disk numeric counter
+log system@storage(counter)  / "disk"
+log system@weight(counter)   / 0
+log system@type(counter)     / "numeric"
+log system@size(counter)     / tamaño serializado
+
+/ Info del compilador
+log compiler@version
+log compiler@name        / "altairc"
+log compiler@build       / fecha de compilación
+log compiler@architecture  / "x86_64" o "arm64"
+
+/ Metadatos del programa (de la cabecera altair.doc)
+log program@name
+log program@version
+log program@author
+```
+
+---
+
+## 14. Variables token
+
+Un `token` solo se puede consumir una vez. Leerlo una segunda vez lanza
+`ALT0004`.
+
+```altair
+define token api_key temp = "secret-api-key-abc123"
+
+/ La primera lectura consume el token
+define text key = api_key
+log "Clave usada: " + key
+
+/ La segunda lectura lanza error
+define text key2 = api_key   / ERROR: Token already consumed
+```
+
+Útil para contraseñas de un solo uso, códigos de invitación, tokens CSRF, etc.
+
+---
+
+## 15. Orbit y prefer
+
+### `orbit` — migración entre varios niveles
+
+Declara una variable con estados de almacenamiento nombrados entre los que
+puede migrar:
+
+```altair
+define numeric data orbit 1 "hot" ram, 2 "warm" disk, 3 "cold" cache expire=1h = 0
+
+/ Mover a otro estado
+migrate data as "warm"
+migrate data as 3
+```
+
+### `prefer` — almacenamiento por orden de preferencia
+
+Prueba niveles de almacenamiento en un orden de preferencia:
+
+```altair
+define text session prefer ram, cache expire=30m, disk = ""
+```
+
+El runtime usa el primer nivel disponible.
+
+---
+
+## 16. Servidor HTTP
+
+Arranca un servidor HTTP en un puerto. El bloque `listen` contiene
+declaraciones de rutas, middleware, health, métricas y apagado.
+
+```altair
+listen 8080;
+    route "GET" "/hello";
+        respond.text("Hello, World!")
     break
 break
 ```
 
-### Métodos disponibles en el handler
+El servidor corre hasta que se termina. Las señales (`SIGTERM`, `Ctrl+C`)
+disparan un apagado ordenado.
 
-| Función | Descripción |
-|---------|-------------|
-| `body()` | Cuerpo crudo de la petición (text) |
-| `header("nombre")` | Valor de una cabecera HTTP |
-| `param("nombre")` | Parámetro de query string |
-| `respond.json(expr)` | Responde con `Content-Type: application/json` |
-| `respond.text(expr)` | Responde con `Content-Type: text/plain` |
-| `respond.status(n)` | Establece el código de estado HTTP |
-| `stop` | Detiene el procesamiento (útil en middleware) |
+**Cómo funciona:** el servidor HTTP integrado de Altair usa sockets TCP
+POSIX (sin librerías externas). Es de un solo hilo pero usa un modelo de
+conexión por petición.
+
+---
+
+## 17. Rutas y handlers
 
 ```altair
-route "GET" "/usuario";
-    define text uid = param("id")
-    if uid == "";
+route "METHOD" "/path";
+    / cuerpo del handler
+break
+```
+
+**Métodos soportados:** `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `*` (cualquiera)
+
+### Parámetros de ruta
+
+Sintaxis `:param` en las rutas:
+
+```altair
+route "GET" "/users/:id";
+    define text user_id = param("id")
+    respond.json("found user " + user_id)
+break
+```
+
+### Acceso a la petición
+
+Dentro de un handler:
+```altair
+define text body_data = body()                / cuerpo crudo de la petición
+define text auth = header("Authorization")     / cabecera de la petición
+define text id = param("id")                   / parámetro de ruta
+```
+
+### Respuesta
+
+```altair
+respond.text("respuesta en texto plano")
+respond.json("cadena o valor json")
+respond.status(201)
+respond.status(404)
+respond.status(500)
+```
+
+**Ejemplo:**
+```altair
+route "POST" "/users";
+    define text payload = body()
+    if payload == "";
         respond.status(400)
-        respond.json("{\"error\":\"id requerido\"}")
-        stop
+        respond.json("missing body")
     break
-    respond.json("{\"id\":\"" + uid + "\"}")
+    respond.status(201)
+    respond.json("user created")
 break
 ```
 
 ---
 
-## 21. Middleware
+## 18. Middleware
 
-Un middleware es una función que se ejecuta **antes** de cada ruta. Si llama a `stop`, la petición no llega al handler de la ruta.
+El middleware se ejecuta antes de cada handler de ruta. Si el middleware
+llama a `stop`, se detiene la cadena de la petición.
 
 ```altair
-middleware autenticacion;
-    define text clave = header("X-API-Key")
-    if clave != "mi-secreto";
+middleware auth;
+    define text token = header("Authorization")
+    if token == "";
         respond.status(401)
-        respond.json("{\"error\":\"no autorizado\"}")
+        respond.json("unauthorized")
         stop
     break
 break
 ```
 
-Los middleware se aplican en orden de declaración, antes de las rutas.
+Varios `middleware` se encadenan en orden:
+```altair
+listen 8080;
+    middleware logger;
+        log "petición recibida"
+    break
+    middleware auth;
+        define text tok = header("X-API-Key")
+        if tok != "secret";
+            respond.status(401)
+            respond.json("bad key")
+            stop
+        break
+    break
+    route "GET" "/data";
+        respond.json("protected data")
+    break
+break
+```
 
 ---
 
-## 22. Rate limiting
+## 19. Límite de tasa (rate limiting)
 
-Se declara directamente en la ruta.
+Se puede añadir a cualquier ruta:
 
 ```altair
-route "POST" "/api/datos" rate_limit 60 per_minute;
-    / máximo 60 peticiones por minuto por IP
+route "POST" "/login" rate_limit 10 per_minute;
     respond.json("ok")
 break
-
-route "GET" "/buscar" rate_limit 10 per_second;
-    respond.json("resultados")
-break
 ```
 
-Si se supera el límite, el runtime devuelve automáticamente `429 Too Many Requests`.
+Al superar el límite, el runtime devuelve automáticamente HTTP 429 con
+`{"error":"rate limit exceeded"}`.
+
+**Sintaxis:**
+```altair
+route "METHOD" "/path" rate_limit N per_minute;
+```
+o
+```altair
+rate_limit N per_second
+```
 
 ---
 
-## 23. Health checks
+## 20. Health checks
+
+La declaración `health` registra una ruta `GET` que responde con estado JSON:
 
 ```altair
 health "/health";
-    check "base_datos" -> 1     / 1 = OK, 0 = fallo
-    check "almacenamiento" -> 1
+    check "database" -> true
+    check "cache"    -> true
 break
 ```
 
-El endpoint devuelve JSON con el estado de cada check y un `status` global (`ok` o `degraded`).
+**Formato de respuesta:**
+```json
+{"status":"ok","checks":{"database":"ok","cache":"ok"}}
+```
+
+Si algún `check` devuelve `false`, el estado HTTP es `503 Service
+Unavailable`. El lado derecho de `->` es una expresión (numérica o
+booleana); cualquier valor distinto de cero se considera saludable.
 
 ---
 
-## 24. Métricas
+## 21. Métricas
+
+Registra un endpoint de métricas compatible con Prometheus:
 
 ```altair
 metrics "/metrics";
 ```
 
-Expone un endpoint compatible con Prometheus con métricas internas del runtime (peticiones totales, errores, tiempos de respuesta).
+Expone un `GET /metrics` en formato Prometheus de texto plano.
+
+El endpoint produce algo como:
+```
+# TYPE events_total counter
+events_total 42
+```
 
 ---
 
-## 25. Graceful shutdown
+## 22. Apagado ordenado (graceful shutdown)
+
+Registra lógica de limpieza que se ejecuta al recibir `SIGTERM` o al llamar a
+`altair_server_stop()`:
 
 ```altair
 on_shutdown;
-    log "Servidor deteniendo..."
-    / limpiar recursos, cerrar conexiones, etc.
+    log "Servidor apagándose, guardando datos..."
+    snapshot create "shutdown_checkpoint"
 break
 ```
 
-Se ejecuta cuando el proceso recibe `SIGTERM` (Linux/macOS) o un evento de cierre equivalente (Windows).
-
----
-
-## 26. Sesiones
-
-Las sesiones se almacenan en memoria del runtime, indexadas por un ID de sesión que el cliente debe proporcionar.
-
+**Ejemplo con ciclo de vida completo:**
 ```altair
-session usuario_sesion expires 30m;
-/ Ahora 'usuario_sesion' es una variable de sesión
+listen 8080;
+    route "GET" "/";
+        respond.text("running")
+    break
+    on_shutdown;
+        log "adiós!"
+    break
+break
 ```
 
-Las sesiones se leen y escriben mediante las funciones internas del runtime usando el ID de sesión de la petición.
+---
+
+## 23. Sesiones
+
+Declara variables de sesión con TTL opcional:
+
+```altair
+session user_token expires 30m;
+```
+
+Las sesiones se guardan en memoria del proceso en un almacén clave-valor
+indexado por un ID de sesión. Usa `header("X-Session-ID")` para recuperar el
+ID de sesión del cliente.
+
+**Dentro de handlers de ruta:**
+
+```altair
+route "GET" "/profile";
+    define text sid = header("X-Session-ID")
+    define text username = session_get(sid, "username")
+    if username == "";
+        respond.status(401)
+        respond.json("not logged in")
+    break
+    respond.json("Hello " + username)
+break
+
+route "POST" "/login";
+    define text user = body()
+    session_set("my-session-id", "username", user, 1800)
+    respond.json("logged in")
+break
+```
 
 ---
 
-## 27. Config y variables de entorno
+## 24. Configuración y variables de entorno
+
+Usa el bloque `config` para declarar configuración respaldada por variables
+de entorno:
 
 ```altair
 config;
+    env("DATABASE_URL") default "postgres://localhost/mydb"
     env("PORT") default "8080"
     env("API_SECRET") required
-    env("LOG_LEVEL") default "info"
 break
 ```
 
-- `default "valor"`: usa ese valor si la variable de entorno no está definida.
-- `required`: el programa falla al arrancar si la variable no está definida.
+- `default "valor"` — valor de respaldo si la variable de entorno no está definida
+- `required` — lanza `ALT0015` al arrancar si la variable falta
 
-Las variables de entorno se leen en el inicio del programa y están disponibles como variables Altair con el mismo nombre.
+**Acceder a los valores:**
 
----
-
-## 28. Pool de base de datos
-
+La declaración `env(...)` crea variables en el ámbito, nombradas según la
+clave:
 ```altair
-db_pool conexion = connect("postgresql://usuario:pass@host:5432/db") max 10
-```
-
-Define un pool de conexiones. El soporte de queries es extensible a través del runtime.
-
----
-
-## 29. Jobs programados
-
-Un job es una función que se ejecuta periódicamente mientras el servidor está en marcha.
-
-```altair
-job limpieza every 5m;
-    / código que se ejecuta cada 5 minutos
-    log "Limpieza ejecutada"
+config;
+    env("PORT") default "8080"
 break
 
-job heartbeat every 30s;
-    log "Servidor activo"
+define numeric port = PORT
+listen port;
+    route "GET" "/";
+        respond.text("ok")
+    break
 break
 ```
 
-Los jobs se ejecutan en el hilo principal entre peticiones HTTP.
+---
+
+## 25. Pool de base de datos
+
+Declara un pool de conexiones para una URL de base de datos:
+
+```altair
+db_pool db = connect("postgres://user:pass@localhost/mydb") max 20
+```
+
+Esto crea una variable `db` que guarda la cadena de conexión. Hay que
+conectar tu propia librería cliente de base de datos en el C generado, o usar
+el stub para prototipar. `max` fija el tamaño del pool (10 por defecto).
+
+> Altair da la sintaxis de declaración y el stub de pooling; el soporte
+> completo de consultas SQL requiere enlazar tu propia librería cliente
+> (PostgreSQL/MySQL/SQLite) en el C generado.
 
 ---
 
-## 30. Gráficos y UI con Raylib (v1.6.5vC)
+## 26. Planificador de tareas (job scheduler)
 
-La versión 1.6.5vC añade soporte de gráficos 2D/UI mediante [Raylib](https://www.raylib.com/). El compilador detecta automáticamente si el programa usa `link * raylib` y enlaza la librería.
-
-### Activar Raylib
+Registra tareas periódicas en segundo plano con `job`:
 
 ```altair
-link * raylib
+job cleanup every 5m;
+    log "ejecutando tarea de limpieza"
+break
 ```
 
-### Ventana y bucle principal
+**Sintaxis:**
+```altair
+job <nombre> every <duración>;
+    / cuerpo de la tarea
+break
+```
+
+`schedule` es un alias de `job`:
+```altair
+schedule heartbeat every 30s;
+    log "heartbeat"
+break
+```
+
+**Cómo funciona:** las tareas se comprueban en cada petición
+(`altair_jobs_tick()` se llama por conexión). En escenarios de poco tráfico,
+usa `wait` dentro de un `forever` para temporización precisa en su lugar.
+
+---
+
+## 27. Gráficos (raylib)
+
+Altair puede producir programas gráficos con ventana sobre raylib. Requiere
+tener raylib disponible en tiempo de compilación (empaquetado en
+`libs/raylib/<os>/` o instalado en el sistema).
+
+### Activar el modo gráfico
 
 ```altair
-link * raylib
+link graphics raylib
+```
 
-window;
-    title = "Mi Juego"
+Debe aparecer una vez, antes de cualquier sentencia de ventana/loop/draw.
+Indica al compilador que enlace `-lraylib` (más las librerías de ventaneo de
+la plataforma) en el binario final.
+
+### Ventana
+
+```altair
+window
+    title = "Mi Ventana"
+    width = 800
+    height = 600
+    fps = 60
+create window
+```
+
+### Bucle principal
+
+```altair
+loop
+    clear skyblue
+    / sentencias en cada frame
+break
+```
+
+`clear <color>` limpia el frame. `break` cierra la definición del bloque
+`loop` (no sale del programa — el `while` generado corre hasta que se cierra
+la ventana).
+
+### draw
+
+```altair
+draw <tipo>
+    x = 100
+    y = 100
+    ...
+create draw
+```
+
+| tipo | props requeridas | notas |
+|---|---|---|
+| `text` | `content`/`text`, `x`, `y`, `size`, `color` | |
+| `rect` / `rectangle` | `x`, `y`, `width`/`w`, `height`/`h`, `color` | |
+| `circle` | `x`, `y`, `radius`/`r`, `color` | |
+| `line` | `x`, `y`, `x2`, `y2`, `color` | |
+| `line_thick` / `thick_line` | añade `thick`/`thickness` | |
+| `triangle` | `x`,`y`,`x2`,`y2`,`x3`,`y3`,`color` | |
+| `pixel` | `x`, `y`, `color` | |
+| `image` / `texture` | `image`/`src` (variable de textura), `x`, `y`, `color` | |
+
+Los colores aceptan nombres de raylib (`red`, `gold`, `skyblue`, `white`,
+...) o una declaración de bloque `color`.
+
+### Ejemplo completo
+
+```altair
+link graphics raylib
+
+window
+    title = "Paint Test"
     width = 800
     height = 600
     fps = 60
 create window
 
-loop;
-    clear black
-
-    draw text;
-        text = "Hola desde Altair!"
-        x = 100
-        y = 100
+loop
+    clear skyblue
+    draw text
+        content = "Altair Graphics"
+        x = 10
+        y = 10
         size = 24
         color = white
     create draw
-
-    / leer teclado
-    if key "SPACE";
-        log "Espacio pulsado"
-    break
+    draw rect
+        x = 100
+        y = 100
+        width = 200
+        height = 120
+        color = red
+    create draw
+    draw circle
+        x = 500
+        y = 200
+        radius = 60
+        color = gold
+    create draw
 break
 ```
 
-### Colores predefinidos
-
-`white`, `black`, `red`, `green`, `blue`, `yellow`, `orange`, `purple`, `pink`, `gray`, `lightgray`, `darkgray`, `brown`, `skyblue`, `darkblue`, `maroon`, `darkgreen`, `lime`, `gold`, `beige`, `magenta`, `violet`, `darkpurple`, `darkbrown`, `raywhite`, `transparent`.
-
-Color personalizado:
-```altair
-color miColor = rgb(255, 128, 0)
-color miColorHex = "#FF8000"
-```
-
-### Draw (primitivas)
-
-```altair
-draw rectangle;
-    x = 50
-    y = 50
-    width = 200
-    height = 100
-    color = red
-create draw
-
-draw circle;
-    x = 400
-    y = 300
-    radius = 50
-    color = blue
-create draw
-
-draw text;
-    text = "Puntuación: " + score
-    x = 10
-    y = 10
-    size = 20
-    color = white
-create draw
-
-draw line;
-    x1 = 0
-    y1 = 0
-    x2 = 800
-    y2 = 600
-    color = green
-create draw
-
-draw image;
-    image = miImagen
-    x = 100
-    y = 100
-create draw
-```
-
-### Imágenes
-
-```altair
-image fondo = "fondo.png" disk
-image sprite = "personaje.png" ram
-```
-
-### Audio
-
-```altair
-sound disparo = "disparo.wav"
-music musica_fondo = "musica.mp3"
-
-play musica_fondo
-pause musica_fondo
-stop musica_fondo
-play disparo
-```
-
-### Teclado y ratón
-
-```altair
-/ Teclas: SPACE, ENTER, ESCAPE, A-Z, 0-9, F1-F12, UP, DOWN, LEFT, RIGHT, etc.
-if key "SPACE";
-    log "Espacio pulsado"
-break
-
-if key "A";
-    jugador_x -= velocidad
-break
-```
-
-Constantes de ratón disponibles en el contexto Raylib: `MOUSE_LEFT`, `MOUSE_RIGHT`, `MOUSE_MIDDLE`.
-
-### Temporizadores
-
-```altair
-timer cuenta_atras = 60   / en segundos
-```
-
-### Escenas
-
-```altair
-scene menu;
-scene juego;
-scene fin;
-
-goto menu
-goto juego
+Compilar y ejecutar:
+```bash
+altairc test/paint.at -o paint
+./paint
 ```
 
 ---
 
-## 31. Referencia CLI de altairc
+## 28. Consultas de sistema integradas
+
+| Consulta | Devuelve |
+|---|---|
+| `system@time` | Timestamp Unix (numeric) |
+| `system@random` | Aleatorio 0.0–1.0 (numeric) |
+| `system@pid` | PID del proceso (numeric) |
+| `system@hostname` | Nombre de la máquina (text) |
+| `system@username` | Usuario del SO (text) |
+| `system@os` | "linux" / "macos" / "windows" (text) |
+| `system@memory` | RAM usada en bytes (numeric) |
+| `system@diskfree` | Bytes libres en disco (numeric) |
+| `compiler@version` | Versión del compilador |
+| `compiler@name` | "altairc" |
+| `compiler@build` | Fecha de compilación |
+| `compiler@architecture` | "x86_64" / "arm64" |
+| `program@name` | De la cabecera altair.doc |
+| `program@version` | De la cabecera altair.doc |
+| `program@author` | De la cabecera altair.doc |
+
+---
+
+## 29. Referencia de la CLI `altairc`
 
 ```
-Altair Compiler v1.6.5vC
-
-Uso:
-  altairc <archivo.at> [opciones]
-  altairc guide              Escribe ALTAIR_GUIDE.md en el directorio actual
-  altairc guide --stdout     Imprime la guía en stdout
-
-Opciones:
-  -o <salida>       Nombre del binario de salida (por defecto: a.out / a.exe)
-  -icon <file.ico>  Incrusta un icono .ico en el .exe (solo Windows)
-  --emit-c          Imprime el C generado en stdout (no compila)
-  --emit-ast        Imprime el número de nodos del AST
-  --no-sema         Omite el análisis semántico
-  -v, --version     Muestra la versión del compilador
-  -h, --help        Muestra esta ayuda
-
-Ejemplos:
-  altairc hola.at -o hola
-  altairc servidor.at -o servidor
-  altairc app.at -o app -icon app.ico
-  altairc programa.at --emit-c | head -100
-  altairc guide
+altairc <source.at> [opciones]   Compila un programa Altair
+altairc guide                    Escribe ALTAIR_GUIDE.md en el directorio actual
+altairc guide --stdout           Imprime la guía por stdout
+altairc --version                Imprime la versión del compilador
+altairc --help                   Muestra la ayuda
 ```
 
-### Compilar y ejecutar (Linux/macOS)
+**Opciones:**
+
+| Flag | Descripción |
+|---|---|
+| `-o <file>` | Nombre del binario de salida (por defecto: `a.out`) |
+| `--emit-c` | Imprime el código C generado por stdout |
+| `--emit-ast` | Imprime un resumen de nodos del AST |
+| `--no-sema` | Salta el análisis semántico (compila más rápido) |
+| `-v` | Número de versión |
+
+**Ejemplos:**
 
 ```bash
-altairc programa.at -o programa
-./programa
-```
+# Compilar un programa
+altairc hello.at -o hello
 
-### Compilar y ejecutar (Windows)
+# Compilar un servidor
+altairc server.at -o myserver
 
-```cmd
-altairc programa.at -o programa.exe
-programa.exe
-```
+# Depurar: ver qué C se genera
+altairc server.at --emit-c | head -200
 
-### Instalar (Linux/macOS, desde el fuente)
-
-```bash
-make
-make install    # instala en ~/.local/bin/altairc
+# Generar la guía del lenguaje
+altairc guide
 ```
 
 ---
 
-## 32. Códigos de error
+## 30. Códigos de error
 
-| Código | Significado |
-|--------|-------------|
-| ALT0001 | Variable desconocida |
-| ALT0002 | Operación con tipos incompatibles |
-| ALT0003 | Error de sintaxis (token inesperado) |
-| ALT0006 | Bloque `prefer` sin ningún tier |
-| ALT0007 | Reasignación de variable `const` |
-| ALT0008 | `weight` negativo |
-| ALT0009 | Estados `orbit` duplicados |
-| ALT0010 | División o módulo por cero |
-| ALT0011 | Namespace de introspección desconocido |
-| ALT0012 | Estado `orbit` no encontrado, o variable sin orbit |
-| ALT0013 | Índice de lista fuera de rango |
+| Código | Descripción |
+|---|---|
+| `ALT0001` | Variable desconocida o acceso a objeto nulo |
+| `ALT0002` | Tipos incompatibles en aritmética o comparación |
+| `ALT0003` | Error de parseo / sintaxis |
+| `ALT0004` | Token ya consumido |
+| `ALT0005` | Error de snapshot (crear/restaurar/borrar) |
+| `ALT0006` | Bloque `prefer` sin entradas de almacenamiento |
+| `ALT0007` | Asignación a una variable `const` |
+| `ALT0008` | `weight` debe ser un entero no negativo |
+| `ALT0009` | `orbit` tiene números de estado duplicados |
+| `ALT0010` | División o módulo por cero |
+| `ALT0011` | Clave o namespace de introspección desconocido |
+| `ALT0012` | Estado de `orbit` no encontrado / variable sin orbit |
+| `ALT0013` | Índice de lista (o de texto) fuera de rango |
+| `ALT0014` | Campo de objeto no encontrado |
+| `ALT0015` | Variable de entorno requerida no definida |
 
 ---
 
-## 33. Ejemplo completo de servidor
+## 31. `char`, `file`, `point@Tipo` y operadores a nivel de bit
+
+> Añadidos para dar soporte a **self-hosting** (que un compilador de Altair
+> pueda algún día escribirse en el propio Altair). Tocan las cuatro etapas
+> del compilador: `lexer.c/h` (tokens nuevos), `parser.c` (gramática nueva),
+> `ast.h` (`VTYPE_FILE`, `VTYPE_POINTER`), `codegen.c` (nuevos casos de
+> emisión) y `altair_rt.c/h` (nuevas etiquetas `ALT_FILE`/`ALT_POINTER` y
+> nuevas funciones C integradas).
+
+### 31.1 `char` — texto de un carácter
+
+`char` es un **alias de tipo**, no un tipo de runtime nuevo. El parser mapea
+el token `char` directamente a `VTYPE_TEXT` (`tok_to_vtype()` en
+`parser.c`), así que una variable `char` es, a nivel de C/runtime, un valor
+`ALT_TEXT` normal que contiene un solo carácter. Por eso toda operación de
+texto (`+`, comparaciones, `length()`) ya funciona sobre `char` sin necesitar
+codegen nuevo.
+
+```altair
+text code = "hola"
+char c = code[0]
+log c
+```
+
+### 31.2 Indexar texto: `text[índice]`
+
+Antes de este cambio, el indexado `[i]` (`ND_INDEX_ACCESS`) solo funcionaba
+sobre `ALT_LIST`. La función de runtime `altair_list_get()` ahora también
+maneja `ALT_TEXT`: comprueba límites contra `strlen()` y devuelve una nueva
+cadena de un carácter. Acceder fuera de rango lanza `ALT0013`, el mismo
+código que usan las listas.
+
+```altair
+text s = "abc"
+log s[0]      / "a"
+log length(s) / 3   (length() ahora también acepta text, no solo listas)
+```
+
+### 31.3 `file` — un tipo manejador de fichero
+
+`file` es un tipo de valor genuinamente nuevo: `VTYPE_FILE` en el AST mapea
+a `ALT_FILE` en runtime. `AltairVal` recibió un campo `void *ptr` (union)
+compartido entre `ALT_FILE` (guarda un `FILE*` de C) y `ALT_POINTER` (ver
+más abajo). Copiar un valor `file` (`altair_val_copy`) es una copia
+**superficial**: el `FILE*` subyacente se comparte, igual que al asignar un
+puntero en C.
+
+```altair
+file f = open("data.txt")
+text contents = read(f)
+close(f)
+```
+
+### 31.4 `point@Tipo` — punteros crudos
+
+Forma de declaración nueva, parseada como su propia rama en `parser.c`,
+antes del camino genérico de declaración de tipos:
+
+```altair
+point@Tipo nombre [= expresión]
+```
+
+`point@Tipo` declara una variable de `VTYPE_POINTER` (`ALT_POINTER` en
+runtime). El `Tipo` tras la `@` se guarda solo a efectos de documentación /
+un futuro chequeo de tipos — el valor subyacente es un `void*` opaco (típicamente
+de `ptr_alloc`), así que Altair todavía no obliga a que el puntero apunte
+siempre a valores de `Tipo`. Es el bloque de construcción que describía la
+propuesta original para construir ASTs, listas enlazadas y grafos.
+
+```altair
+point@node current = ptr_alloc(64)
+if ptr_is_null(current);
+    log "sin memoria"
+break
+ptr_free(current)
+```
+
+### 31.5 Operadores a nivel de bit
+
+Tokens nuevos `& | ^ ~ << >>`, distinguidos correctamente de `&&`/`||` (el
+lexer comprueba primero las formas de dos caracteres). Se insertaron nuevos
+niveles de precedencia en la gramática de expresiones, del más flojo al más
+fuerte, igual que en C:
+
+```
+comparación  ( == != < > <= >= )
+      |
+   bitor    ( | )
+      |
+   bitxor   ( ^ )
+      |
+   bitand   ( & )
+      |
+   shift    ( << >> )
+      |
+   suma/resta ( + - )
+```
+
+Cada operador compila a un pequeño helper de runtime (`altair_band`,
+`altair_bor`, `altair_bxor`, `altair_bnot`, `altair_shl`, `altair_shr` en
+`altair_rt.c`) que exige que ambos operandos sean `numeric` — los números de
+Altair son `double` internamente, así que las operaciones a nivel de bit
+convierten a `long long` antes de aplicar el operador de C y vuelven a
+`double` al devolver. Pasar un operando que no sea numérico lanza `ALT0002`.
+
+```altair
+numeric flags = 6 & 3   / 2
+numeric merged = 6 | 3  / 7
+numeric x = 1 << 4      / 16
+numeric inv = ~0        / -1
+```
+
+---
+
+## 32. E/S de ficheros y ejecución de procesos
+
+Son llamadas a función normales (`ND_FUNC_CALL`) — no hizo falta gramática
+nueva, porque el compilador ya tenía un mecanismo genérico: cualquier
+llamada `nombre(args)` que no sea un método conocido de lista/texto compila
+directo a una llamada en C `_fn_nombre(args)`. Cada builtin de abajo es
+simplemente una función de C llamada `_fn_<nombre>` implementada en
+`altair_rt.c`.
+
+| Función | Firma | Descripción |
+|---|---|---|
+| `open(path)` | `file` | Abre para lectura (modo `"r"`). |
+| `open_write(path)` | `file` | Abre para escritura, truncando (modo `"w"`). |
+| `open_append(path)` | `file` | Abre para añadir (modo `"a"`). |
+| `read(f)` | `text` | Lee todo el contenido restante de `f`. |
+| `read_line(f)` | `text` | Lee una línea (sin el `\n`/`\r` final). |
+| `write(f, texto)` | `bool` | Escribe `texto` en `f`. |
+| `close(f)` | `bool` | Cierra `f`. Se puede llamar dos veces sin problema. |
+| `create_file(path)` | `bool` | Crea un fichero vacío si no existe. |
+| `delete_file(path)` | `bool` | Borra un fichero. |
+| `mkdir(path)` | `bool` | Crea un directorio (éxito si ya existe). |
+| `file_exists(path)` | `bool` | Comprueba existencia vía `stat()`. |
+| `list_dir(path)` | `list` | Lista los nombres de un directorio (excluye `.`/`..`). |
+| `exec(cmd)` | `numeric` | Ejecuta `cmd` con `system()`; devuelve el código de salida. |
+| `exec_capture(cmd)` | `text` | Ejecuta `cmd` con `popen()`; devuelve el stdout capturado. |
+
+```altair
+create_file("build/out.txt")
+file f = open_write("build/out.txt")
+write(f, "gcc invoked here")
+close(f)
+
+numeric rc = exec("gcc build/main.c -o programa.exe")
+if rc == 0;
+    log "build ok"
+break
+```
+
+**Resolución de rutas:** las rutas se pasan tal cual a la librería estándar de
+C (`fopen`, `stat`, `opendir`...) relativas al directorio de trabajo del
+proceso — no hay ninguna resolución automática hacia una carpeta de
+proyecto para `file`/`open`/etc. (Esa carpeta de "carpeta propia por
+proyecto" descrita para las *variables persistentes* sí se implementó, ver
+§35, pero es un mecanismo aparte, no parte de `file`/`open`.)
+
+---
+
+## 33. Punteros crudos
+
+Builtins que acompañan a `point@Tipo` (§31.4):
+
+| Función | Firma | Descripción |
+|---|---|---|
+| `ptr_alloc(n)` | `point` | Reserva `n` bytes a cero (`calloc`) y devuelve un puntero. |
+| `ptr_free(p)` | `bool` | Libera la memoria y pone a `NULL` el puntero de `p`. |
+| `ptr_is_null(p)` | `bool` | Verdadero si `p` no es un puntero o apunta a `NULL`. |
+
+Los punteros **no** tienen recolector de basura y **no** se liberan
+automáticamente — es gestión manual de memoria intencionadamente cruda, al
+estilo de C, coherente con el objetivo original de que Altair pueda
+construir ASTs, listas enlazadas y grafos a mano.
+
+```altair
+point@byte buf = ptr_alloc(256)
+/ ... usar buf ...
+ptr_free(buf)
+```
+
+---
+
+## 34. Argumentos de línea de comandos
+
+Antes de este cambio, un binario Altair compilado no tenía forma de leer su
+propio `argv`. Como un compilador auto-hospedado necesita aceptar una ruta
+de fichero fuente por línea de comandos, el `main(int argc, char **argv)`
+generado ahora llama a `altair_set_args(argc, argv)` antes de ejecutar el
+cuerpo del programa.
+
+| Función | Firma | Descripción |
+|---|---|---|
+| `argc()` | `numeric` | Número de argumentos de línea de comandos (incluye argv[0]). |
+| `arg(i)` | `text` | El argumento `i`-ésimo (base 0; `arg(0)` es la ruta del binario). |
+
+```altair
+numeric n = argc()
+if n < 2;
+    log "uso: programa <archivo>"
+else;
+    log "archivo: " + arg(1)
+break
+```
+
+---
+
+## 35. Variables persistentes con archivo propio
+
+Sintaxis: tras la declaración normal de una variable, un identificador
+punteado a modo de "nombre de fichero" (por ejemplo `player.coins`):
+
+```altair
+numeric coins = 120 player.coins
+text playerName = "Victor" player.name
+```
+
+**Cómo funciona internamente:**
+
+- **Parser:** tras parsear los cualificadores de almacenamiento en la
+  declaración genérica de variable, si sigue un identificador de la forma
+  `algo.algo`, se guarda como `n->persist_file` en el nodo AST (usa una
+  instantánea/restauración del lexer para poder "mirar hacia delante" sin
+  romper el resto del parseo si no hay patrón `ident.ident`).
+- **Codegen — al declarar:** si `persist_file` está presente, se emite una
+  llamada a `altair_persist_load("player.coins")`. Si el fichero ya existe,
+  su valor **sobreescribe** el de la expresión inicial (esto permite que el
+  valor sobreviva entre ejecuciones). Si no existe, se usa el valor inicial
+  y se escribe inmediatamente al fichero. La variable además se registra
+  en un listado global para volcarse también al apagar el programa.
+- **Codegen — en cada asignación:** cualquier asignación posterior a esa
+  variable (`coins = coins + 10`) dispara automáticamente un
+  `altair_persist_save(...)` con el nuevo valor.
+- **Formato en disco:** cada fichero de `variables/` tiene dos líneas: una
+  etiqueta de tipo (`N` numeric, `T` text, `B` bool) y el valor serializado.
+  Esto permite auto-describir el tipo al recargar sin que el compilador
+  necesite conocerlo de antemano.
+- **Ubicación:** todos estos ficheros se guardan automáticamente en la
+  carpeta `variables/` (relativa al directorio de trabajo del binario
+  compilado). La carpeta se crea sola si no existe.
 
 ```altair
 altair.doc;
-    name = "TodoAPI"
+    name = "PersistTest"
     version = "1.0"
-    author = "Altair Team"
+    author = "a"
 create altair.doc
 
-/ Configuración de entorno
-config;
-    env("PORT") default "8080"
-    env("API_SECRET") required
-break
+numeric coins = 120 player.coins
+text playerName = "Victor" player.name
 
-/ Lista de tareas persistente en disco
-define list todos disk = []
-
-/ Middleware de autenticación
-middleware auth;
-    define text clave = header("X-API-Key")
-    if clave != API_SECRET;
-        respond.status(401)
-        respond.json("{\"error\":\"no autorizado\"}")
-        stop
-    break
-break
-
-/ Health check
-health "/health";
-    check "almacenamiento" -> 1
-break
-
-/ Métricas Prometheus
-metrics "/metrics";
-
-/ Job de limpieza periódica
-job limpieza every 1h;
-    log "Limpieza ejecutada"
-break
-
-/ Rutas
-listen PORT;
-    route "GET" "/todos";
-        respond.json(todos)
-    break
-
-    route "POST" "/todos" rate_limit 60 per_minute;
-        define text titulo = body()
-        if titulo == "";
-            respond.status(400)
-            respond.json("{\"error\":\"titulo requerido\"}")
-            stop
-        break
-        todos.append(titulo)
-        respond.status(201)
-        respond.json("{\"creado\":true}")
-    break
-
-    route "DELETE" "/todos";
-        todos.clear()
-        respond.json("{\"ok\":true}")
-    break
-break
+log "coins=" + coins
+coins = coins + 10
+log "coins tras sumar=" + coins
 ```
 
-```bash
-altairc TodoAPI.at -o todoapi
-API_SECRET=mi-clave PORT=3000 ./todoapi
-curl -H "X-API-Key: mi-clave" http://localhost:3000/todos
-curl -H "X-API-Key: mi-clave" -X POST -d "Comprar pan" http://localhost:3000/todos
-```
+Primera ejecución → imprime `coins=120`, luego `coins tras sumar=130`, y dentro
+de `variables/` quedan `player.coins` (`N` / `130`) y `player.name`
+(`T` / `Victor`). Segunda ejecución → el `120` inicial es ignorado porque ya
+existe `variables/player.coins`; arranca directamente con `coins=130`.
+
+**Limitación conocida:** de momento solo `numeric`, `text` y `bool` se
+serializan; declarar una variable `list` con nombre punteado no falla, pero
+su contenido no se persiste entre ejecuciones.
 
 ---
 
-*Generado a partir del código fuente real de `altairc v1.6.5vC`.*
-*Lexer: `lexer.c` · Parser: `parser.c` · Sema: `sema.c` · Codegen: `codegen.c` · Runtime: `altair_rt.c`*
+## 36. El compilador auto-hospedado (Altair-Core)
+
+`selfhost/altair.at` es un compilador escrito **enteramente en Altair** (usa
+`file`, indexado de texto, `char`, y el control de flujo / funciones que
+Altair ya tenía) que compila un subconjunto deliberadamente más pequeño del
+lenguaje, llamado **Altair-Core**, directamente a C.
+
+```
+                 (bootstrap, una sola vez)
+ altair.at  ──────────────────────────▶  altairc-selfhost
+ (Altair real)      altairc (en C)        (binario nativo)
+
+                 (repetible, sin necesitar inventar un compilador C)
+ programa.atc ─────────────────────────▶ programa.gen.c ──▶ gcc ──▶ binario
+              altairc-selfhost
+```
+
+Compilarlo:
+```bash
+./altairc selfhost/altair.at -o selfhost/altairc-selfhost
+```
+
+Usarlo:
+```bash
+./altairc-selfhost fib.atc fib.gen.c
+gcc fib.gen.c -o fib_bin -lm   # -lm hace falta: numeric % compila a fmod()
+./fib_bin
+```
+
+### 36.1 Gramática de Altair-Core
+
+Altair-Core conserva la forma `if/elif/else...break`, `while...break` y
+`fun nombre -> tipo ... break` de Altair, pero no tiene análisis semántico
+propio — los errores de tipos aparecen como **errores de gcc** sobre el C
+generado, no como errores de Altair. Los `;` tras las cabeceras son
+opcionales: el lexer de Altair-Core los trata igual que un espacio en
+blanco.
+
+```
+programa  := stmt*
+stmt      := vardecl | assign | log | return | if | while | fun-call
+vardecl   := ("numeric"|"text"|"bool") IDENT "=" expr
+assign    := IDENT "=" expr
+log       := "log" expr
+if        := "if" expr stmt* ("elif" expr stmt*)* ("else" stmt*)? "break"
+while     := "while" expr stmt* "break"
+fun       := "fun" IDENT ("->" tipo)? (tipo IDENT ("," tipo IDENT)*)? stmt* "break"
+return    := "return" expr?
+```
+
+Y expresiones con precedencia clásica (`or` → `and` → `not` → comparación →
+suma/resta → mult/div/mod → unario → primario), donde `primario` incluye
+número, cadena, `true`/`false`, identificador, llamada `nombre(args)` y
+`(expr)`.
+
+### 36.2 Mapeo de tipos (Altair-Core → C)
+
+| Altair-Core | C generado |
+|---|---|
+| `numeric` | `double` |
+| `text` | `char*` |
+| `bool` | `int` |
+| `%` | `fmod(a, b)` (el `%` nativo de C no aplica a `double`) |
+| `+` | `+` nativo — **solo aritmético**, no concatena texto |
+
+### 36.3 Runtime integrado (se emite una vez por fichero de salida)
+
+| Función | Propósito |
+|---|---|
+| `concat(a, b)` | Concatenación de texto (no hay `+` para texto). |
+| `streq(a, b)` | Igualdad de texto (`==`/`!=` sobre `char*` compararía punteros, no contenido). |
+| `numstr(n)` | `numeric → text`, para usar con `log`. |
+
+```altair
+fun fib -> numeric numeric n;
+    if n < 2;
+        return n
+    break
+    return fib(n - 1) + fib(n - 2)
+break
+
+numeric i = 0
+while i < 10;
+    log numstr(fib(i))
+    i = i + 1
+break
+
+log concat("hola, ", "mundo")
+```
+
+### 36.4 Qué significa y qué no significa "self-hosting" aquí
+
+`altairc-selfhost` compila programas Altair-Core, pero **todavía no puede
+compilar su propio código fuente** (`altair.at`), porque `altair.at` usa
+funcionalidades que Altair-Core no soporta: `list`, `file`/`open`/`read`/
+`close`, indexado de texto, y declaraciones con más de un parámetro
+tipado. Cerrar ese círculo — reescribir `altair.at` usando *solo*
+Altair-Core, tras ampliar Altair-Core con listas y E/S de ficheros — es el
+siguiente paso natural y no está hecho todavía.
+
+Lo que **sí** está probado de punta a punta:
+- `altairc` (en C) compila con éxito `altair.at` (Altair real) →
+  `altairc-selfhost`.
+- `altairc-selfhost` compila con éxito programas Altair-Core (recursión,
+  `if/elif/else`, `while`, concatenación de texto, `%`, comparación de
+  texto) → C.
+- El C generado compila limpio con `gcc` y produce el resultado correcto.
+
+---
+
+*Guía generada a partir de la implementación real del compilador y el
+runtime de Altair. No cubre `async`, `safe block` ni `data ... save data`:
+no están implementados todavía.*
