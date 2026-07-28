@@ -1566,7 +1566,7 @@ break
 <p>Sintaxis: tras la declaración normal de una variable, un identificador
 punteado a modo de "nombre de fichero" (por ejemplo <code>player.coins</code>):</p>
 <pre><code class="language-altair">numeric coins = 120 player.coins
-text playerName = &quot;Victor&quot; player.name
+text playerName = &quot;Nombre&quot; player.name
 </code></pre>
 <p><strong>Cómo funciona internamente:</strong></p>
 <ul>
@@ -1599,7 +1599,7 @@ text playerName = &quot;Victor&quot; player.name
 create altair.doc
 
 numeric coins = 120 player.coins
-text playerName = &quot;Victor&quot; player.name
+text playerName = &quot;Nombre&quot; player.name
 
 log &quot;coins=&quot; + coins
 coins = coins + 10
@@ -1607,7 +1607,7 @@ log &quot;coins tras sumar=&quot; + coins
 </code></pre>
 <p>Primera ejecución → imprime <code>coins=120</code>, luego <code>coins tras sumar=130</code>, y dentro
 de <code>variables/</code> quedan <code>player.coins</code> (<code>N</code> / <code>130</code>) y <code>player.name</code>
-(<code>T</code> / <code>Victor</code>). Segunda ejecución → el <code>120</code> inicial es ignorado porque ya
+(<code>T</code> / <code>Nombre</code>). Segunda ejecución → el <code>120</code> inicial es ignorado porque ya
 existe <code>variables/player.coins</code>; arranca directamente con <code>coins=130</code>.</p>
 <p><strong>Limitación conocida:</strong> de momento solo <code>numeric</code>, <code>text</code> y <code>bool</code> se
 serializan; declarar una variable <code>list</code> con nombre punteado no falla, pero
@@ -1761,7 +1761,7 @@ data create
 </ul>
 <pre><code class="language-altair">data PlayerSave disk;
     numeric coins = 120
-    text name = &quot;Victor&quot;
+    text name = &quot;Nombre&quot;
 data create
 
 log coins
@@ -3458,7 +3458,7 @@ data create
 </ul>
 <pre><code class="language-altair">data PlayerSave disk;
     numeric coins = 120
-    text name = &quot;Victor&quot;
+    text name = &quot;Nombre&quot;
 data create
 
 log coins
