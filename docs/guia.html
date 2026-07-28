@@ -21,7 +21,7 @@ html{scroll-behavior:smooth;}
 body{background:var(--bg); color:var(--text); font-family:var(--font-display); line-height:1.65; min-height:100vh;}
 .wrap{max-width:860px; margin:0 auto; padding:0 24px 100px;}
 
-/* nav */
+
 nav{display:flex; justify-content:space-between; align-items:center; padding:22px 0 30px; border-bottom:1px solid var(--line); margin-bottom:30px; flex-wrap:wrap; gap:14px;}
 .brand{font-weight:700; font-size:1.1rem; text-decoration:none; color:var(--text); display:flex; align-items:center; gap:8px;}
 .brand img{width:22px; height:22px; border-radius:50%;}
@@ -29,7 +29,7 @@ nav{display:flex; justify-content:space-between; align-items:center; padding:22p
 .navlinks a{color:var(--text-dim); text-decoration:none; font-size:.88rem; font-family:var(--font-mono); transition:color .15s;}
 .navlinks a:hover{color:var(--gold);}
 
-/* language toggle */
+
 .lang-toggle{
   display:flex; align-items:center; background:var(--bg-panel); border:1px solid var(--line);
   border-radius:999px; padding:4px; font-family:var(--font-mono); font-size:.8rem; gap:2px;
@@ -41,41 +41,38 @@ nav{display:flex; justify-content:space-between; align-items:center; padding:22p
 .lang-toggle button.active{background:linear-gradient(135deg,var(--gold),var(--ember)); color:#160b02;}
 .lang-toggle button:not(.active):hover{color:var(--text);}
 
-/* headings */
 h1{font-size:2.2rem; font-weight:700; letter-spacing:-.01em; margin-bottom:10px; line-height:1.2;}
 .subtitle{color:var(--text-dim); font-size:1rem; margin-bottom:40px;}
 h2{font-size:1.4rem; font-weight:700; margin-top:60px; margin-bottom:18px; color:var(--gold); border-bottom:1px solid var(--line); padding-bottom:10px; scroll-margin-top:20px;}
 h3{font-size:1.1rem; font-weight:600; margin-top:30px; margin-bottom:12px; color:var(--text); scroll-margin-top:20px;}
 
-/* text */
 p{color:#c7ceda; font-size:.97rem; margin-bottom:14px;}
 li{color:#c7ceda; font-size:.97rem; margin-bottom:6px;}
 ul,ol{padding-left:20px; margin-bottom:14px;}
 a{color:var(--gold); text-decoration:none;}
 a:hover{text-decoration:underline;}
 
-/* inline code */
+
 code{font-family:var(--font-mono); background:var(--bg-panel); border:1px solid var(--line); border-radius:4px; padding:2px 7px; font-size:.83em; color:var(--gold);}
 
-/* code blocks */
+
 pre{background:var(--bg-panel); border:1px solid var(--line); border-radius:10px; padding:20px 22px; overflow-x:auto; margin-bottom:20px;}
 pre code{background:none; border:none; padding:0; color:#c7ceda; font-size:.87rem; line-height:1.7;}
 
-/* tables */
+
 table{border-collapse:collapse; width:100%; margin:16px 0 22px; font-size:.9rem;}
 th,td{border:1px solid var(--line); padding:9px 14px; text-align:left; vertical-align:top;}
 th{color:var(--gold); font-family:var(--font-mono); font-size:.78rem; background:var(--bg-panel-2); text-transform:uppercase; letter-spacing:.06em;}
 td code{font-size:.82em;}
 
-/* blockquote */
 blockquote{border-left:3px solid var(--gold); margin:20px 0; padding:8px 20px; color:var(--text-dim); background:var(--bg-panel); border-radius:0 8px 8px 0; font-size:.95rem;}
 blockquote p{margin-bottom:0;}
 
-/* eyebrow */
+
 .eyebrow{font-family:var(--font-mono); font-size:.75rem; color:var(--gold); letter-spacing:.14em; text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
 .eyebrow::before{content:"✦";}
 
-/* toc */
+
 .toc{background:var(--bg-panel); border:1px solid var(--line); border-radius:12px; padding:24px 28px; margin-bottom:50px;}
 .toc h3,.toc h2{margin-top:0; margin-bottom:14px; font-size:1rem; color:var(--text-dim); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.08em; border:none; padding:0;}
 .toc ol{column-count:2; column-gap:24px;}
@@ -84,19 +81,13 @@ blockquote p{margin-bottom:0;}
 .toc a:hover{color:var(--gold); text-decoration:none;}
 @media(max-width:600px){.toc ol{column-count:1;} nav{flex-direction:column; align-items:flex-start;}}
 
-/* version badge */
+
 .badge{display:inline-block; font-family:var(--font-mono); font-size:.72rem; padding:3px 10px; border-radius:20px; background:linear-gradient(135deg,var(--gold),var(--ember)); color:#160b02; font-weight:700; margin-left:10px; vertical-align:middle;}
 
-/* new badge */
+
 .new{font-family:var(--font-mono); font-size:.68rem; padding:2px 7px; border-radius:4px; background:#5b7fff22; color:#5b7fff; border:1px solid #5b7fff44; margin-left:6px; vertical-align:middle;}
-
-/* divider */
 hr{border:none; border-top:1px solid var(--line); margin:48px 0;}
-
-/* footer */
 footer{margin-top:80px; padding-top:24px; border-top:1px solid var(--line); color:var(--text-dim); font-size:.82rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;}
-
-/* lang panes */
 .lang-pane{display:none;}
 .lang-pane.active{display:block;}
 </style>
@@ -126,8 +117,9 @@ footer{margin-top:80px; padding-top:24px; border-top:1px solid var(--line); colo
 <blockquote>
 <p>Basada en el funcionamiento interno real del compilador (<code>altairc</code>, escrito en C:
 lexer → parser → sema → codegen → C → gcc → binario nativo) y del runtime
-(<code>altair_rt.c</code>). No incluye las funcionalidades de <code>async</code>, <code>safe block</code> ni
-<code>data ... save data</code>, que todavía no están implementadas.</p>
+(<code>altair_rt.c</code>). No incluye <code>async</code> ni <code>safe block</code>, que todavía no están
+implementadas. El bloque <code>data</code> sí está implementado (con una sintaxis
+distinta a la propuesta original) — ver §37.</p>
 </blockquote>
 <h2 id="es-indice">Índice</h2>
 <ol>
@@ -161,12 +153,13 @@ lexer → parser → sema → codegen → C → gcc → binario nativo) y del ru
 <li><a href="#es-28-consultas-de-sistema-integradas">Consultas de sistema integradas</a></li>
 <li><a href="#es-29-referencia-de-la-cli-altairc">Referencia de la CLI <code>altairc</code></a></li>
 <li><a href="#es-30-códigos-de-error">Códigos de error</a></li>
-<li><a href="#es-31-char-file-pointtipo-y-operadores-a-nivel-de-bit"><code>char</code>, <code>file</code>, <code>point@Tipo</code> y operadores a nivel de bit</a></li>
+<li><a href="#es-31-char-file-ptipo-y-operadores-a-nivel-de-bit"><code>char</code>, <code>file</code>, <code>p#Tipo</code> y operadores a nivel de bit</a></li>
 <li><a href="#es-32-es-de-ficheros-y-ejecución-de-procesos">E/S de ficheros y ejecución de procesos</a></li>
 <li><a href="#es-33-punteros-crudos">Punteros crudos</a></li>
 <li><a href="#es-34-argumentos-de-línea-de-comandos">Argumentos de línea de comandos</a></li>
 <li><a href="#es-35-variables-persistentes-con-archivo-propio">Variables persistentes con archivo propio</a></li>
 <li><a href="#es-36-el-compilador-auto-hospedado-altair-core">El compilador auto-hospedado (Altair-Core)</a></li>
+<li><a href="#es-37-bloque-data--contenedores-de-variables-agrupadas">Bloque <code>data</code> — contenedores de variables agrupadas</a></li>
 </ol>
 <hr />
 <h2 id="es-1-vision-general">1. Visión general</h2>
@@ -342,7 +335,7 @@ define text again = invite_code   / ERROR: ALT0004, token ya consumido
 </code></pre>
 <h3 id="es-char-texto-de-un-caracter-anadido-para-self-hosting-31"><code>char</code> — texto de un carácter <em>(añadido para self-hosting, §31)</em></h3>
 <h3 id="es-file-manejador-de-fichero-anadido-para-self-hosting-3132"><code>file</code> — manejador de fichero <em>(añadido para self-hosting, §31–32)</em></h3>
-<h3 id="es-pointtipo-puntero-crudo-anadido-para-self-hosting-31-33"><code>point@Tipo</code> — puntero crudo <em>(añadido para self-hosting, §31, §33)</em></h3>
+<h3 id="es-ptipo-puntero-crudo-anadido-para-self-hosting-31-33"><code>p#Tipo</code> — puntero crudo <em>(añadido para self-hosting, §31, §33)</em></h3>
 <hr />
 <h2 id="es-5-operadores-y-expresiones">5. Operadores y expresiones</h2>
 <h3 id="es-aritmeticos">Aritméticos</h3>
@@ -1222,7 +1215,7 @@ altairc guide
 </tbody>
 </table>
 <hr />
-<h2 id="es-31-char-file-pointtipo-y-operadores-a-nivel-de-bit">31. <code>char</code>, <code>file</code>, <code>point@Tipo</code> y operadores a nivel de bit</h2>
+<h2 id="es-31-char-file-ptipo-y-operadores-a-nivel-de-bit">31. <code>char</code>, <code>file</code>, <code>p#Tipo</code> y operadores a nivel de bit</h2>
 <blockquote>
 <p>Añadidos para dar soporte a <strong>self-hosting</strong> (que un compilador de Altair
 pueda algún día escribirse en el propio Altair). Tocan las cuatro etapas
@@ -1263,23 +1256,85 @@ puntero en C.</p>
 text contents = read(f)
 close(f)
 </code></pre>
-<h3 id="es-314-pointtipo-punteros-crudos">31.4 <code>point@Tipo</code> — punteros crudos</h3>
-<p>Forma de declaración nueva, parseada como su propia rama en <code>parser.c</code>,
-antes del camino genérico de declaración de tipos:</p>
-<pre><code class="language-altair">point@Tipo nombre [= expresión]
+<h3 id="es-314-ptipo-punteros-crudos-sintaxis-actualizada">31.4 <code>p#Tipo</code> — punteros crudos (sintaxis actualizada)</h3>
+<blockquote>
+<p><strong>Esta sintaxis sustituye a la antigua <code>point@Tipo</code>, que ya no existe.</strong>
+La palabra clave completa <code>point</code> se abrevió a <code>p</code>, y el namespace pasó de
+<code>@</code> a <code>#</code> (para diferenciarlo visualmente de <code>system@</code>/<code>compiler@</code>, que son
+namespaces de solo lectura, mientras que <code>p#</code> opera sobre memoria mutable).
+<code>p</code> queda <strong>reservada</strong> como palabra clave en todo el lenguaje: ya no se
+puede usar como nombre de variable o función.</p>
+</blockquote>
+<p><strong>Declarar y reservar memoria (en un solo paso):</strong></p>
+<pre><code class="language-altair">p#Tipo nombre = alloc(n)
 </code></pre>
-<p><code>point@Tipo</code> declara una variable de <code>VTYPE_POINTER</code> (<code>ALT_POINTER</code> en
-runtime). El <code>Tipo</code> tras la <code>@</code> se guarda solo a efectos de documentación /
-un futuro chequeo de tipos — el valor subyacente es un <code>void*</code> opaco (típicamente
-de <code>ptr_alloc</code>), así que Altair todavía no obliga a que el puntero apunte
-siempre a valores de <code>Tipo</code>. Es el bloque de construcción que describía la
-propuesta original para construir ASTs, listas enlazadas y grafos.</p>
-<pre><code class="language-altair">point@node current = ptr_alloc(64)
-if ptr_is_null(current);
-    log &quot;sin memoria&quot;
-break
-ptr_free(current)
+<p><code>p#Tipo</code> declara una variable de <code>VTYPE_POINTER</code> (<code>ALT_POINTER</code> en runtime).
+El <code>Tipo</code> tras la <code>#</code> se guarda solo a efectos de documentación — el valor
+subyacente es un bloque de memoria cruda de <code>n</code> bytes, así que Altair no
+obliga a que el puntero apunte siempre a valores de <code>Tipo</code>.</p>
+<p><strong>Namespace <code>p#</code> — operaciones sobre un puntero ya creado:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Operación</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>p#write(nombre, offset, valor)</code></td>
+<td>Escribe <code>valor</code> (numeric) en el slot <code>offset</code></td>
+</tr>
+<tr>
+<td><code>numeric v = p#read(nombre, offset)</code></td>
+<td>Lee el slot <code>offset</code></td>
+</tr>
+<tr>
+<td><code>p#bytes(nombre)</code></td>
+<td>Bytes totales reservados por <code>alloc(n)</code></td>
+</tr>
+<tr>
+<td><code>p#null(nombre)</code></td>
+<td><code>true</code> si el puntero es nulo o ya fue liberado</td>
+</tr>
+<tr>
+<td><code>p#free(nombre)</code></td>
+<td>Libera la memoria</td>
+</tr>
+</tbody>
+</table>
+<p>Cada <code>offset</code> es un <strong>slot de 8 bytes</strong> (un <code>numeric</code>/<code>double</code>), no un byte
+crudo — así <code>alloc(64)</code> da 8 slots utilizables, del <code>0</code> al <code>7</code>. Leer o
+escribir fuera de esos límites falla de forma segura (<code>p#write</code> devuelve
+<code>false</code>, <code>p#read</code> devuelve <code>0</code>), sin volcar memoria ajena.</p>
+<pre><code class="language-altair">p#node n = alloc(64)
+
+p#write(n, 0, 42)
+p#write(n, 1, 100)
+
+numeric a = p#read(n, 0)
+numeric b = p#read(n, 1)
+
+log a               / 42
+log b               / 100
+log p#bytes(n)      / 64
+log p#null(n)       / false
+
+p#free(n)
+log p#null(n)       / true
 </code></pre>
+<p><strong>Por qué antes no servía para nada:</strong> en la primera versión (<code>point@Tipo</code>,
+con <code>ptr_alloc</code>/<code>ptr_free</code>/<code>ptr_is_null</code>), el puntero solo reservaba y
+liberaba memoria — no existía forma de leer ni escribir dentro de ese
+bloque, así que era inútil para construir listas enlazadas o nodos de AST.
+<code>p#write</code>/<code>p#read</code> son justo lo que faltaba para que sea funcional de
+verdad.</p>
+<p><strong>Detalle interno importante:</strong> <code>p#free</code> y <code>p#write</code> reciben el puntero <strong>por
+referencia</strong> (no una copia), para que la mutación (liberar memoria, poner el
+puntero a <code>NULL</code>) se refleje también en la variable original. El resto de
+llamadas a función en Altair sí reciben copias — este es un caso especial
+en el codegen (<code>ND_FUNC_CALL</code> con <code>fun_name</code> igual a <code>p_free</code>/<code>p_write</code>
+usa <code>cg_expr_receiver</code> en vez de <code>cg_expr</code> para su primer argumento).</p>
 <h3 id="es-315-operadores-a-nivel-de-bit">31.5 Operadores a nivel de bit</h3>
 <p>Tokens nuevos <code>&amp; | ^ ~ &lt;&lt; &gt;&gt;</code>, distinguidos correctamente de <code>&amp;&amp;</code>/<code>||</code> (el
 lexer comprueba primero las formas de dos caracteres). Se insertaron nuevos
@@ -1288,6 +1343,7 @@ fuerte, igual que en C:</p>
 <pre><code>comparación  ( == != &lt; &gt; &lt;= &gt;= )
       |
    bitor    ( | )
+
       |
    bitxor   ( ^ )
       |
@@ -1414,41 +1470,61 @@ proyecto para <code>file</code>/<code>open</code>/etc. (Esa carpeta de "carpeta 
 proyecto" descrita para las <em>variables persistentes</em> sí se implementó, ver
 §35, pero es un mecanismo aparte, no parte de <code>file</code>/<code>open</code>.)</p>
 <hr />
-<h2 id="es-33-punteros-crudos">33. Punteros crudos</h2>
-<p>Builtins que acompañan a <code>point@Tipo</code> (§31.4):</p>
+<h2 id="es-33-punteros-crudos-referencia-completa-de-p">33. Punteros crudos: referencia completa de <code>p#</code></h2>
 <table>
 <thead>
 <tr>
-<th>Función</th>
+<th>Sintaxis</th>
 <th>Firma</th>
 <th>Descripción</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>ptr_alloc(n)</code></td>
-<td><code>point</code></td>
-<td>Reserva <code>n</code> bytes a cero (<code>calloc</code>) y devuelve un puntero.</td>
+<td><code>p#Tipo nombre = alloc(n)</code></td>
+<td>declaración</td>
+<td>Reserva <code>n</code> bytes y crea el puntero <code>nombre</code></td>
 </tr>
 <tr>
-<td><code>ptr_free(p)</code></td>
+<td><code>p#write(nombre, offset, valor)</code></td>
 <td><code>bool</code></td>
-<td>Libera la memoria y pone a <code>NULL</code> el puntero de <code>p</code>.</td>
+<td>Escribe <code>valor</code> en el slot <code>offset</code> (8 bytes)</td>
 </tr>
 <tr>
-<td><code>ptr_is_null(p)</code></td>
+<td><code>numeric v = p#read(nombre, offset)</code></td>
+<td><code>numeric</code></td>
+<td>Lee el slot <code>offset</code></td>
+</tr>
+<tr>
+<td><code>p#bytes(nombre)</code></td>
+<td><code>numeric</code></td>
+<td>Bytes totales reservados</td>
+</tr>
+<tr>
+<td><code>p#null(nombre)</code></td>
 <td><code>bool</code></td>
-<td>Verdadero si <code>p</code> no es un puntero o apunta a <code>NULL</code>.</td>
+<td><code>true</code> si es nulo o ya liberado</td>
+</tr>
+<tr>
+<td><code>p#free(nombre)</code></td>
+<td><code>bool</code></td>
+<td>Libera la memoria</td>
 </tr>
 </tbody>
 </table>
+<p>Internamente, <code>alloc(n)</code> reserva <code>n</code> bytes <strong>más una cabecera oculta</strong> de
+<code>sizeof(size_t)</code> bytes justo antes de la dirección que se le entrega a
+Altair — esa cabecera guarda <code>n</code>, y es lo que consulta <code>p#bytes</code>. <code>p#free</code>
+libera desde el inicio real del bloque (<code>puntero - sizeof(size_t)</code>), no
+desde donde apunta la variable Altair.</p>
 <p>Los punteros <strong>no</strong> tienen recolector de basura y <strong>no</strong> se liberan
-automáticamente — es gestión manual de memoria intencionadamente cruda, al
-estilo de C, coherente con el objetivo original de que Altair pueda
-construir ASTs, listas enlazadas y grafos a mano.</p>
-<pre><code class="language-altair">point@byte buf = ptr_alloc(256)
-/ ... usar buf ...
-ptr_free(buf)
+automáticamente al salir de ámbito — es gestión manual de memoria
+intencionadamente cruda, al estilo de C. Usar un puntero después de
+<code>p#free</code> no está protegido salvo que compruebes <code>p#null</code> tú mismo antes.</p>
+<pre><code class="language-altair">p#byte buf = alloc(256)
+p#write(buf, 0, 1)
+log p#read(buf, 0)
+p#free(buf)
 </code></pre>
 <hr />
 <h2 id="es-34-argumentos-de-linea-de-comandos">34. Argumentos de línea de comandos</h2>
@@ -1664,16 +1740,78 @@ siguiente paso natural y no está hecho todavía.</p>
   texto) → C.
 - El C generado compila limpio con <code>gcc</code> y produce el resultado correcto.</p>
 <hr />
+<h2 id="es-37-bloque-data-contenedores-de-variables-agrupadas">37. Bloque <code>data</code> — contenedores de variables agrupadas</h2>
+<p>Agrupa varias variables bajo un nombre común y un "lugar" de almacenamiento
+compartido. <code>data</code>, <code>p</code> y <code>#</code> son ahora también palabras clave reservadas.</p>
+<pre><code class="language-altair">data Nombre lugar;
+    tipo var1 = valor1
+    tipo var2 = valor2
+data create
+</code></pre>
+<ul>
+<li><code>lugar</code> puede ser uno de los cuatro niveles de almacenamiento normales
+  (<code>ram</code>, <code>disk</code>, <code>cache</code>, <code>temp</code>) <strong>o cualquier identificador propio</strong> (una
+  extensión personalizada, p. ej. <code>data PlayerSave save; ... data create</code>).</li>
+<li>El bloque termina con <code>data create</code> (no con <code>break</code>).</li>
+<li>Internamente, cada variable declarada dentro se etiqueta con un fichero de
+  persistencia propio, reutilizando el mismo mecanismo que las variables
+  persistentes con nombre (§35): <code>variables/&lt;Nombre&gt;.&lt;var&gt;.&lt;lugar&gt;</code>. Por eso
+  cada campo tiene su propio fichero — necesario para que <code>migrate</code> pueda
+  mover todos los ficheros que compartan el prefijo <code>&lt;Nombre&gt;.</code> de una vez.</li>
+</ul>
+<pre><code class="language-altair">data PlayerSave disk;
+    numeric coins = 120
+    text name = &quot;Victor&quot;
+data create
+
+log coins
+log name
+
+coins = coins + 5
+</code></pre>
+<p>Esto crea <code>variables/PlayerSave.coins.disk</code> y <code>variables/PlayerSave.name.disk</code>,
+y cada asignación posterior a <code>coins</code> o <code>name</code> los mantiene actualizados
+(igual que en §35).</p>
+<h3 id="es-migrar-todo-el-bloque-de-golpe">Migrar todo el bloque de golpe</h3>
+<pre><code class="language-altair">data Nombre migrate lugar
+</code></pre>
+<p>Busca todos los ficheros <code>variables/Nombre.*.</code> y los renombra al nuevo
+<code>lugar</code>. Es una operación de fichero real (<code>rename()</code>), no un stub.</p>
+<p><strong>Limitación conocida — importante:</strong> el fichero al que cada variable lee y
+escribe queda <strong>fijado en tiempo de compilación</strong> (el nombre se hornea en el
+C generado). <code>migrate</code> renombra el fichero en disco, pero si el programa
+sigue corriendo tras el <code>migrate</code> y esa variable vuelve a asignarse, o el
+programa simplemente termina (el volcado final de cierre también usa el
+nombre original), <strong>el fichero antiguo se vuelve a crear</strong> con el nombre de
+antes. Es decir: <code>migrate</code> sirve como operación puntual de reetiquetado /
+exportación, pero <strong>no</strong> convierte el programa en curso en un consumidor
+dinámico de la nueva ubicación — no es un cambio de nivel de almacenamiento
+en caliente que el propio programa recuerde y respete después.</p>
+<pre><code class="language-altair">data PlayerSave disk;
+    numeric coins = 120
+data create
+
+coins = coins + 5
+data PlayerSave migrate cache
+/ en este punto variables/PlayerSave.coins.cache existe con valor 125,
+/ pero si el programa reasigna coins otra vez, o simplemente termina,
+/ variables/PlayerSave.coins.disk se vuelve a crear también.
+</code></pre>
+<hr />
 <p><em>Guía generada a partir de la implementación real del compilador y el
-runtime de Altair. No cubre <code>async</code>, <code>safe block</code> ni <code>data ... save data</code>:
-no están implementados todavía.</em></p>
+runtime de Altair. Versión del compilador: </em><em>1.7</em><em>. No cubre <code>async</code> ni
+<code>safe block</code>: no están implementadas todavía. El bloque <code>data</code> (§37) sí
+está implementado.</em></p>
 </div>
 
 <div id="pane-en" class="lang-pane">
-<h1 id="en-altair-language-reference-v165vb">Altair Language Reference - v1.6.5vB</h1>
+<h1 id="en-altair-language-reference-v17">Altair Language Reference - v1.7</h1>
 <blockquote>
 <p><strong>altairc guide</strong> - complete language reference for the Altair programming language.
-Generated by: <code>altairc guide</code></p>
+Generated by: <code>altairc guide</code>
+Does not cover <code>async</code> or <code>safe block</code>, which are not implemented yet.
+The <code>data</code> block <strong>is</strong> implemented (with syntax different from the
+original proposal) — see §37.</p>
 </blockquote>
 <hr />
 <h2 id="en-table-of-contents">Table of Contents</h2>
@@ -1714,6 +1852,7 @@ Generated by: <code>altairc guide</code></p>
 <li><a href="#en-34-cli-arguments-in-compiled-programs">CLI Arguments in Compiled Programs</a></li>
 <li><a href="#en-35-the-self-hosted-compiler-altair-core">The Self-Hosted Compiler (Altair-Core)</a></li>
 <li><a href="#en-36-complete-server-example">Complete Server Example</a></li>
+<li><a href="#en-37-data-block--grouped-variable-containers"><code>data</code> Block — grouped variable containers</a></li>
 </ol>
 <hr />
 <h2 id="en-1-overview">1. Overview</h2>
@@ -2776,23 +2915,83 @@ underlying <code>FILE*</code> is shared, exactly like assigning a pointer in C.<
 text contents = read(f)
 close(f)
 </code></pre>
-<h3 id="en-314-pointtype-raw-pointers">31.4 <code>point@Type</code> — raw pointers</h3>
-<p>New declaration form, parsed as its own branch in <code>parser.c</code> before the
-generic type-declaration path:</p>
-<pre><code class="language-altair">point@Type name [= expr]
+<h3 id="en-314-ptype-raw-pointers-updated-syntax">31.4 <code>p#Type</code> — raw pointers (updated syntax)</h3>
+<blockquote>
+<p><strong>This syntax replaces the old <code>point@Type</code>, which no longer exists.</strong>
+The full keyword <code>point</code> was shortened to <code>p</code>, and the namespace changed
+from <code>@</code> to <code>#</code> (to visually distinguish it from <code>system@</code>/<code>compiler@</code>,
+which are read-only namespaces, while <code>p#</code> operates on mutable memory).
+<code>p</code> is now a <strong>reserved</strong> keyword throughout the language: it can no
+longer be used as a variable or function name.</p>
+</blockquote>
+<p><strong>Declare and allocate memory (in one step):</strong></p>
+<pre><code class="language-altair">p#Type name = alloc(n)
 </code></pre>
-<p><code>point@Type</code> declares a variable of <code>VTYPE_POINTER</code> (<code>ALT_POINTER</code> at
-runtime). The <code>Type</code> after <code>@</code> is stored only for documentation / future
-type-checking — the underlying value is an opaque <code>void*</code> (from <code>ptr_alloc</code>,
-typically), so Altair does not currently enforce that the pointer only ever
-points at values of <code>Type</code>. This is the building block the language docs
-describe for constructing ASTs, linked lists, and graphs.</p>
-<pre><code class="language-altair">point@node current = ptr_alloc(64)
-if ptr_is_null(current);
-    log &quot;sin memoria&quot;
-break
-ptr_free(current)
+<p><code>p#Type</code> declares a variable of <code>VTYPE_POINTER</code> (<code>ALT_POINTER</code> at
+runtime). The <code>Type</code> after <code>#</code> is stored only for documentation purposes —
+the underlying value is a raw memory block of <code>n</code> bytes, so Altair does not
+enforce that the pointer only ever points at values of <code>Type</code>.</p>
+<p><strong>Namespace <code>p#</code> — operations on an existing pointer:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>p#write(name, offset, value)</code></td>
+<td>Writes <code>value</code> (numeric) into slot <code>offset</code></td>
+</tr>
+<tr>
+<td><code>numeric v = p#read(name, offset)</code></td>
+<td>Reads slot <code>offset</code></td>
+</tr>
+<tr>
+<td><code>p#bytes(name)</code></td>
+<td>Total bytes allocated by <code>alloc(n)</code></td>
+</tr>
+<tr>
+<td><code>p#null(name)</code></td>
+<td><code>true</code> if the pointer is null or already freed</td>
+</tr>
+<tr>
+<td><code>p#free(name)</code></td>
+<td>Frees the memory</td>
+</tr>
+</tbody>
+</table>
+<p>Each <code>offset</code> is an <strong>8-byte slot</strong> (a <code>numeric</code>/<code>double</code>), not a raw byte —
+so <code>alloc(64)</code> gives 8 usable slots, <code>0</code> through <code>7</code>. Reading or writing
+outside those bounds fails safely (<code>p#write</code> returns <code>false</code>, <code>p#read</code>
+returns <code>0</code>), without touching foreign memory.</p>
+<pre><code class="language-altair">p#node n = alloc(64)
+p#write(n, 0, 42)
+p#write(n, 1, 100)
+
+numeric a = p#read(n, 0)
+numeric b = p#read(n, 1)
+
+log a               / 42
+log b               / 100
+log p#bytes(n)      / 64
+log p#null(n)       / false
+
+p#free(n)
+log p#null(n)       / true
 </code></pre>
+<p><strong>Why the old version was useless:</strong> in the first version (<code>point@Type</code>,
+with <code>ptr_alloc</code>/<code>ptr_free</code>/<code>ptr_is_null</code>), the pointer could only allocate
+and free memory — there was no way to read or write inside that block, so
+it was useless for building linked lists or AST nodes. <code>p#write</code>/<code>p#read</code>
+are exactly what was missing to make it actually functional.</p>
+<p><strong>Important internal detail:</strong> <code>p#free</code> and <code>p#write</code> receive the pointer
+<strong>by reference</strong> (not a copy), so the mutation (freeing memory, setting the
+pointer to <code>NULL</code>) is also reflected in the original variable. Every other
+function call in Altair receives copies — this is a special case in codegen
+(<code>ND_FUNC_CALL</code> with <code>fun_name</code> equal to <code>p_free</code>/<code>p_write</code> uses
+<code>cg_expr_receiver</code> instead of <code>cg_expr</code> for its first argument).</p>
 <h3 id="en-315-bitwise-operators">31.5 Bitwise operators</h3>
 <p>New tokens <code>&amp; | ^ ~ &lt;&lt; &gt;&gt;</code>, lexed distinctly from <code>&amp;&amp;</code>/<code>||</code> (the lexer checks
 the two-character forms first). New precedence levels were inserted into the
@@ -2932,41 +3131,61 @@ in sections 31–35 covers only what was actually implemented: file I/O,
 self-hosted compiler.</p>
 </blockquote>
 <hr />
-<h2 id="en-33-raw-pointers">33. Raw Pointers</h2>
-<p>Companion builtins to <code>point@Type</code> (§31.4):</p>
+<h2 id="en-33-raw-pointers-complete-p-reference">33. Raw Pointers: complete <code>p#</code> reference</h2>
 <table>
 <thead>
 <tr>
-<th>Function</th>
+<th>Syntax</th>
 <th>Signature</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>ptr_alloc(n)</code></td>
-<td><code>point</code></td>
-<td><code>calloc</code>s <code>n</code> zeroed bytes, returns a pointer to them.</td>
+<td><code>p#Type name = alloc(n)</code></td>
+<td>declaration</td>
+<td>Allocates <code>n</code> bytes and creates the pointer <code>name</code></td>
 </tr>
 <tr>
-<td><code>ptr_free(p)</code></td>
+<td><code>p#write(name, offset, value)</code></td>
 <td><code>bool</code></td>
-<td>Frees the memory and nulls out <code>p</code>'s pointer field.</td>
+<td>Writes <code>value</code> into slot <code>offset</code> (8 bytes)</td>
 </tr>
 <tr>
-<td><code>ptr_is_null(p)</code></td>
+<td><code>numeric v = p#read(name, offset)</code></td>
+<td><code>numeric</code></td>
+<td>Reads slot <code>offset</code></td>
+</tr>
+<tr>
+<td><code>p#bytes(name)</code></td>
+<td><code>numeric</code></td>
+<td>Total bytes allocated</td>
+</tr>
+<tr>
+<td><code>p#null(name)</code></td>
 <td><code>bool</code></td>
-<td>True if <code>p</code> is not a pointer or points at <code>NULL</code>.</td>
+<td><code>true</code> if null or already freed</td>
+</tr>
+<tr>
+<td><code>p#free(name)</code></td>
+<td><code>bool</code></td>
+<td>Frees the memory</td>
 </tr>
 </tbody>
 </table>
-<p>Pointers are <strong>not</strong> garbage collected and are <strong>not</strong> automatically freed —
-this is intentionally raw, C-style manual memory management, matching the
-original design goal of letting Altair build ASTs, linked lists, and graphs
-by hand.</p>
-<pre><code class="language-altair">point@byte buf = ptr_alloc(256)
-/ ... use buf via future pointer-dereference builtins ...
-ptr_free(buf)
+<p>Internally, <code>alloc(n)</code> reserves <code>n</code> bytes <strong>plus a hidden header</strong> of
+<code>sizeof(size_t)</code> bytes right before the address handed to Altair — that
+header stores <code>n</code>, which is what <code>p#bytes</code> looks up. <code>p#free</code> frees from
+the real start of the block (<code>pointer - sizeof(size_t)</code>), not from where
+the Altair variable points.</p>
+<p>Pointers are <strong>not</strong> garbage collected and are <strong>not</strong> automatically freed
+on scope exit — this is intentionally raw, C-style manual memory
+management. Using a pointer after <code>p#free</code> is not protected unless you
+check <code>p#null</code> yourself first.</p>
+<pre><code class="language-altair">p#byte buf = alloc(256)
+p#write(buf, 0, 1)
+log p#read(buf, 0)
+p#free(buf)
 </code></pre>
 <hr />
 <h2 id="en-34-cli-arguments-in-compiled-programs">34. CLI Arguments in Compiled Programs</h2>
@@ -3218,7 +3437,65 @@ curl http://localhost:3000/health
 curl http://localhost:3000/metrics
 </code></pre>
 <hr />
-<p><em>Altair Language Reference - v1.6.5vB - Generated by <code>altairc guide</code></em>
+<h2 id="en-37-data-block-grouped-variable-containers">37. <code>data</code> Block — grouped variable containers</h2>
+<p>Groups several variables under a common name and shared storage "place".
+<code>data</code>, <code>p</code>, and <code>#</code> are now also reserved keywords.</p>
+<pre><code class="language-altair">data Name place;
+    type var1 = value1
+    type var2 = value2
+data create
+</code></pre>
+<ul>
+<li><code>place</code> can be one of the four normal storage tiers (<code>ram</code>, <code>disk</code>,
+  <code>cache</code>, <code>temp</code>) <strong>or any custom identifier</strong> (a user-defined extension,
+  e.g. <code>data PlayerSave save; ... data create</code>).</li>
+<li>The block ends with <code>data create</code> (not <code>break</code>).</li>
+<li>Internally, each variable declared inside gets tagged with its own
+  persistence file, reusing the same mechanism as named persistent
+  variables (§35): <code>variables/&lt;Name&gt;.&lt;var&gt;.&lt;place&gt;</code>. That's why each field
+  gets its own file — necessary so that <code>migrate</code> can move all files
+  sharing the <code>&lt;Name&gt;.</code> prefix at once.</li>
+</ul>
+<pre><code class="language-altair">data PlayerSave disk;
+    numeric coins = 120
+    text name = &quot;Victor&quot;
+data create
+
+log coins
+log name
+
+coins = coins + 5
+</code></pre>
+<p>This creates <code>variables/PlayerSave.coins.disk</code> and
+<code>variables/PlayerSave.name.disk</code>, and every subsequent assignment to
+<code>coins</code> or <code>name</code> keeps them up to date (same as in §35).</p>
+<h3 id="en-migrating-the-whole-block-at-once">Migrating the whole block at once</h3>
+<pre><code class="language-altair">data Name migrate place
+</code></pre>
+<p>Finds all <code>variables/Name.*.</code> files and renames them to the new <code>place</code>.
+This is a real file operation (<code>rename()</code>), not a stub.</p>
+<p><strong>Known limitation — important:</strong> the file each variable reads from and
+writes to is <strong>fixed at compile time</strong> (the name is baked into the
+generated C). <code>migrate</code> renames the file on disk, but if the program keeps
+running after the <code>migrate</code> and that variable gets reassigned again, or the
+program simply exits (the final shutdown dump also uses the original
+name), <strong>the old file gets recreated</strong> under the previous name. In other
+words: <code>migrate</code> works as a one-off relabeling/export operation, but it
+does <strong>not</strong> turn the running program into a dynamic consumer of the new
+location — it's not a hot storage-tier switch that the program itself
+remembers and honors afterward.</p>
+<pre><code class="language-altair">data PlayerSave disk;
+    numeric coins = 120
+data create
+
+coins = coins + 5
+data PlayerSave migrate cache
+/ at this point variables/PlayerSave.coins.cache exists with value 125,
+/ but if the program reassigns coins again, or simply exits,
+/ variables/PlayerSave.coins.disk gets recreated too.
+</code></pre>
+<hr />
+<p><em>Altair Language Reference - v1.7 - Generated by <code>altairc guide</code></em>
 <em>Compiler: altairc 1.7 | License: MIT</em></p>
 </div>
 
@@ -3252,7 +3529,7 @@ function setLang(lang){
   try{ localStorage.setItem('altair_guide_lang', lang); }catch(e){}
 }
 
-// Restore last chosen language on load
+
 (function(){
   var saved = null;
   try{ saved = localStorage.getItem('altair_guide_lang'); }catch(e){}
