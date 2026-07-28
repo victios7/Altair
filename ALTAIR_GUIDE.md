@@ -2,8 +2,9 @@
 
 > Basada en el funcionamiento interno real del compilador (`altairc`, escrito en C:
 > lexer → parser → sema → codegen → C → gcc → binario nativo) y del runtime
-> (`altair_rt.c`). No incluye las funcionalidades de `async`, `safe block` ni
-> `data ... save data`, que todavía no están implementadas.
+> (`altair_rt.c`). No incluye `async` ni `safe block`, que todavía no están
+> implementadas. El bloque `data` sí está implementado (con una sintaxis
+> distinta a la propuesta original) — ver §37.
 
 ## Índice
 
@@ -37,12 +38,13 @@
 28. [Consultas de sistema integradas](#28-consultas-de-sistema-integradas)
 29. [Referencia de la CLI `altairc`](#29-referencia-de-la-cli-altairc)
 30. [Códigos de error](#30-códigos-de-error)
-31. [`char`, `file`, `point@Tipo` y operadores a nivel de bit](#31-char-file-pointtipo-y-operadores-a-nivel-de-bit)
+31. [`char`, `file`, `p#Tipo` y operadores a nivel de bit](#31-char-file-ptipo-y-operadores-a-nivel-de-bit)
 32. [E/S de ficheros y ejecución de procesos](#32-es-de-ficheros-y-ejecución-de-procesos)
 33. [Punteros crudos](#33-punteros-crudos)
 34. [Argumentos de línea de comandos](#34-argumentos-de-línea-de-comandos)
 35. [Variables persistentes con archivo propio](#35-variables-persistentes-con-archivo-propio)
 36. [El compilador auto-hospedado (Altair-Core)](#36-el-compilador-auto-hospedado-altair-core)
+37. [Bloque `data` — contenedores de variables agrupadas](#37-bloque-data--contenedores-de-variables-agrupadas)
 
 ---
 
@@ -240,7 +242,7 @@ define text again = invite_code   / ERROR: ALT0004, token ya consumido
 
 ### `file` — manejador de fichero *(añadido para self-hosting, §31–32)*
 
-### `point@Tipo` — puntero crudo *(añadido para self-hosting, §31, §33)*
+### `p#Tipo` — puntero crudo *(añadido para self-hosting, §31, §33)*
 
 ---
 
@@ -1150,7 +1152,7 @@ altairc guide
 
 ---
 
-## 31. `char`, `file`, `point@Tipo` y operadores a nivel de bit
+## 31. `char`, `file`, `p#Tipo` y operadores a nivel de bit
 
 > Añadidos para dar soporte a **self-hosting** (que un compilador de Altair
 > pueda algún día escribirse en el propio Altair). Tocan las cuatro etapas
@@ -1203,29 +1205,71 @@ text contents = read(f)
 close(f)
 ```
 
-### 31.4 `point@Tipo` — punteros crudos
+### 31.4 `p#Tipo` — punteros crudos (sintaxis actualizada)
 
-Forma de declaración nueva, parseada como su propia rama en `parser.c`,
-antes del camino genérico de declaración de tipos:
+> **Esta sintaxis sustituye a la antigua `point@Tipo`, que ya no existe.**
+> La palabra clave completa `point` se abrevió a `p`, y el namespace pasó de
+> `@` a `#` (para diferenciarlo visualmente de `system@`/`compiler@`, que son
+> namespaces de solo lectura, mientras que `p#` opera sobre memoria mutable).
+> `p` queda **reservada** como palabra clave en todo el lenguaje: ya no se
+> puede usar como nombre de variable o función.
 
+**Declarar y reservar memoria (en un solo paso):**
 ```altair
-point@Tipo nombre [= expresión]
+p#Tipo nombre = alloc(n)
 ```
 
-`point@Tipo` declara una variable de `VTYPE_POINTER` (`ALT_POINTER` en
-runtime). El `Tipo` tras la `@` se guarda solo a efectos de documentación /
-un futuro chequeo de tipos — el valor subyacente es un `void*` opaco (típicamente
-de `ptr_alloc`), así que Altair todavía no obliga a que el puntero apunte
-siempre a valores de `Tipo`. Es el bloque de construcción que describía la
-propuesta original para construir ASTs, listas enlazadas y grafos.
+`p#Tipo` declara una variable de `VTYPE_POINTER` (`ALT_POINTER` en runtime).
+El `Tipo` tras la `#` se guarda solo a efectos de documentación — el valor
+subyacente es un bloque de memoria cruda de `n` bytes, así que Altair no
+obliga a que el puntero apunte siempre a valores de `Tipo`.
+
+**Namespace `p#` — operaciones sobre un puntero ya creado:**
+
+| Operación | Descripción |
+|---|---|
+| `p#write(nombre, offset, valor)` | Escribe `valor` (numeric) en el slot `offset` |
+| `numeric v = p#read(nombre, offset)` | Lee el slot `offset` |
+| `p#bytes(nombre)` | Bytes totales reservados por `alloc(n)` |
+| `p#null(nombre)` | `true` si el puntero es nulo o ya fue liberado |
+| `p#free(nombre)` | Libera la memoria |
+
+Cada `offset` es un **slot de 8 bytes** (un `numeric`/`double`), no un byte
+crudo — así `alloc(64)` da 8 slots utilizables, del `0` al `7`. Leer o
+escribir fuera de esos límites falla de forma segura (`p#write` devuelve
+`false`, `p#read` devuelve `0`), sin volcar memoria ajena.
 
 ```altair
-point@node current = ptr_alloc(64)
-if ptr_is_null(current);
-    log "sin memoria"
-break
-ptr_free(current)
+p#node n = alloc(64)
+
+p#write(n, 0, 42)
+p#write(n, 1, 100)
+
+numeric a = p#read(n, 0)
+numeric b = p#read(n, 1)
+
+log a               / 42
+log b               / 100
+log p#bytes(n)      / 64
+log p#null(n)       / false
+
+p#free(n)
+log p#null(n)       / true
 ```
+
+**Por qué antes no servía para nada:** en la primera versión (`point@Tipo`,
+con `ptr_alloc`/`ptr_free`/`ptr_is_null`), el puntero solo reservaba y
+liberaba memoria — no existía forma de leer ni escribir dentro de ese
+bloque, así que era inútil para construir listas enlazadas o nodos de AST.
+`p#write`/`p#read` son justo lo que faltaba para que sea funcional de
+verdad.
+
+**Detalle interno importante:** `p#free` y `p#write` reciben el puntero **por
+referencia** (no una copia), para que la mutación (liberar memoria, poner el
+puntero a `NULL`) se refleje también en la variable original. El resto de
+llamadas a función en Altair sí reciben copias — este es un caso especial
+en el codegen (`ND_FUNC_CALL` con `fun_name` igual a `p_free`/`p_write`
+usa `cg_expr_receiver` en vez de `cg_expr` para su primer argumento).
 
 ### 31.5 Operadores a nivel de bit
 
@@ -1238,6 +1282,7 @@ fuerte, igual que en C:
 comparación  ( == != < > <= >= )
       |
    bitor    ( | )
+
       |
    bitxor   ( ^ )
       |
@@ -1311,30 +1356,39 @@ proyecto" descrita para las *variables persistentes* sí se implementó, ver
 
 ---
 
-## 33. Punteros crudos
+## 33. Punteros crudos: referencia completa de `p#`
 
-Builtins que acompañan a `point@Tipo` (§31.4):
-
-| Función | Firma | Descripción |
+| Sintaxis | Firma | Descripción |
 |---|---|---|
-| `ptr_alloc(n)` | `point` | Reserva `n` bytes a cero (`calloc`) y devuelve un puntero. |
-| `ptr_free(p)` | `bool` | Libera la memoria y pone a `NULL` el puntero de `p`. |
-| `ptr_is_null(p)` | `bool` | Verdadero si `p` no es un puntero o apunta a `NULL`. |
+| `p#Tipo nombre = alloc(n)` | declaración | Reserva `n` bytes y crea el puntero `nombre` |
+| `p#write(nombre, offset, valor)` | `bool` | Escribe `valor` en el slot `offset` (8 bytes) |
+| `numeric v = p#read(nombre, offset)` | `numeric` | Lee el slot `offset` |
+| `p#bytes(nombre)` | `numeric` | Bytes totales reservados |
+| `p#null(nombre)` | `bool` | `true` si es nulo o ya liberado |
+| `p#free(nombre)` | `bool` | Libera la memoria |
+
+Internamente, `alloc(n)` reserva `n` bytes **más una cabecera oculta** de
+`sizeof(size_t)` bytes justo antes de la dirección que se le entrega a
+Altair — esa cabecera guarda `n`, y es lo que consulta `p#bytes`. `p#free`
+libera desde el inicio real del bloque (`puntero - sizeof(size_t)`), no
+desde donde apunta la variable Altair.
 
 Los punteros **no** tienen recolector de basura y **no** se liberan
-automáticamente — es gestión manual de memoria intencionadamente cruda, al
-estilo de C, coherente con el objetivo original de que Altair pueda
-construir ASTs, listas enlazadas y grafos a mano.
+automáticamente al salir de ámbito — es gestión manual de memoria
+intencionadamente cruda, al estilo de C. Usar un puntero después de
+`p#free` no está protegido salvo que compruebes `p#null` tú mismo antes.
 
 ```altair
-point@byte buf = ptr_alloc(256)
-/ ... usar buf ...
-ptr_free(buf)
+p#byte buf = alloc(256)
+p#write(buf, 0, 1)
+log p#read(buf, 0)
+p#free(buf)
 ```
 
 ---
 
 ## 34. Argumentos de línea de comandos
+
 
 Antes de este cambio, un binario Altair compilado no tenía forma de leer su
 propio `argv`. Como un compilador auto-hospedado necesita aceptar una ruta
@@ -1528,6 +1582,79 @@ Lo que **sí** está probado de punta a punta:
 
 ---
 
+## 37. Bloque `data` — contenedores de variables agrupadas
+
+Agrupa varias variables bajo un nombre común y un "lugar" de almacenamiento
+compartido. `data`, `p` y `#` son ahora también palabras clave reservadas.
+
+```altair
+data Nombre lugar;
+    tipo var1 = valor1
+    tipo var2 = valor2
+data create
+```
+
+- `lugar` puede ser uno de los cuatro niveles de almacenamiento normales
+  (`ram`, `disk`, `cache`, `temp`) **o cualquier identificador propio** (una
+  extensión personalizada, p. ej. `data PlayerSave save; ... data create`).
+- El bloque termina con `data create` (no con `break`).
+- Internamente, cada variable declarada dentro se etiqueta con un fichero de
+  persistencia propio, reutilizando el mismo mecanismo que las variables
+  persistentes con nombre (§35): `variables/<Nombre>.<var>.<lugar>`. Por eso
+  cada campo tiene su propio fichero — necesario para que `migrate` pueda
+  mover todos los ficheros que compartan el prefijo `<Nombre>.` de una vez.
+
+```altair
+data PlayerSave disk;
+    numeric coins = 120
+    text name = "Victor"
+data create
+
+log coins
+log name
+
+coins = coins + 5
+```
+
+Esto crea `variables/PlayerSave.coins.disk` y `variables/PlayerSave.name.disk`,
+y cada asignación posterior a `coins` o `name` los mantiene actualizados
+(igual que en §35).
+
+### Migrar todo el bloque de golpe
+
+```altair
+data Nombre migrate lugar
+```
+
+Busca todos los ficheros `variables/Nombre.*.` y los renombra al nuevo
+`lugar`. Es una operación de fichero real (`rename()`), no un stub.
+
+**Limitación conocida — importante:** el fichero al que cada variable lee y
+escribe queda **fijado en tiempo de compilación** (el nombre se hornea en el
+C generado). `migrate` renombra el fichero en disco, pero si el programa
+sigue corriendo tras el `migrate` y esa variable vuelve a asignarse, o el
+programa simplemente termina (el volcado final de cierre también usa el
+nombre original), **el fichero antiguo se vuelve a crear** con el nombre de
+antes. Es decir: `migrate` sirve como operación puntual de reetiquetado /
+exportación, pero **no** convierte el programa en curso en un consumidor
+dinámico de la nueva ubicación — no es un cambio de nivel de almacenamiento
+en caliente que el propio programa recuerde y respete después.
+
+```altair
+data PlayerSave disk;
+    numeric coins = 120
+data create
+
+coins = coins + 5
+data PlayerSave migrate cache
+/ en este punto variables/PlayerSave.coins.cache existe con valor 125,
+/ pero si el programa reasigna coins otra vez, o simplemente termina,
+/ variables/PlayerSave.coins.disk se vuelve a crear también.
+```
+
+---
+
 *Guía generada a partir de la implementación real del compilador y el
-runtime de Altair. No cubre `async`, `safe block` ni `data ... save data`:
-no están implementados todavía.*
+runtime de Altair. Versión del compilador: **1.7**. No cubre `async` ni
+`safe block`: no están implementadas todavía. El bloque `data` (§37) sí
+está implementado.*
