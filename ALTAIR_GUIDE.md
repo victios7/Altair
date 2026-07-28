@@ -1419,7 +1419,7 @@ punteado a modo de "nombre de fichero" (por ejemplo `player.coins`):
 
 ```altair
 numeric coins = 120 player.coins
-text playerName = "Victor" player.name
+text playerName = "Nombre" player.name
 ```
 
 **Cómo funciona internamente:**
@@ -1454,7 +1454,7 @@ altair.doc;
 create altair.doc
 
 numeric coins = 120 player.coins
-text playerName = "Victor" player.name
+text playerName = "Nombre" player.name
 
 log "coins=" + coins
 coins = coins + 10
@@ -1463,7 +1463,7 @@ log "coins tras sumar=" + coins
 
 Primera ejecución → imprime `coins=120`, luego `coins tras sumar=130`, y dentro
 de `variables/` quedan `player.coins` (`N` / `130`) y `player.name`
-(`T` / `Victor`). Segunda ejecución → el `120` inicial es ignorado porque ya
+(`T` / `Nombre`). Segunda ejecución → el `120` inicial es ignorado porque ya
 existe `variables/player.coins`; arranca directamente con `coins=130`.
 
 **Limitación conocida:** de momento solo `numeric`, `text` y `bool` se
@@ -1607,7 +1607,7 @@ data create
 ```altair
 data PlayerSave disk;
     numeric coins = 120
-    text name = "Victor"
+    text name = "Nombre"
 data create
 
 log coins
