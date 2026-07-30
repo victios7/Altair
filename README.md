@@ -9,7 +9,7 @@ jobs, sesiones y storage tiers integrados directamente en la sintaxis.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-e8b34d.svg)](LICENSE)
 [![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#instalación)
-[![Version](https://img.shields.io/badge/version-1.6.5vC-ff6a3d.svg)](ALTAIR_GUIDE.md)
+[![Version](https://img.shields.io/badge/version-1.7vB-ff6a3d.svg)](ALTAIR_GUIDE.md)
 
 [**Descargar Altair**](https://github.com/victios7/altair/releases/latest) ·
 [Sitio web](https://victios7.github.io/Altair/) ·
