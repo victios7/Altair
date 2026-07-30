@@ -174,3 +174,7 @@ Request.
 ## Licencia
 
 Altair se distribuye bajo licencia [MIT](LICENSE).
+
+## Nota
+Solo para ser transparente: usé IA para ayudar con el logo y ocasionalmente con la revisión/corrección de cosas mientras desarrollaba Altair. El lenguaje, compilador, runtime, arquitectura e implementación son mi propio trabajo. La IA es una herramienta que usé durante el desarrollo para ayudarme, no la autora del proyecto.
+Si quieres llamarlo “porquería de IA”, está bien, pero por favor recuerda que hay una persona real detrás de este proyecto que ha pasado mucho tiempo construyéndolo. Critica el proyecto si no te gusta, pero no descartes el trabajo de alguien sin mirar realmente lo que hicieron.
