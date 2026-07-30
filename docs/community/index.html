@@ -107,15 +107,15 @@ async function loadPosts(){
     </div>
   `).join("");
 
-  // Rellenar nombre en cada mini-form de comentario
+
   document.querySelectorAll(".comment-author").forEach(el => el.value = getAuthorName());
 
-  // Toggle comentarios
+ 
   document.querySelectorAll("[data-toggle]").forEach(btn => {
     btn.addEventListener("click", () => toggleComments(btn.dataset.toggle, btn));
   });
 
-  // Enviar comentario
+  
   document.querySelectorAll("[data-comment-submit]").forEach(btn => {
     btn.addEventListener("click", () => submitComment(btn.dataset.commentSubmit));
   });
