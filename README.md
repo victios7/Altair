@@ -4,7 +4,7 @@
 
 # Altair Lang
 
-**Lenguaje compilado a C nativo, con storage tiers, HTTP, jobs y sesiones en la propia sintaxis.**
+**Lenguaje compilado a C nativo: storage tiers, sintaxis clara y control de memoria cuando hace falta.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-e8b34d.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#instalación)
@@ -21,23 +21,152 @@
 
 ## ¿Qué es Altair?
 
-Altair es un lenguaje **estáticamente compilado y orientado a expresiones**. Su compilador, `altairc`, transpila cada programa `.at` a C y luego a un **binario nativo** sin runtime externo que instalar.
+Altair es un lenguaje **estáticamente compilado y orientado a expresiones**. Su compilador, `altairc`, transpila cada programa `.at` a C y luego a un **binario nativo** — sin runtime externo que instalar.
 
 ```
 .at → lexer → parser → sema → codegen → .c → gcc → binario
 ```
 
-No es un lenguaje de scripting interpretado ni un framework encima de otro runtime: el resultado es un ejecutable normal de Windows, Linux o macOS.
+Está pensado en un punto **medio-bajo**: sintaxis legible y tipos cómodos, con la opción de bajar a memoria explícita y decidir **dónde vive cada dato**.
 
-A partir de la serie 1.6.5, Altair incorpora de forma nativa:
+## Lo esencial del lenguaje
 
-- servidor HTTP (`listen` / `route`)
-- jobs programados
-- sesiones con TTL
-- configuración por entorno
-- **storage tiers** (`ram`, `cache`, `disk`, `temp`) con `orbit`, `prefer`, `weight` y migración
+### Storage tiers
 
-Todo eso se declara en la sintaxis del lenguaje, sin frameworks externos.
+Cada valor puede declarar en qué nivel vive. El runtime puede moverlo después.
+
+| Tier | Uso típico |
+|---|---|
+| `ram` | Rápido, volátil |
+| `cache` | Intermedio |
+| `disk` | Persistente |
+| `temp` | Temporal |
+
+```altair
+numeric contador = 0 ram
+text log_path = "app.log" disk
+list cola = [] cache
+
+/ mover entre niveles
+orbit contador -> disk
+prefer log_path weight 10
+```
+
+Con `orbit`, `prefer`, `weight` y migración, el lenguaje trata el almacenamiento como parte de la semántica, no solo como detalle del sistema operativo.
+
+### Sintaxis sencilla
+
+Variables, funciones, control de flujo y texto sin ceremonia:
+
+```altair
+altair.doc;
+    name = "Hola"
+    version = "1.0"
+create altair.doc
+
+fun saludo -> text text nombre;
+    return "Hola, " + nombre
+break
+
+numeric i = 0
+while i < 3;
+    log saludo("mundo") + " #" + i
+    i = i + 1
+break
+```
+
+### Tipos y datos
+
+Tipos básicos claros (`numeric`, `text`, `bool`, `list`, `file`) y composición con listas y texto. Cuando hace falta control fino, bloques contiguos con **`p#`**:
+
+```altair
+p#w buf = alloc(1024)
+p#write(buf, 0, 42)
+numeric x = p#read(buf, 0)
+```
+
+### Compilado a nativo
+
+Un `.at` produce un ejecutable normal en Windows, Linux o macOS. Ideal para CLIs, herramientas y programas que quieres distribuir como un solo binario.
+
+---
+
+## En la práctica: R0 (ensamblador escrito en Altair)
+
+R0 es un compilador de ensamblador → C implementado **enteramente en Altair**: lexer, directivas, dos pasadas y emisión de C. Sirve como demostración de que el lenguaje aguanta programas largos y de sistemas.
+
+**Lexer y tokens**
+
+```altair
+fun next_token;
+    skip_ws()
+    if POS >= LEN;
+        set_tok("eof", "")
+        return
+    break
+    text c = peekc()
+    if is_digit(c);
+        text n = ""
+        while is_digit(peekc());
+            n = n + advc()
+        break
+        set_tok("num", n)
+        return
+    break
+    if is_alpha(c);
+        text id = ""
+        while is_alnum(peekc());
+            id = id + advc()
+        break
+        set_tok("id", id)
+        return
+    break
+    / ... strings, registros, comas, corchetes
+break
+```
+
+**Emisión de operaciones al C generado**
+
+```altair
+fun emit_binop text mnem, text dst, text src;
+    text d = operand_cexpr(dst, 2)
+    text s = operand_cexpr(src, 2)
+    if mnem == "add";
+        emit(d + "=(" + d + "+" + s + ")&0xffff;\n")
+    elif mnem == "sub";
+        emit(d + "=(" + d + "-" + s + ")&0xffff;\n")
+    elif mnem == "xor";
+        emit(d + "=(" + d + "^" + s + ")&0xffff;\n")
+    break
+    emit("FLAG_Z=((" + d + ")==0);FLAG_N=(((int16_t)(" + d + "))<0);\n")
+break
+```
+
+**Uso**
+
+```bash
+altairc r0.at -o r0
+./r0 programa.r0 salida.c
+gcc -o programa salida.c
+./programa
+```
+
+R0 muestra el lado “herramienta de sistemas”: parsers, tablas de símbolos, generación de código y ficheros, con la misma sintaxis que un script corto.
+
+---
+
+## Otras capacidades
+
+Más allá del núcleo del lenguaje, Altair incluye piezas opcionales en la sintaxis:
+
+| | |
+|---|---|
+| **HTTP** | `listen` / `route`, útil para APIs pequeñas autocontenidas |
+| **Jobs** | tareas con `job … every` |
+| **Sesiones y config** | TTL y variables de entorno tipadas |
+| **Métricas** | endpoints de salud al estilo Prometheus |
+
+Ejemplo mínimo de servidor (opcional):
 
 ```altair
 listen 8080;
@@ -47,107 +176,56 @@ listen 8080;
 break
 ```
 
-## Por qué existe
-
-Altair ocupa un punto **medio-bajo**:
-
-| Más control que Python/JS | Más cómodo que C puro |
-|---|---|
-| `p#` y memoria explícita | tipos, strings, listas y ficheros fáciles |
-| storage tiers y `orbit` | HTTP, jobs y sesiones en la sintaxis |
-| un solo binario nativo | sin gestionar `malloc` a mano para lo cotidiano |
-
-Sirve tanto para herramientas de sistemas (compiladores, ensambladores, CLIs) como para servicios pequeños autocontenidos.
-
-## Características
-
-| | |
-|---|---|
-| **Storage tiers** | Cada valor puede vivir en `ram`, `cache`, `disk` o `temp`. Con `orbit`, `prefer`, `weight` y migración entre niveles. |
-| **Memoria explícita** | Bloques contiguos con `p#` (`alloc`, `p#read`, `p#write`) cuando hace falta control fino. |
-| **Servidor HTTP nativo** | `listen` y `route` con middleware y rate limiting integrados. |
-| **Sesiones y config** | Sesiones con TTL y variables de entorno tipadas (`session`, `config`). |
-| **Jobs programados** | Tareas recurrentes con `job … every`. |
-| **Salud y métricas** | `/health` y `/metrics` (estilo Prometheus) en pocas líneas. |
-| **Binario nativo** | Un único ejecutable por programa. Windows, Linux y macOS. |
-
-Referencia completa de tipos, control de flujo, clases, snapshots y el resto de la sintaxis: [ALTAIR_GUIDE.md](ALTAIR_GUIDE.md).
+La referencia completa está en [ALTAIR_GUIDE.md](ALTAIR_GUIDE.md).
 
 ## Instalación
 
-Paquetes oficiales en [**Releases**](https://github.com/victios7/altair/releases/latest).
+Paquetes en [**Releases**](https://github.com/victios7/altair/releases/latest).
 
 ### Windows (10/11, 64-bit)
 
 1. Descarga `Altair-Setup-<version>.exe`
-2. Ejecútalo (permisos de administrador para añadir `altairc` al `PATH`)
-3. Abre **Altair Terminal** o cualquier terminal y comprueba:
+2. Ejecútalo (admin para el `PATH`)
+3. Comprueba:
 
 ```bash
 altairc --version
 ```
 
-El instalador trae compilador, terminal, toolchain `mingw64` e iconos. No hace falta instalar nada más.
+Incluye compilador, terminal y `mingw64`.
 
-### Linux (`.deb`)
+### Linux
 
 ```bash
 sudo dpkg -i altair_<version>_amd64.deb
 altairc --version
 ```
 
-También puedes usar `altair-linux-<version>.tar.gz` si prefieres el binario suelto.
+También: `altair-linux-<version>.tar.gz`.
 
 ### macOS (Apple Silicon)
 
-1. Descarga `Altair-Setup-<version>.pkg`
-2. Ábrelo (clic derecho → **Abrir** si macOS avisa de desarrollador no verificado)
-3. Sigue el asistente (`altairc` queda en `/usr/local/bin`)
-4. Comprueba:
+1. `Altair-Setup-<version>.pkg` (clic derecho → Abrir si hace falta)
+2. `altairc` en `/usr/local/bin`
+3. `altairc --version`
 
-```bash
-altairc --version
-```
-
-Alternativa: `altair-macos-<version>.tar.gz`.
+También: `altair-macos-<version>.tar.gz`.
 
 ## Uso rápido
 
 ```bash
-# Compilar
 altairc hola.at -o hola
+./hola              # Linux / macOS
+hola.exe            # Windows
 
-# Ejecutar
-./hola          # Linux / macOS
-hola.exe        # Windows
-
-# Generar la guía del lenguaje en el directorio actual
-altairc guide
+altairc guide       # genera la guía en el directorio actual
 ```
-
-Ejemplo de servidor incluido:
-
-```bash
-altairc examples/servidor.at -o servidor
-API_SECRET=mysecret PORT=3000 ./servidor
-curl http://localhost:3000/health
-```
-
-## Ecosistema alrededor de Altair
-
-El propio lenguaje se usa para construir herramientas no triviales, por ejemplo:
-
-- **R0** — ensamblador / compilador a C escrito en Altair (lexer, dos pasadas, emisión de C)
-- proyectos de experimentación (motores pequeños, CLIs, demos de storage y red)
-
-Eso refleja el objetivo del diseño: suficiente control de bajo nivel para sistemas, con sintaxis usable para programas reales.
 
 
 
 ## Contribuir
 
-Issues y propuestas: [Issues](https://github.com/victios7/altair/issues).  
-Cambios al compilador o a la guía: Pull Request bienvenido.
+[Issues](https://github.com/victios7/altair/issues) y Pull Requests bienvenidos.
 
 ## Licencia
 
@@ -155,6 +233,6 @@ Cambios al compilador o a la guía: Pull Request bienvenido.
 
 ## Nota del autor
 
-Para ser transparente: usé IA como ayuda puntual (logo y, a veces, revisión de texto) mientras desarrollaba Altair. **El lenguaje, el compilador, el runtime, la arquitectura y la implementación son trabajo mío.** La IA fue una herramienta, no la autora del proyecto.
+Usé IA como ayuda puntual (logo y, a veces, revisión de texto). **El lenguaje, el compilador, el runtime, la arquitectura y la implementación son trabajo mío.** La IA fue una herramienta, no la autora del proyecto.
 
-Si quieres criticar el diseño o el código, adelante: mira lo que hace el proyecto y juzga eso. Preferible a descartar el trabajo de una persona real sin revisarlo.
+Si quieres criticar el diseño o el código, mira lo que hace el proyecto y juzga eso.
