@@ -4,14 +4,13 @@
 
 # Altair Lang
 
-**Un lenguaje de programación compilado a C nativo, con servidor HTTP,
-jobs, sesiones y storage tiers integrados directamente en la sintaxis.**
+**Lenguaje compilado a C nativo, con storage tiers, HTTP, jobs y sesiones en la propia sintaxis.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-e8b34d.svg)](LICENSE)
-[![Platform: Windows | Linux | macOS](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#instalación)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#instalación)
 [![Version](https://img.shields.io/badge/version-1.7vB-ff6a3d.svg)](ALTAIR_GUIDE.md)
 
-[**Descargar Altair**](https://github.com/victios7/altair/releases/latest) ·
+[**Descargar**](https://github.com/victios7/altair/releases/latest) ·
 [Sitio web](https://victios7.github.io/Altair/) ·
 [Guía del lenguaje](ALTAIR_GUIDE.md) ·
 [Ejemplos](examples)
@@ -22,19 +21,23 @@ jobs, sesiones y storage tiers integrados directamente en la sintaxis.**
 
 ## ¿Qué es Altair?
 
-Altair es un lenguaje de programación **estáticamente compilado y orientado a
-expresiones** que transpila a C mediante su propio compilador, `altairc`.
-Cada programa `.at` se convierte en un binario nativo sin dependencias en
-tiempo de ejecución.
+Altair es un lenguaje **estáticamente compilado y orientado a expresiones**. Su compilador, `altairc`, transpila cada programa `.at` a C y luego a un **binario nativo** sin runtime externo que instalar.
 
 ```
-.at source → lexer → parser → sema → codegen → .c → gcc → binario
+.at → lexer → parser → sema → codegen → .c → gcc → binario
 ```
 
-A partir de la versión 1.6.5vC, Altair incluye una capa completa de servidor
-HTTP, scheduler de tareas, gestión de sesiones y configuración por variables
-de entorno, todo declarado con la sintaxis propia del lenguaje — sin
-frameworks externos.
+No es un lenguaje de scripting interpretado ni un framework encima de otro runtime: el resultado es un ejecutable normal de Windows, Linux o macOS.
+
+A partir de la serie 1.6.5, Altair incorpora de forma nativa:
+
+- servidor HTTP (`listen` / `route`)
+- jobs programados
+- sesiones con TTL
+- configuración por entorno
+- **storage tiers** (`ram`, `cache`, `disk`, `temp`) con `orbit`, `prefer`, `weight` y migración
+
+Todo eso se declara en la sintaxis del lenguaje, sin frameworks externos.
 
 ```altair
 listen 8080;
@@ -44,94 +47,85 @@ listen 8080;
 break
 ```
 
+## Por qué existe
+
+Altair ocupa un punto **medio-bajo**:
+
+| Más control que Python/JS | Más cómodo que C puro |
+|---|---|
+| `p#` y memoria explícita | tipos, strings, listas y ficheros fáciles |
+| storage tiers y `orbit` | HTTP, jobs y sesiones en la sintaxis |
+| un solo binario nativo | sin gestionar `malloc` a mano para lo cotidiano |
+
+Sirve tanto para herramientas de sistemas (compiladores, ensambladores, CLIs) como para servicios pequeños autocontenidos.
+
 ## Características
 
 | | |
 |---|---|
-| 🗄️ **Storage tiers** | Cada variable declara dónde vive: `ram`, `disk`, `cache` o `temp`, con expiración y prioridad. |
-| 🌐 **Servidor HTTP nativo** | `listen` y `route` declaran endpoints con middleware y rate limiting integrados. |
-| 🔐 **Sesiones y config** | Sesiones con TTL y variables de entorno tipadas vía `session` y `config`. |
-| ⏱️ **Jobs programados** | Tareas recurrentes con `job … every`. |
-| 📊 **Salud y métricas** | Endpoints `/health` y `/metrics` compatibles con Prometheus en una línea. |
-| ⚙️ **Binario nativo** | Todo compila a un único ejecutable sin runtime que instalar, en Windows, Linux y macOS. |
+| **Storage tiers** | Cada valor puede vivir en `ram`, `cache`, `disk` o `temp`. Con `orbit`, `prefer`, `weight` y migración entre niveles. |
+| **Memoria explícita** | Bloques contiguos con `p#` (`alloc`, `p#read`, `p#write`) cuando hace falta control fino. |
+| **Servidor HTTP nativo** | `listen` y `route` con middleware y rate limiting integrados. |
+| **Sesiones y config** | Sesiones con TTL y variables de entorno tipadas (`session`, `config`). |
+| **Jobs programados** | Tareas recurrentes con `job … every`. |
+| **Salud y métricas** | `/health` y `/metrics` (estilo Prometheus) en pocas líneas. |
+| **Binario nativo** | Un único ejecutable por programa. Windows, Linux y macOS. |
 
-Consulta la [guía completa del lenguaje](ALTAIR_GUIDE.md) para la referencia
-de tipos, control de flujo, clases, snapshots y el resto de la sintaxis.
+Referencia completa de tipos, control de flujo, clases, snapshots y el resto de la sintaxis: [ALTAIR_GUIDE.md](ALTAIR_GUIDE.md).
 
 ## Instalación
 
-Altair se distribuye como instalador nativo para **Windows**, **Linux** y
-**macOS**. Descarga el paquete de tu sistema desde la página de
-[**Releases**](https://github.com/victios7/altair/releases/latest)
+Paquetes oficiales en [**Releases**](https://github.com/victios7/altair/releases/latest).
 
-### 🪟 Windows (10/11, 64-bit)
+### Windows (10/11, 64-bit)
 
 1. Descarga `Altair-Setup-<version>.exe`
-2. Ejecútalo y acepta permisos de administrador (necesarios para añadir
-   `altairc` al `PATH` del sistema)
-3. Abre **Altair Terminal** desde el acceso directo del escritorio, o una
-   terminal normal, y comprueba la instalación:
+2. Ejecútalo (permisos de administrador para añadir `altairc` al `PATH`)
+3. Abre **Altair Terminal** o cualquier terminal y comprueba:
 
-   ```bash
-   altairc --version
-   ```
+```bash
+altairc --version
+```
 
-El instalador incluye el compilador, la terminal de Altair, el toolchain
-`mingw64` necesario para generar el binario final, e íconos y accesos
-directos — no hace falta instalar nada más.
+El instalador trae compilador, terminal, toolchain `mingw64` e iconos. No hace falta instalar nada más.
 
-### 🐧 Linux (paquete `.deb`)
+### Linux (`.deb`)
 
-1. Descarga `altair_<version>_amd64.deb`
-2. Instálalo con:
+```bash
+sudo dpkg -i altair_<version>_amd64.deb
+altairc --version
+```
 
-   ```bash
-   sudo dpkg -i altair_<version>_amd64.deb
-   ```
-3. Comprueba la instalación:
+También puedes usar `altair-linux-<version>.tar.gz` si prefieres el binario suelto.
 
-   ```bash
-   altairc --version
-   ```
-
-Alternativamente, descarga `altair-linux-<version>.tar.gz` para obtener el
-binario `altairc` suelto sin necesidad de paquete `.deb`.
-
-### 🍎 macOS (Apple Silicon)
+### macOS (Apple Silicon)
 
 1. Descarga `Altair-Setup-<version>.pkg`
-2. Haz doble clic para abrir el instalador
+2. Ábrelo (clic derecho → **Abrir** si macOS avisa de desarrollador no verificado)
+3. Sigue el asistente (`altairc` queda en `/usr/local/bin`)
+4. Comprueba:
 
-   > ⚠️ Como el paquete no está firmado con un certificado de Apple
-   > Developer, macOS puede mostrar un aviso de "desarrollador no
-   > verificado" la primera vez. Para abrirlo: clic derecho sobre el
-   > `.pkg` → **Abrir**, o ve a **Ajustes del Sistema → Privacidad y
-   > Seguridad** y pulsa **Abrir de todas formas**.
+```bash
+altairc --version
+```
 
-3. Sigue el asistente — instala `altairc` en `/usr/local/bin`
-4. Comprueba la instalación:
-
-   ```bash
-   altairc --version
-   ```
-
-Alternativamente, descarga `altair-macos-<version>.tar.gz` para obtener el
-binario `altairc` suelto sin necesidad de instalador.
+Alternativa: `altair-macos-<version>.tar.gz`.
 
 ## Uso rápido
 
 ```bash
-# Compilar un programa
+# Compilar
 altairc hola.at -o hola
 
-# Ejecutarlo
-./hola
+# Ejecutar
+./hola          # Linux / macOS
+hola.exe        # Windows
 
-# Generar esta misma guía del lenguaje en tu carpeta actual
+# Generar la guía del lenguaje en el directorio actual
 altairc guide
 ```
 
-Prueba el ejemplo de servidor incluido en [`examples/servidor.at`](examples/servidor.at):
+Ejemplo de servidor incluido:
 
 ```bash
 altairc examples/servidor.at -o servidor
@@ -139,42 +133,28 @@ API_SECRET=mysecret PORT=3000 ./servidor
 curl http://localhost:3000/health
 ```
 
-## Estructura del repositorio
+## Ecosistema alrededor de Altair
 
-```
-altair/
-├── .github/workflows/    # Compilación e integración continua multiplataforma
-│   └── release.yml
-├── docs/                 # Sitio web (GitHub Pages) — altair.github.io/altair
-│   ├── index.html
-│   ├── ALTAIR_LOGO.ico
-│   ├── robots.txt
-│   └── sitemap.xml
-├── examples/             # Programas .at de ejemplo
-│   ├── hola.at
-│   └── servidor.at
-├── ALTAIR_GUIDE.md        # Referencia completa del lenguaje (generada por `altairc guide`)
-├── LICENSE
-└── README.md
-```
+El propio lenguaje se usa para construir herramientas no triviales, por ejemplo:
 
-Los binarios (`altairc.exe`, `altairc` de Linux/macOS, `.deb`, `.pkg`,
-`Altair-Setup.exe`) **no se versionan en el repositorio** — se compilan y
-publican automáticamente para las tres plataformas en la sección de
-[Repo de compilación](https://github.com/victios7/altair-builder/releases) para no
-inflar el historial de git con archivos binarios.
+- **R0** — ensamblador / compilador a C escrito en Altair (lexer, dos pasadas, emisión de C)
+- proyectos de experimentación (motores pequeños, CLIs, demos de storage y red)
+
+Eso refleja el objetivo del diseño: suficiente control de bajo nivel para sistemas, con sintaxis usable para programas reales.
+
+
 
 ## Contribuir
 
-Las incidencias y propuestas de mejora son bienvenidas a través de
-[Issues](https://github.com/victios7/altair/issues). Si quieres
-proponer cambios al compilador o a la guía del lenguaje, abre un Pull
-Request.
+Issues y propuestas: [Issues](https://github.com/victios7/altair/issues).  
+Cambios al compilador o a la guía: Pull Request bienvenido.
 
 ## Licencia
 
-Altair se distribuye bajo licencia [MIT](LICENSE).
+[MIT](LICENSE).
 
-## Nota
-Solo para ser transparente: usé IA para ayudar con el logo y ocasionalmente con la revisión/corrección de cosas mientras desarrollaba Altair. El lenguaje, compilador, runtime, arquitectura e implementación son mi propio trabajo. La IA es una herramienta que usé durante el desarrollo para ayudarme, no la autora del proyecto.
-Si quieres llamarlo “porquería de IA”, está bien, pero por favor recuerda que hay una persona real detrás de este proyecto que ha pasado mucho tiempo construyéndolo. Critica el proyecto si no te gusta, pero no descartes el trabajo de alguien sin mirar realmente lo que hicieron.
+## Nota del autor
+
+Para ser transparente: usé IA como ayuda puntual (logo y, a veces, revisión de texto) mientras desarrollaba Altair. **El lenguaje, el compilador, el runtime, la arquitectura y la implementación son trabajo mío.** La IA fue una herramienta, no la autora del proyecto.
+
+Si quieres criticar el diseño o el código, adelante: mira lo que hace el proyecto y juzga eso. Preferible a descartar el trabajo de una persona real sin revisarlo.
