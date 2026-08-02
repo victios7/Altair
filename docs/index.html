@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Altair Lang — Lenguaje de programación compilado a C nativo</title>
-<meta name="description" content="Altair Lang es un lenguaje de programación compilado a C nativo. Control de memoria con storage tiers (ram, disk, cache, temp), punteros p#, operadores bit a bit y binario nativo para Windows, Linux y macOS.">
-<meta name="keywords" content="altair, altair lang, altairc, storage tiers, ram disk cache, p#, punteros, operadores bit a bit, lenguaje compilado a C, altair linux, altair macos">
+<title>Altair Lang — Lenguaje compilado a C nativo</title>
+<meta name="description" content="Altair Lang: lenguaje compilado a C nativo. Storage tiers (ram, disk, cache, temp), punteros p#, operadores bit a bit y binario sin dependencias para Windows, Linux y macOS.">
+<meta name="keywords" content="altair, altair lang, altairc, storage tiers, ram disk cache temp, p#, punteros, orbit, prefer, migrate, operadores bit a bit, lenguaje compilado a C">
 <meta name="author" content="Altair Language">
 <link rel="canonical" href="https://victios7.github.io/Altair/">
 <link rel="icon" type="image/png" href="ALTAIR_LOGO.png">
@@ -13,22 +13,22 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Altair Lang">
 <meta property="og:title" content="Altair Lang — Control de memoria y binario nativo">
-<meta property="og:description" content="Lenguaje compilado a C nativo: storage tiers (ram, disk, cache, temp), memoria p#, operadores bit a bit y sintaxis clara.">
+<meta property="og:description" content="Storage tiers, p#, orbit, prefer, operadores bit a bit. Compilado a C nativo para Windows, Linux y macOS.">
 <meta property="og:url" content="https://victios7.github.io/Altair/">
 <meta property="og:image" content="https://victios7.github.io/Altair/altair logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Altair Lang">
-<meta name="twitter:description" content="Storage tiers, p#, operadores bit a bit y binario nativo. Compilado a C para Windows, Linux y macOS.">
+<meta name="twitter:description" content="Storage tiers, p#, orbit/prefer y binario nativo. Compilado a C.">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Altair Lang",
-  "alternateName": ["Altair", "Altair Language", "Altair Programming Language"],
+  "alternateName": ["Altair", "Altair Language"],
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": ["Windows", "Linux", "macOS"],
-  "description": "Lenguaje de programación compilado a C nativo con storage tiers (ram, disk, cache, temp), memoria explícita p#, operadores bit a bit y binario sin dependencias.",
-  "softwareVersion": "1.7vB",
+  "description": "Lenguaje de programación compilado a C nativo con storage tiers, memoria p#, orbit/prefer y operadores bit a bit.",
+  "softwareVersion": "1.7.5",
   "license": "https://victios7.github.io/Altair/LICENSE",
   "url": "https://victios7.github.io/Altair/"
 }
@@ -43,7 +43,15 @@
       "name": "¿Qué es Altair Lang?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Altair es un lenguaje compilado que transpila a C y genera un binario nativo. Destaca por los storage tiers (ram, disk, cache, temp), la memoria contigua con p# y los operadores bit a bit integrados en la sintaxis."
+        "text": "Altair es un lenguaje compilado que transpila a C y genera un binario nativo. Destaca por los storage tiers (ram, disk, cache, temp, auto), punteros p#, orbit/prefer y operadores bit a bit."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo se declara el almacenamiento de una variable?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Con un tier al declarar: numeric x = 0 ram. También weight, expire, bloques prefer y orbit, y migrate para cambiar el estado de un orbit."
       }
     },
     {
@@ -51,15 +59,7 @@
       "name": "¿Altair Lang es lo mismo que Altair BASIC?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. Altair BASIC fue el intérprete BASIC de Microsoft en 1975 para el Altair 8800. Altair Lang es un lenguaje distinto y moderno, sin relación con aquel proyecto."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "¿Cómo se controla la memoria en Altair?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Cada variable puede declarar el tier donde vive: ram, disk, cache o temp. Con orbit, prefer y weight se mueve entre niveles. Para bloques contiguos se usa p# (alloc, p#read, p#write)."
+        "text": "No. Altair BASIC fue el intérprete de Microsoft de 1975 para el Altair 8800. Altair Lang es un lenguaje distinto y moderno."
       }
     },
     {
@@ -67,15 +67,15 @@
       "name": "¿Cómo se compila un programa en Altair?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Con altairc: altairc programa.at -o programa genera un binario nativo para Windows, Linux o macOS sin dependencias externas."
+        "text": "altairc programa.at -o programa genera un binario nativo para Windows, Linux o macOS."
       }
     },
     {
       "@type": "Question",
-      "name": "¿Altair es gratis y de código abierto?",
+      "name": "¿Altair es gratis?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sí, bajo licencia MIT. Los instaladores para Windows, Linux y macOS son gratuitos en las Releases de GitHub."
+        "text": "Sí, licencia MIT. Instaladores y código en GitHub."
       }
     }
   ]
@@ -103,7 +103,7 @@
     background:var(--bg);
     color:var(--text);
     font-family:var(--font-display);
-    line-height:1.5;
+    line-height:1.55;
     overflow-x:hidden;
   }
   a{color:inherit;}
@@ -123,62 +123,60 @@
       radial-gradient(1.5px 1.5px at 95% 90%, #fff, transparent);
     background-repeat:repeat;
     background-size:600px 600px;
-    opacity:.5;
+    opacity:.45;
   }
   .wrap{max-width:1080px; margin:0 auto; padding:0 28px; position:relative; z-index:1;}
   nav{
     display:flex; align-items:center; justify-content:space-between;
     padding:22px 0;
   }
-  .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.02em; font-size:1.15rem;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.02em; font-size:1.15rem; text-decoration:none;}
   .brand img{width:26px; height:26px;}
-  .navlinks{display:flex; gap:28px; font-size:.92rem; color:var(--text-dim);}
-  .navlinks a:hover{color:var(--gold);}
+  .navlinks{display:flex; gap:26px; font-size:.9rem; color:var(--text-dim); flex-wrap:wrap;}
   .navlinks a{text-decoration:none;}
+  .navlinks a:hover{color:var(--gold);}
   .hero{
-    padding:92px 0 70px;
-    display:grid; grid-template-columns:1.1fr .9fr; gap:48px; align-items:center;
+    padding:88px 0 64px;
+    display:grid; grid-template-columns:1.05fr .95fr; gap:48px; align-items:center;
   }
   .eyebrow{
-    font-family:var(--font-mono); font-size:.78rem; color:var(--gold);
-    letter-spacing:.14em; text-transform:uppercase; margin-bottom:18px;
-    display:flex; align-items:center; gap:10px;
+    font-family:var(--font-mono); font-size:.75rem; color:var(--gold);
+    letter-spacing:.14em; text-transform:uppercase; margin-bottom:16px;
   }
-  .eyebrow::before{content:"✦"; font-size:.9em;}
   h1{
-    font-size:3.2rem; font-weight:700; line-height:1.08; letter-spacing:-.01em;
-    margin-bottom:22px;
+    font-size:3.1rem; font-weight:700; line-height:1.08; letter-spacing:-.02em;
+    margin-bottom:20px;
   }
   h1 .accent{color:var(--gold);}
   .lede{
-    font-size:1.08rem; color:var(--text-dim); max-width:48ch; margin-bottom:34px;
+    font-size:1.06rem; color:var(--text-dim); max-width:48ch; margin-bottom:32px;
   }
-  .cta-row{display:flex; gap:14px; flex-wrap:wrap; align-items:center;}
+  .cta-row{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
   .btn{
-    font-family:var(--font-mono); font-weight:600; font-size:.92rem;
-    padding:14px 24px; border-radius:8px; text-decoration:none;
-    display:inline-flex; align-items:center; gap:10px;
-    transition:transform .15s ease, box-shadow .15s ease;
+    font-family:var(--font-mono); font-weight:600; font-size:.88rem;
+    padding:13px 22px; border-radius:8px; text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
   }
   .btn-primary{
     background:linear-gradient(135deg, var(--gold), var(--ember));
     color:#160b02;
     box-shadow:0 8px 26px -8px rgba(232,179,77,.55);
   }
-  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 12px 30px -8px rgba(232,179,77,.7);}
+  .btn-primary:hover{transform:translateY(-2px);}
   .btn-ghost{
     border:1px solid var(--line); color:var(--text);
   }
   .btn-ghost:hover{border-color:var(--gold); color:var(--gold);}
   .meta-line{
-    font-family:var(--font-mono); font-size:.78rem; color:var(--text-dim); margin-top:16px;
+    font-family:var(--font-mono); font-size:.76rem; color:var(--text-dim); margin-top:16px;
   }
   .terminal{
     background:var(--bg-panel);
     border:1px solid var(--line);
     border-radius:12px;
     overflow:hidden;
-    box-shadow:0 30px 60px -30px rgba(0,0,0,.8);
+    box-shadow:0 30px 60px -30px rgba(0,0,0,.85);
   }
   .term-bar{
     display:flex; align-items:center; gap:8px;
@@ -186,68 +184,68 @@
   }
   .dot{width:10px; height:10px; border-radius:50%;}
   .dot.r{background:#ff5f56;} .dot.y{background:#ffbd2e;} .dot.g{background:#27c93f;}
-  .term-title{margin-left:8px; font-family:var(--font-mono); font-size:.76rem; color:var(--text-dim);}
+  .term-title{margin-left:8px; font-family:var(--font-mono); font-size:.74rem; color:var(--text-dim);}
   .term-body{
-    padding:22px 20px; font-family:var(--font-mono); font-size:.84rem;
-    color:#c7ceda; min-height:260px; line-height:1.55;
+    padding:20px 18px; font-family:var(--font-mono); font-size:.82rem;
+    color:#c7ceda; min-height:280px; line-height:1.6;
   }
   .term-body .p{color:var(--gold);}
-  .term-body .c{color:#8b93a7;}
+  .term-body .c{color:#6b7388;}
   .term-body .s{color:#8fd3a0;}
   .term-body .k{color:var(--blue-glow);}
-  .caret{display:inline-block; width:7px; height:15px; background:var(--gold); vertical-align:middle; animation:blink 1s step-end infinite;}
+  .caret{display:inline-block; width:7px; height:14px; background:var(--gold); vertical-align:middle; animation:blink 1s step-end infinite;}
   @keyframes blink{50%{opacity:0;}}
-  section{padding:70px 0; position:relative;}
-  .section-head{margin-bottom:38px;}
+  section{padding:72px 0;}
+  .section-head{margin-bottom:36px;}
   .section-head .eyebrow{margin-bottom:10px;}
-  h2{font-size:1.9rem; font-weight:700; letter-spacing:-.01em;}
-  .section-head p{color:var(--text-dim); margin-top:10px; max-width:58ch;}
-  .grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:20px;}
-  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
-  .card{
-    background:var(--bg-panel); border:1px solid var(--line); border-radius:12px;
-    padding:24px; transition:border-color .15s ease, transform .15s ease;
-  }
-  .card:hover{border-color:#3a4258; transform:translateY(-3px);}
-  .card.featured{
-    border-color:rgba(232,179,77,.35);
-    background:linear-gradient(160deg, var(--bg-panel), #16120a);
-  }
-  .card .icon{font-family:var(--font-mono); color:var(--gold); font-size:.8rem; margin-bottom:14px; display:block;}
-  .card h3{font-size:1.05rem; margin-bottom:8px; font-weight:600;}
-  .card p{font-size:.9rem; color:var(--text-dim);}
+  h2{font-size:1.85rem; font-weight:700; letter-spacing:-.02em;}
+  .section-head p{color:var(--text-dim); margin-top:10px; max-width:58ch; font-size:.98rem;}
   .tier-row{
-    display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-top:28px;
+    display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin-bottom:28px;
   }
   .tier{
     background:var(--bg-panel); border:1px solid var(--line); border-radius:10px;
-    padding:18px 14px; text-align:center;
+    padding:18px 12px; text-align:center;
   }
   .tier strong{
     display:block; font-family:var(--font-mono); color:var(--gold);
-    font-size:1rem; margin-bottom:6px;
+    font-size:.95rem; margin-bottom:6px;
   }
-  .tier span{font-size:.8rem; color:var(--text-dim);}
-  .steps{counter-reset:step; display:flex; flex-direction:column; gap:0;}
+  .tier span{font-size:.78rem; color:var(--text-dim); line-height:1.4;}
+  .grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:18px;}
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .card{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:12px;
+    padding:22px; transition:border-color .15s ease, transform .15s ease;
+  }
+  .card:hover{border-color:#3a4258; transform:translateY(-2px);}
+  .card.featured{
+    border-color:rgba(232,179,77,.32);
+    background:linear-gradient(160deg, var(--bg-panel), #14100a);
+  }
+  .card .icon{font-family:var(--font-mono); color:var(--gold); font-size:.76rem; margin-bottom:12px; display:block; letter-spacing:.04em;}
+  .card h3{font-size:1.02rem; margin-bottom:8px; font-weight:600;}
+  .card p{font-size:.88rem; color:var(--text-dim);}
+  .steps{counter-reset:step;}
   .step{
-    display:grid; grid-template-columns:56px 1fr; gap:20px;
-    padding:26px 0; border-bottom:1px solid var(--line);
+    display:grid; grid-template-columns:52px 1fr; gap:18px;
+    padding:24px 0; border-bottom:1px solid var(--line);
   }
   .step:last-child{border-bottom:none;}
   .step-num{
     counter-increment:step; font-family:var(--font-mono); color:var(--gold);
-    font-size:.85rem; display:flex; align-items:flex-start; padding-top:2px;
+    font-size:.82rem; padding-top:3px;
   }
   .step-num::before{content: counter(step, decimal-leading-zero);}
-  .step h3{font-size:1.05rem; margin-bottom:6px; font-weight:600;}
-  .step p{color:var(--text-dim); font-size:.92rem; max-width:60ch;}
+  .step h3{font-size:1.02rem; margin-bottom:6px; font-weight:600;}
+  .step p{color:var(--text-dim); font-size:.9rem; max-width:62ch;}
   .step code{
     background:var(--bg-panel); border:1px solid var(--line); border-radius:5px;
-    padding:2px 7px; font-family:var(--font-mono); font-size:.85rem; color:var(--gold);
+    padding:2px 6px; font-family:var(--font-mono); font-size:.82rem; color:var(--gold);
   }
   .code-block{
     background:var(--bg-panel); border:1px solid var(--line); border-radius:12px;
-    padding:24px; font-family:var(--font-mono); font-size:.85rem; overflow-x:auto;
+    padding:22px; font-family:var(--font-mono); font-size:.82rem; overflow-x:auto;
     color:#c7ceda; line-height:1.65;
   }
   .code-block .kw{color:var(--gold);}
@@ -257,27 +255,27 @@
   .code-block .ty{color:#c49bff;}
   .download-panel{
     background:linear-gradient(160deg, var(--bg-panel), var(--bg-panel-2));
-    border:1px solid var(--line); border-radius:16px; padding:44px;
-    display:grid; grid-template-columns:1.3fr 1fr; gap:32px; align-items:center;
+    border:1px solid var(--line); border-radius:16px; padding:40px;
+    display:grid; grid-template-columns:1.3fr 1fr; gap:28px; align-items:center;
   }
   .download-panel h2{margin-bottom:10px;}
-  .download-panel p{color:var(--text-dim); font-size:.94rem; max-width:48ch;}
+  .download-panel p{color:var(--text-dim); font-size:.92rem; max-width:48ch;}
   .file-info{
-    background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:18px 20px;
-    font-family:var(--font-mono); font-size:.82rem; color:var(--text-dim);
+    background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:16px 18px;
+    font-family:var(--font-mono); font-size:.8rem; color:var(--text-dim);
   }
-  .file-info div{display:flex; justify-content:space-between; padding:5px 0;}
-  .file-info span:last-child{color:var(--text);}
+  .file-info div{display:flex; justify-content:space-between; padding:5px 0; gap:12px;}
+  .file-info span:last-child{color:var(--text); text-align:right;}
   footer{
-    border-top:1px solid var(--line); padding:36px 0 60px;
+    border-top:1px solid var(--line); padding:32px 0 56px;
     display:flex; justify-content:space-between; align-items:center;
-    font-size:.85rem; color:var(--text-dim); flex-wrap:wrap; gap:12px;
+    font-size:.84rem; color:var(--text-dim); flex-wrap:wrap; gap:12px;
   }
   footer a{text-decoration:none;}
   footer a:hover{color:var(--gold);}
-  @media (max-width: 860px){
-    .hero{grid-template-columns:1fr;}
-    h1{font-size:2.3rem;}
+  @media (max-width: 900px){
+    .hero{grid-template-columns:1fr; padding-top:56px;}
+    h1{font-size:2.25rem;}
     .grid{grid-template-columns:1fr;}
     .grid-2{grid-template-columns:1fr;}
     .tier-row{grid-template-columns:1fr 1fr;}
@@ -290,7 +288,7 @@
 <div id="stars"></div>
 <div class="wrap">
   <nav>
-    <div class="brand"><img src="altair logo.png" alt=""> Altair</div>
+    <a class="brand" href="#"><img src="altair logo.png" alt=""> Altair</a>
     <div class="navlinks">
       <a href="#memoria">Memoria</a>
       <a href="#caracteristicas">Características</a>
@@ -299,26 +297,26 @@
       <a href="#faq">FAQ</a>
       <a href="guia.html">Guía</a>
       <a href="community/index.html">Community</a>
-      <a href="https://github.com/victios7/Altair" target="_blank">GitHub</a>
+      <a href="https://github.com/victios7/Altair" target="_blank" rel="noopener">GitHub</a>
     </div>
   </nav>
 
   <section class="hero">
     <div>
-      <div class="eyebrow">v1.7vB · compila a C nativo</div>
-      <h1>Control de <span class="accent">memoria</span> en la sintaxis. Binario nativo al final.</h1>
+      <div class="eyebrow">v1.7.5 · compila a C nativo</div>
+      <h1>La memoria se <span class="accent">declara</span>, no se improvisa.</h1>
       <p class="lede">
-        Altair es un lenguaje compilado de nivel medio-bajo: declaras dónde vive cada dato
+        Altair es un lenguaje de nivel medio-bajo: cada valor elige dónde vive
         (<code>ram</code>, <code>disk</code>, <code>cache</code>, <code>temp</code>),
-        trabajas con bloques contiguos <code>p#</code> y operadores bit a bit,
-        y <code>altairc</code> genera un ejecutable sin runtime externo.
+        los punteros llevan tipo con <code>p#</code>, y <code>altairc</code>
+        genera un binario nativo sin runtime externo.
       </p>
       <div class="cta-row">
         <a class="btn btn-primary" href="https://github.com/victios7/Altair/releases/latest">Descargar Altair</a>
-        <a class="btn btn-ghost" href="#memoria">Ver storage tiers</a>
-        <a class="btn btn-ghost" href="#instalar">Instalación</a>
+        <a class="btn btn-ghost" href="#memoria">Storage tiers</a>
+        <a class="btn btn-ghost" href="#ejemplo">Ver ejemplo</a>
       </div>
-      <div class="meta-line">Windows · Linux · macOS · MIT · un solo binario por programa</div>
+      <div class="meta-line">Windows · Linux · macOS · MIT · un ejecutable por programa</div>
     </div>
     <div class="terminal">
       <div class="term-bar">
@@ -326,19 +324,22 @@
         <span class="term-title">memoria.at</span>
       </div>
       <div class="term-body">
-<span class="c">/ dónde vive cada valor</span><br>
+<span class="c">/ tiers de almacenamiento</span><br>
 <span class="k">numeric</span> score = 0 <span class="p">ram</span><br>
-<span class="k">text</span> log_path = <span class="s">"app.log"</span> <span class="p">disk</span><br>
+<span class="k">text</span> ruta = <span class="s">"app.log"</span> <span class="p">disk</span><br>
 <span class="k">list</span> cola = [] <span class="p">cache</span><br><br>
-<span class="c">/ mover entre niveles</span><br>
-<span class="p">orbit</span> score -&gt; disk<br>
-<span class="p">prefer</span> log_path weight 10<br><br>
-<span class="c">/ memoria contigua</span><br>
-<span class="k">p#w</span> buf = <span class="fn">alloc</span>(1024)<br>
-<span class="fn">p#write</span>(buf, 0, 42)<br>
-<span class="k">numeric</span> x = <span class="fn">p#read</span>(buf, 0)<br><br>
-<span class="c">/ bit a bit</span><br>
-<span class="k">numeric</span> flags = a <span class="p">&amp;</span> b <span class="p">|</span> c <span class="p">&lt;&lt;</span> 2<span class="caret"></span>
+<span class="c">/ orbit + migrate</span><br>
+<span class="k">numeric</span> sesion = 0 <span class="p">orbit</span>;<br>
+&nbsp;&nbsp;1 = nueva <span class="p">temp</span><br>
+&nbsp;&nbsp;2 = activa <span class="p">ram</span><br>
+&nbsp;&nbsp;3 = guardada <span class="p">disk</span><br>
+<span class="p">break</span><br>
+sesion <span class="p">migrate</span> 2<br><br>
+<span class="c">/ puntero tipado</span><br>
+<span class="p">p#buf</span> bloque = <span class="fn">alloc</span>(256)<br>
+<span class="fn">p#write</span>(bloque, 0, 42)<br>
+<span class="k">numeric</span> v = <span class="fn">p#read</span>(bloque, 0)<br>
+<span class="fn">p#free</span>(bloque)<span class="caret"></span>
       </div>
     </div>
   </section>
@@ -346,47 +347,36 @@
   <section id="memoria">
     <div class="section-head">
       <div class="eyebrow">Storage tiers</div>
-      <h2>La memoria no se improvisa: se declara</h2>
+      <h2>Dónde vive cada valor forma parte del lenguaje</h2>
       <p>
-        En Altair el nivel de almacenamiento forma parte del lenguaje.
-        Eliges el tier al crear el valor y puedes moverlo después con
-        <code>orbit</code>, <code>prefer</code> y <code>weight</code>.
+        Declaras el tier al crear la variable. Puedes añadir <code>weight</code>,
+        <code>expire</code>, o usar bloques <code>prefer</code> y <code>orbit</code>
+        cuando el almacenamiento debe ser dinámico.
       </p>
     </div>
     <div class="tier-row">
-      <div class="tier">
-        <strong>ram</strong>
-        <span>Rápido, volátil. Estado caliente del programa.</span>
-      </div>
-      <div class="tier">
-        <strong>cache</strong>
-        <span>Intermedio. Reutilización sin persistir siempre.</span>
-      </div>
-      <div class="tier">
-        <strong>disk</strong>
-        <span>Persistente. Sobrevive al reinicio del proceso.</span>
-      </div>
-      <div class="tier">
-        <strong>temp</strong>
-        <span>Temporal. Datos de corta vida.</span>
-      </div>
+      <div class="tier"><strong>ram</strong><span>Rápido, volátil</span></div>
+      <div class="tier"><strong>cache</strong><span>Disco con TTL</span></div>
+      <div class="tier"><strong>disk</strong><span>Persiste entre ejecuciones</span></div>
+      <div class="tier"><strong>temp</strong><span>RAM; se borra al liberar</span></div>
+      <div class="tier"><strong>auto</strong><span>Lo elige el runtime</span></div>
     </div>
-    <div class="grid-2" style="margin-top:28px;">
+    <div class="grid-2">
       <div class="card featured">
-        <span class="icon">p#</span>
-        <h3>Memoria contigua</h3>
+        <span class="icon">ORBIT · MIGRATE</span>
+        <h3>Estados de almacenamiento</h3>
         <p>
-          Cuando necesitas control fino: <code>alloc</code>, <code>p#read</code>, <code>p#write</code>
-          sobre bloques planos. Ideal para buffers, tablas de pesos, estructuras densas
-          y herramientas de sistemas.
+          Defines ciclos de vida con <code>orbit</code> y cambias de estado con
+          <code>migrate</code> (por número o por nombre). Cada estado tiene su tier.
         </p>
       </div>
       <div class="card featured">
-        <span class="icon">&amp; | ^ &lt;&lt; &gt;&gt;</span>
-        <h3>Operadores bit a bit</h3>
+        <span class="icon">PREFER · WEIGHT · EXPIRE</span>
+        <h3>Prioridad y caducidad</h3>
         <p>
-          AND, OR, XOR, desplazamientos y máscaras en la expresión normal del lenguaje.
-          Pensado para flags, protocolos, ensambladores y lógica de bajo nivel sin salir a C.
+          <code>prefer</code> ordena fallbacks de storage.
+          <code>weight</code> marca prioridad.
+          <code>expire</code> define TTL en variables <code>cache</code> o <code>disk</code>.
         </p>
       </div>
     </div>
@@ -395,38 +385,38 @@
   <section id="caracteristicas">
     <div class="section-head">
       <div class="eyebrow">Características</div>
-      <h2>De lo esencial al binario nativo</h2>
+      <h2>Control fino, sintaxis clara, binario nativo</h2>
     </div>
     <div class="grid">
       <div class="card">
         <span class="icon">01</span>
         <h3>Storage tiers</h3>
-        <p><code>ram</code>, <code>disk</code>, <code>cache</code>, <code>temp</code> con <code>orbit</code>, <code>prefer</code> y <code>weight</code>. La política de datos es sintaxis, no convención.</p>
+        <p><code>ram</code>, <code>disk</code>, <code>cache</code>, <code>temp</code>, <code>auto</code> en la declaración. Opcionalmente <code>weight</code> y <code>expire</code>.</p>
       </div>
       <div class="card">
         <span class="icon">02</span>
-        <h3>Memoria p#</h3>
-        <p>Bloques contiguos con <code>alloc</code>, lectura y escritura por offset. Control cercano a C con tipos de Altair.</p>
+        <h3>Punteros p#</h3>
+        <p><code>p#Tipo nombre</code> declara un puntero tipado. <code>alloc</code>, <code>p#read</code>, <code>p#write</code>, <code>p#free</code>.</p>
       </div>
       <div class="card">
         <span class="icon">03</span>
         <h3>Bit a bit</h3>
-        <p>Operadores <code>&amp;</code> <code>|</code> <code>^</code> <code>&lt;&lt;</code> <code>&gt;&gt;</code> integrados para flags, packing y código de sistemas.</p>
+        <p>Operadores <code>&amp;</code> <code>|</code> <code>^</code> <code>~</code> <code>&lt;&lt;</code> <code>&gt;&gt;</code> sobre <code>numeric</code> para flags y packing.</p>
       </div>
       <div class="card">
         <span class="icon">04</span>
-        <h3>Sintaxis clara</h3>
-        <p>Variables, funciones, texto y listas sin ceremonia. Productivo para parsers, CLIs y herramientas.</p>
+        <h3>Matemáticas m#</h3>
+        <p><code>m#sqrt</code>, <code>m#exp</code>, <code>m#tanh</code>, <code>m#pow</code> y el resto del runtime matemático.</p>
       </div>
       <div class="card">
         <span class="icon">05</span>
         <h3>Compila a nativo</h3>
-        <p><code>.at → C → gcc → binario</code>. Un ejecutable por programa en Windows, Linux o macOS.</p>
+        <p>Pipeline <code>.at → C → binario</code>. Un ejecutable por programa en Windows, Linux o macOS.</p>
       </div>
       <div class="card">
         <span class="icon">06</span>
         <h3>HTTP y jobs</h3>
-        <p>Opcional: <code>listen</code>/<code>route</code>, sesiones y <code>job … every</code> cuando el programa necesita servicio, no solo lógica.</p>
+        <p>Opcional: <code>listen</code> / <code>route</code>, sesiones y <code>job … every</code> cuando el programa es un servicio.</p>
       </div>
     </div>
   </section>
@@ -434,7 +424,8 @@
   <section id="ejemplo">
     <div class="section-head">
       <div class="eyebrow">Ejemplo</div>
-      <h2>Tiers, p# y bits en un solo archivo</h2>
+      <h2>Sintaxis real del lenguaje</h2>
+      <p>Declaración de storage, orbit, prefer, puntero tipado y bits — tal como los espera el compilador.</p>
     </div>
     <div class="code-block">
 <span class="kw">altair.doc</span>;<br>
@@ -443,46 +434,59 @@
 <span class="kw">create</span> <span class="kw">altair.doc</span><br><br>
 <span class="ty">numeric</span> contador = 0 <span class="kw">ram</span><br>
 <span class="ty">text</span> ruta = <span class="str">"estado.dat"</span> <span class="kw">disk</span><br>
-<span class="ty">list</span> buffer = [] <span class="kw">cache</span><br><br>
-<span class="kw">orbit</span> contador -&gt; disk<br>
-<span class="kw">prefer</span> ruta weight 8<br><br>
-<span class="ty">p#w</span> bloque = <span class="fn">alloc</span>(256)<br>
+<span class="ty">numeric</span> hot = 0 <span class="kw">ram weight</span> 800<br>
+<span class="kw">expire</span> 1h <span class="ty">text</span> ticket = <span class="str">"abc"</span> <span class="kw">cache</span><br><br>
+<span class="ty">numeric</span> sesion = 0 <span class="kw">orbit</span>;<br>
+&nbsp;&nbsp;1 = nueva <span class="kw">temp</span><br>
+&nbsp;&nbsp;2 = activa <span class="kw">ram</span><br>
+&nbsp;&nbsp;3 = guardada <span class="kw">disk</span><br>
+<span class="kw">break</span><br><br>
+sesion <span class="kw">migrate</span> 2<br>
+sesion = 100<br>
+sesion <span class="kw">migrate</span> guardada<br><br>
+<span class="ty">numeric</span> resultado = 0 <span class="kw">prefer</span>;<br>
+&nbsp;&nbsp;1 = ram<br>
+&nbsp;&nbsp;2 = cache<br>
+&nbsp;&nbsp;3 = disk<br>
+<span class="kw">break</span><br><br>
+<span class="kw">p#buf</span> bloque = <span class="fn">alloc</span>(256)<br>
 <span class="fn">p#write</span>(bloque, 0, 255)<br>
-<span class="ty">numeric</span> v = <span class="fn">p#read</span>(bloque, 0)<br><br>
-<span class="ty">numeric</span> flags = 0<br>
+<span class="ty">numeric</span> v = <span class="fn">p#read</span>(bloque, 0)<br>
+<span class="fn">p#free</span>(bloque)<br><br>
+<span class="ty">numeric</span> flags = 0 <span class="kw">ram</span><br>
 flags = flags <span class="kw">|</span> 1<br>
 flags = flags <span class="kw">&lt;&lt;</span> 2<br>
-flags = flags <span class="kw">&amp;</span> 0xff<br><br>
-<span class="fn">log</span> <span class="str">"v="</span> + v + <span class="str">" flags="</span> + flags
+flags = flags <span class="kw">&amp;</span> 255<br><br>
+<span class="ty">numeric</span> r = <span class="fn">m#sqrt</span>(16) <span class="kw">ram</span><br>
+<span class="fn">log</span> <span class="str">"v="</span> + v + <span class="str">" flags="</span> + flags + <span class="str">" r="</span> + r
     </div>
   </section>
 
   <section id="instalar">
     <div class="section-head">
       <div class="eyebrow">Instalación</div>
-      <h2>De cero a compilando en tres pasos</h2>
-      <p>El instalador añade <code>altairc</code> al sistema. No necesitas toolchain aparte en Windows.</p>
+      <h2>Tres pasos hasta el primer binario</h2>
     </div>
     <div class="steps">
       <div class="step">
         <div class="step-num"></div>
         <div>
-          <h3>Descarga el instalador o paquete</h3>
-          <p>Windows (<code>.exe</code>), Linux (<code>.deb</code>) o macOS (<code>.pkg</code>) desde las <a href="https://github.com/victios7/Altair/releases/latest" style="color:var(--gold); text-decoration:none;">Releases en GitHub</a>.</p>
+          <h3>Descarga el paquete de tu sistema</h3>
+          <p>Instalador Windows (<code>.exe</code>), paquete Linux (<code>.deb</code>) o macOS (<code>.pkg</code>) en las <a href="https://github.com/victios7/Altair/releases/latest" style="color:var(--gold);text-decoration:none;">Releases de GitHub</a>.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num"></div>
         <div>
           <h3>Instálalo</h3>
-          <p>Windows: acepta administrador si pide PATH. Linux: <code>sudo dpkg -i altair_*.deb</code>. macOS: abre el <code>.pkg</code> (Abrir si el sistema avisa de desarrollador no verificado).</p>
+          <p>Windows: acepta permisos si pide escribir en el PATH. Linux: <code>sudo dpkg -i altair_*.deb</code>. macOS: abre el <code>.pkg</code> (clic derecho → Abrir si el sistema lo bloquea).</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num"></div>
         <div>
-          <h3>Compila tu primer programa</h3>
-          <p><code>altairc --version</code> y luego <code>altairc hola.at -o hola</code>. Obtienes un binario nativo listo para ejecutar.</p>
+          <h3>Compila</h3>
+          <p><code>altairc --version</code> y <code>altairc hola.at -o hola</code>. Obtienes un ejecutable nativo listo para lanzar.</p>
         </div>
       </div>
     </div>
@@ -491,16 +495,16 @@ flags = flags <span class="kw">&amp;</span> 0xff<br><br>
   <section id="descarga">
     <div class="download-panel">
       <div>
-        <h2>Instala Altair ahora</h2>
-        <p>Compilador, terminal y toolchain en un solo paquete por plataforma. Licencia MIT.</p>
-        <div class="cta-row" style="margin-top:22px;">
+        <h2>Instala Altair</h2>
+        <p>Compilador y herramientas en un paquete por plataforma. Licencia MIT, sin coste.</p>
+        <div class="cta-row" style="margin-top:20px;">
           <a class="btn btn-primary" href="https://github.com/victios7/Altair/releases/latest">Descargar Altair</a>
         </div>
       </div>
       <div class="file-info">
         <div><span>Archivos</span><span>.exe · .deb · .pkg</span></div>
         <div><span>Plataformas</span><span>Windows · Linux · macOS</span></div>
-        <div><span>Compilador</span><span>altairc 1.7vB</span></div>
+        <div><span>Versión</span><span>1.7.5 Maths</span></div>
         <div><span>Licencia</span><span>MIT</span></div>
       </div>
     </div>
@@ -508,22 +512,29 @@ flags = flags <span class="kw">&amp;</span> 0xff<br><br>
 
   <section id="faq">
     <div class="section-head">
-      <div class="eyebrow">Preguntas frecuentes</div>
-      <h2>Sobre Altair Lang</h2>
+      <div class="eyebrow">FAQ</div>
+      <h2>Preguntas frecuentes</h2>
     </div>
     <div class="steps">
       <div class="step">
         <div class="step-num" style="counter-increment:none;">Q</div>
         <div>
           <h3>¿Qué es Altair Lang?</h3>
-          <p>Un lenguaje compilado a C nativo. Destaca por storage tiers (<code>ram</code>, <code>disk</code>, <code>cache</code>, <code>temp</code>), memoria <code>p#</code>, operadores bit a bit y un binario por programa en Windows, Linux y macOS.</p>
+          <p>Un lenguaje compilado a C nativo. Destaca por storage tiers, punteros <code>p#Tipo</code>, <code>orbit</code>/<code>prefer</code>/<code>migrate</code>, matemáticas <code>m#</code> y operadores bit a bit.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num" style="counter-increment:none;">Q</div>
         <div>
-          <h3>¿Cómo se controla la memoria?</h3>
-          <p>Declaras el tier al crear la variable y puedes moverla con <code>orbit</code>. Para bloques densos usas <code>p#</code> (<code>alloc</code>, <code>p#read</code>, <code>p#write</code>).</p>
+          <h3>¿Cómo se declara el almacenamiento?</h3>
+          <p><code>numeric x = 0 ram</code>. Opciones: <code>disk</code>, <code>cache</code>, <code>temp</code>, <code>auto</code>, más <code>weight</code>, <code>expire</code>, bloques <code>prefer</code> y <code>orbit</code>, y <code>migrate</code> para cambiar de estado.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="counter-increment:none;">Q</div>
+        <div>
+          <h3>¿Qué es release?</h3>
+          <p><code>release variable</code> elimina la variable del registro y libera su memoria (no solo la pone a cero). Útil en bucles y datos <code>temp</code>.</p>
         </div>
       </div>
       <div class="step">
@@ -536,15 +547,8 @@ flags = flags <span class="kw">&amp;</span> 0xff<br><br>
       <div class="step">
         <div class="step-num" style="counter-increment:none;">Q</div>
         <div>
-          <h3>¿Cómo se compila?</h3>
-          <p><code>altairc programa.at -o programa</code> genera el binario nativo. Guía completa en <a href="guia.html" style="color:var(--gold); text-decoration:none;">guia.html</a>.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num" style="counter-increment:none;">Q</div>
-        <div>
-          <h3>¿Es gratis?</h3>
-          <p>Sí, licencia MIT. Código e instaladores en <a href="https://github.com/victios7/Altair" style="color:var(--gold); text-decoration:none;">GitHub</a>.</p>
+          <h3>¿Cómo se compila y es gratis?</h3>
+          <p><code>altairc programa.at -o programa</code>. Licencia MIT; instaladores en <a href="https://github.com/victios7/Altair" style="color:var(--gold);text-decoration:none;">GitHub</a>. Guía en <a href="guia.html" style="color:var(--gold);text-decoration:none;">guia.html</a>.</p>
         </div>
       </div>
     </div>
