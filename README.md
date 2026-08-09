@@ -1,5 +1,4 @@
 <div align="center">
-
 <img src="docs/altair logo.png" width="72" alt="Altair logo">
 
 # Altair Lang
@@ -14,7 +13,6 @@
 [Sitio web](https://victios7.github.io/Altair/) ·
 [Guía del lenguaje](ALTAIR_GUIDE.md) ·
 [Ejemplos](examples)
-
 </div>
 
 ---
@@ -29,30 +27,63 @@ Altair es un lenguaje **estáticamente compilado y orientado a expresiones**. Su
 
 Está pensado en un punto **medio-bajo**: sintaxis legible y tipos cómodos, con la opción de bajar a memoria explícita y decidir **dónde vive cada dato**.
 
+No hay recolector de basura. La memoria se gestiona con una **política de almacenamiento** por variable y con `release` cuando quieres liberar a mano.
+
 ## Lo esencial del lenguaje
 
 ### Storage tiers
 
-Cada valor puede declarar en qué nivel vive. El runtime puede moverlo después.
+Cada variable declara **un solo** modo de almacenamiento. Los modos no se combinan entre sí.
 
-| Tier | Uso típico |
-|---|---|
-| `ram` | Rápido, volátil |
-| `cache` | Intermedio |
-| `disk` | Persistente |
-| `temp` | Temporal |
+| Modo | Uso típico |
+|------|------------|
+| `ram` | Rápido, volátil (memoria del proceso) |
+| `disk` | Persistente en fichero |
+| `cache` | Persistente con TTL opcional |
+| `temp` | Temporal; se limpia al hacer `release` |
+| `orbit` | Varios estados posibles; el cambio es explícito con `migrate` |
+| `prefer` | Lista ordenada; el runtime elige un nivel al crear la variable |
 
 ```altair
 numeric contador = 0 ram
 text log_path = "app.log" disk
 list cola = [] cache
-
-/ mover entre niveles
-orbit contador -> disk
-prefer log_path weight 10
+text secreto = "token" temp
 ```
 
-Con `orbit`, `prefer`, `weight` y migración, el lenguaje trata el almacenamiento como parte de la semántica, no solo como detalle del sistema operativo.
+Cualificadores opcionales (no son otro modo de storage):
+
+```altair
+numeric score = 0 ram weight 10
+text token = "" cache expire 30m
+```
+
+### `orbit` y `migrate`
+
+`orbit` declara los estados posibles. El cambio de nivel se hace a mano con `migrate`.
+
+```altair
+numeric datos = 0 orbit
+1 "activo" ram
+2 "archivo" disk
+3 "frio" cache
+break
+
+migrate datos as "archivo"
+migrate datos as 1
+```
+
+### `prefer`
+
+```altair
+text sesion = "" prefer;
+ ram
+ cache,
+ disk
+break
+```
+
+El runtime elige un nivel de la lista al crear la variable.
 
 ### Sintaxis sencilla
 
@@ -68,11 +99,13 @@ fun saludo -> text text nombre;
     return "Hola, " + nombre
 break
 
-numeric i = 0
+numeric i = 0 ram
 while i < 3;
     log saludo("mundo") + " #" + i
     i = i + 1
 break
+
+release i
 ```
 
 ### Tipos y datos
@@ -80,9 +113,11 @@ break
 Tipos básicos claros (`numeric`, `text`, `bool`, `list`, `file`) y composición con listas y texto. Cuando hace falta control fino, bloques contiguos con **`p#`**:
 
 ```altair
-p#w buf = alloc(1024)
+p#node buf = alloc(1024)
 p#write(buf, 0, 42)
 numeric x = p#read(buf, 0)
+log p#bytes(buf)
+p#free(buf)
 ```
 
 ### Compilado a nativo
@@ -165,6 +200,7 @@ Más allá del núcleo del lenguaje, Altair incluye piezas opcionales en la sint
 | **Jobs** | tareas con `job … every` |
 | **Sesiones y config** | TTL y variables de entorno tipadas |
 | **Métricas** | endpoints de salud al estilo Prometheus |
+| **Gráficos** | `link graphics raylib` |
 
 Ejemplo mínimo de servidor (opcional):
 
@@ -215,13 +251,11 @@ También: `altair-macos-<version>.tar.gz`.
 
 ```bash
 altairc hola.at -o hola
-./hola              # Linux / macOS
-hola.exe            # Windows
+./hola          # Linux / macOS
+hola.exe        # Windows
 
-altairc guide       # genera la guía en el directorio actual
+altairc guide   # genera la guía en el directorio actual
 ```
-
-
 
 ## Contribuir
 
