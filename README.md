@@ -19,7 +19,7 @@
 
 ## ¿Qué es Altair?
 
-Altair es un lenguaje **estáticamente compilado y orientado a expresiones**. Su compilador, `altairc`, transpila cada programa `.at` a C y luego a un **binario nativo** — sin runtime externo que instalar.
+Altair es un lenguaje **estáticamente compilado, imperativo, estructurado y fuertemente tipado**. Su compilador, `altairc`, transpila cada programa `.at` a C y luego a un **binario nativo** — sin runtime externo que instalar.
 
 ```
 .at → lexer → parser → sema → codegen → .c → gcc → binario
