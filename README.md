@@ -77,9 +77,9 @@ migrate datos as 1
 
 ```altair
 text sesion = "" prefer;
- ram
- cache,
- disk
+ 1 = ram
+ 2 = cache,
+ 3 = disk
 break
 ```
 
@@ -95,7 +95,7 @@ altair.doc;
     version = "1.0"
 create altair.doc
 
-fun saludo -> text text nombre;
+fun saludo text text nombre;
     return "Hola, " + nombre
 break
 
