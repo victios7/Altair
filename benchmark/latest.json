@@ -1,0 +1,548 @@
+{
+  "environment": {
+    "timestamp_utc": "2026-08-14T16:06:33Z",
+    "platform": "Linux-6.12.8+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "gcc": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "altair_version": "altairc 1.7.5vB",
+    "archive": "/home/workdir/attachments/Altair_1_7_5vB_final.zip",
+    "source_dir_mode": false
+  },
+  "configuration": {
+    "runs": 3,
+    "warmups": 1
+  },
+  "workloads": [
+    {
+      "name": "numeric_loop",
+      "status": "pass",
+      "source_lines": 12,
+      "expected_output": "208333250000",
+      "observed_outputs": [
+        "208333250000",
+        "208333250000",
+        "208333250000"
+      ],
+      "compile": {
+        "time": {
+          "min_ms": 1533.821,
+          "median_ms": 1540.633,
+          "p95_ms": 1542.275,
+          "max_ms": 1542.275
+        },
+        "rss": {
+          "min_kb": 71968,
+          "median_kb": 72120,
+          "max_kb": 72576
+        }
+      },
+      "runtime": {
+        "time": {
+          "min_ms": 2.647,
+          "median_ms": 2.757,
+          "p95_ms": 2.974,
+          "max_ms": 2.974
+        },
+        "rss": {
+          "min_kb": 132,
+          "median_kb": 132,
+          "max_kb": 148
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "function_calls",
+      "status": "pass",
+      "source_lines": 15,
+      "expected_output": "50023590625",
+      "observed_outputs": [
+        "50023590625",
+        "50023590625",
+        "50023590625"
+      ],
+      "compile": {
+        "time": {
+          "min_ms": 1518.07,
+          "median_ms": 1642.815,
+          "p95_ms": 1719.942,
+          "max_ms": 1719.942
+        },
+        "rss": {
+          "min_kb": 72392,
+          "median_kb": 72420,
+          "max_kb": 72464
+        }
+      },
+      "runtime": {
+        "time": {
+          "min_ms": 2.711,
+          "median_ms": 2.731,
+          "p95_ms": 3.551,
+          "max_ms": 3.551
+        },
+        "rss": {
+          "min_kb": 132,
+          "median_kb": 132,
+          "max_kb": 144
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "recursion_fib",
+      "status": "pass",
+      "source_lines": 12,
+      "expected_output": "514229",
+      "observed_outputs": [
+        "514229",
+        "514229",
+        "514229"
+      ],
+      "compile": {
+        "time": {
+          "min_ms": 1535.971,
+          "median_ms": 1574.723,
+          "p95_ms": 1699.936,
+          "max_ms": 1699.936
+        },
+        "rss": {
+          "min_kb": 72764,
+          "median_kb": 72912,
+          "max_kb": 72964
+        }
+      },
+      "runtime": {
+        "time": {
+          "min_ms": 3.63,
+          "median_ms": 4.029,
+          "p95_ms": 12.1,
+          "max_ms": 12.1
+        },
+        "rss": {
+          "min_kb": 0,
+          "median_kb": 1564,
+          "max_kb": 1636
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "list_append_index",
+      "status": "pass",
+      "source_lines": 18,
+      "expected_output": "4999650012",
+      "observed_outputs": [
+        "4999650012",
+        "4999650012",
+        "4999650012"
+      ],
+      "compile": {
+        "time": {
+          "min_ms": 1524.856,
+          "median_ms": 1544.376,
+          "p95_ms": 1627.521,
+          "max_ms": 1627.521
+        },
+        "rss": {
+          "min_kb": 73216,
+          "median_kb": 73224,
+          "max_kb": 73404
+        }
+      },
+      "runtime": {
+        "time": {
+          "min_ms": 22.918,
+          "median_ms": 23.008,
+          "p95_ms": 24.753,
+          "max_ms": 24.753
+        },
+        "rss": {
+          "min_kb": 14788,
+          "median_kb": 14812,
+          "max_kb": 15120
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "bitwise_loop",
+      "status": "pass",
+      "source_lines": 12,
+      "expected_output": "255735664",
+      "observed_outputs": [
+        "255735664",
+        "255735664",
+        "255735664"
+      ],
+      "compile": {
+        "time": {
+          "min_ms": 1386.357,
+          "median_ms": 1501.68,
+          "p95_ms": 1504.296,
+          "max_ms": 1504.296
+        },
+        "rss": {
+          "min_kb": 72452,
+          "median_kb": 72476,
+          "max_kb": 72692
+        }
+      },
+      "runtime": {
+        "time": {
+          "min_ms": 2.627,
+          "median_ms": 2.628,
+          "p95_ms": 2.677,
+          "max_ms": 2.677
+        },
+        "rss": {
+          "min_kb": 132,
+          "median_kb": 132,
+          "max_kb": 156
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "string_concat",
+      "status": "pass",
+      "source_lines": 12,
+      "expected_output": "1500",
+      "observed_outputs": [
+        "1500",
+        "1500",
+        "1500"
+      ],
+      "compile": {
+        "time": {
+          "min_ms": 1484.017,
+          "median_ms": 1494.69,
+          "p95_ms": 1503.418,
+          "max_ms": 1503.418
+        },
+        "rss": {
+          "min_kb": 72544,
+          "median_kb": 72632,
+          "max_kb": 72736
+        }
+      },
+      "runtime": {
+        "time": {
+          "min_ms": 2.449,
+          "median_ms": 2.479,
+          "p95_ms": 2.482,
+          "max_ms": 2.482
+        },
+        "rss": {
+          "min_kb": 128,
+          "median_kb": 148,
+          "max_kb": 156
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "file_io",
+      "status": "pass",
+      "source_lines": 18,
+      "expected_output": "true",
+      "observed_outputs": [
+        "true",
+        "true",
+        "true"
+      ],
+      "compile": {
+        "time": {
+          "min_ms": 1352.346,
+          "median_ms": 1368.273,
+          "p95_ms": 1488.818,
+          "max_ms": 1488.818
+        },
+        "rss": {
+          "min_kb": 72660,
+          "median_kb": 73228,
+          "max_kb": 73292
+        }
+      },
+      "runtime": {
+        "time": {
+          "min_ms": 2.464,
+          "median_ms": 2.478,
+          "p95_ms": 2.483,
+          "max_ms": 2.483
+        },
+        "rss": {
+          "min_kb": 132,
+          "median_kb": 132,
+          "max_kb": 144
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "numeric_literal_precision",
+      "status": "pass",
+      "source_lines": 7,
+      "expected_output": "1000003",
+      "observed_outputs": [
+        "1000003",
+        "1000003",
+        "1000003"
+      ],
+      "compile": {
+        "time": {
+          "min_ms": 1326.158,
+          "median_ms": 1339.361,
+          "p95_ms": 1402.269,
+          "max_ms": 1402.269
+        },
+        "rss": {
+          "min_kb": 71620,
+          "median_kb": 71992,
+          "max_kb": 72052
+        }
+      },
+      "runtime": {
+        "time": {
+          "min_ms": 2.476,
+          "median_ms": 2.501,
+          "p95_ms": 2.595,
+          "max_ms": 2.595
+        },
+        "rss": {
+          "min_kb": 144,
+          "median_kb": 148,
+          "max_kb": 156
+        }
+      },
+      "errors": []
+    }
+  ],
+  "compile_scaling": [
+    {
+      "statements_in_function": 10,
+      "source_lines": 20,
+      "status": "pass",
+      "front_end": {
+        "time": {
+          "min_ms": 2.503,
+          "median_ms": 2.51,
+          "p95_ms": 2.526,
+          "max_ms": 2.526
+        },
+        "rss": {
+          "min_kb": 132,
+          "median_kb": 144,
+          "max_kb": 144
+        }
+      },
+      "errors": []
+    },
+    {
+      "statements_in_function": 50,
+      "source_lines": 60,
+      "status": "pass",
+      "front_end": {
+        "time": {
+          "min_ms": 4.61,
+          "median_ms": 4.637,
+          "p95_ms": 4.678,
+          "max_ms": 4.678
+        },
+        "rss": {
+          "min_kb": 4472,
+          "median_kb": 4636,
+          "max_kb": 4876
+        }
+      },
+      "errors": []
+    },
+    {
+      "statements_in_function": 100,
+      "source_lines": 110,
+      "status": "pass",
+      "front_end": {
+        "time": {
+          "min_ms": 6.821,
+          "median_ms": 8.982,
+          "p95_ms": 9.012,
+          "max_ms": 9.012
+        },
+        "rss": {
+          "min_kb": 9664,
+          "median_kb": 10096,
+          "max_kb": 10100
+        }
+      },
+      "errors": []
+    }
+  ],
+  "references": [
+    {
+      "name": "numeric_loop",
+      "c_compile_ms": 48.083,
+      "implementations": {
+        "c": {
+          "status": "pass",
+          "output": [
+            "208333250000",
+            "208333250000",
+            "208333250000"
+          ],
+          "runtime": {
+            "time": {
+              "min_ms": 2.472,
+              "median_ms": 2.484,
+              "p95_ms": 2.615,
+              "max_ms": 2.615
+            },
+            "rss": {
+              "min_kb": 132,
+              "median_kb": 132,
+              "max_kb": 156
+            }
+          }
+        },
+        "python": {
+          "status": "pass",
+          "output": [
+            "208333250000",
+            "208333250000",
+            "208333250000"
+          ],
+          "runtime": {
+            "time": {
+              "min_ms": 41.805,
+              "median_ms": 48.619,
+              "p95_ms": 75.054,
+              "max_ms": 75.054
+            },
+            "rss": {
+              "min_kb": 8836,
+              "median_kb": 8944,
+              "max_kb": 9092
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "recursion_fib",
+      "c_compile_ms": 90.881,
+      "implementations": {
+        "c": {
+          "status": "pass",
+          "output": [
+            "514229",
+            "514229",
+            "514229"
+          ],
+          "runtime": {
+            "time": {
+              "min_ms": 2.621,
+              "median_ms": 2.638,
+              "p95_ms": 2.774,
+              "max_ms": 2.774
+            },
+            "rss": {
+              "min_kb": 132,
+              "median_kb": 132,
+              "max_kb": 132
+            }
+          }
+        },
+        "python": {
+          "status": "pass",
+          "output": [
+            "514229",
+            "514229",
+            "514229"
+          ],
+          "runtime": {
+            "time": {
+              "min_ms": 69.381,
+              "median_ms": 70.075,
+              "p95_ms": 75.358,
+              "max_ms": 75.358
+            },
+            "rss": {
+              "min_kb": 8848,
+              "median_kb": 8980,
+              "max_kb": 9004
+            }
+          }
+        }
+      }
+    }
+  ],
+  "compatibility": [
+    {
+      "name": "hello",
+      "compile_status": "pass",
+      "compile_time_ms": 1434.209,
+      "compile_error": "",
+      "run_status": "pass",
+      "run_time_ms": 2.592,
+      "run_output": "Hola desde Altair v1.6!\nEl valor de x es: 42\nLenguaje: Altair Language\nSistema activo",
+      "run_error": ""
+    },
+    {
+      "name": "game_compile_and_run",
+      "compile_status": "pass",
+      "compile_time_ms": 1785.568,
+      "compile_error": "",
+      "run_status": "pass",
+      "run_time_ms": 10.621,
+      "run_output": "Como te llamas? Bienvenido, Victor!\n\n-- Turno 1 --\nEnemigo: huye\nEl enemigo huye!\n\n===============================\nFin del juego\nJugador: Victor\nSalud final: 100\nScore del personaje: 0\nScore de sesion: 0\n===============================\nPartida guardada en snapshot: final",
+      "run_error": ""
+    },
+    {
+      "name": "databock",
+      "compile_status": "pass",
+      "compile_time_ms": 1343.935,
+      "compile_error": "",
+      "run_status": "pass",
+      "run_time_ms": 7.011,
+      "run_output": "coins=120\nname=Victor\ncoins tras sumar=125",
+      "run_error": ""
+    },
+    {
+      "name": "persist",
+      "compile_status": "pass",
+      "compile_time_ms": 1427.491,
+      "compile_error": "",
+      "run_status": "pass",
+      "run_time_ms": 2.689,
+      "run_output": "coins=120\nname=Victor\ncoins tras sumar=130",
+      "run_error": ""
+    },
+    {
+      "name": "pointer2",
+      "compile_status": "pass",
+      "compile_time_ms": 1332.893,
+      "compile_error": "",
+      "run_status": "pass",
+      "run_time_ms": 33.586,
+      "run_output": "42\n100\n64\nfalse\ntrue",
+      "run_error": ""
+    },
+    {
+      "name": "paint_raylib",
+      "compile_status": "esperado",
+      "compile_time_ms": 54.658,
+      "compile_error": "[altairc] Compiling /tmp/altair-benchmark-mmi25qxg/source/altair-1.7.5vB-builder-main/test/paint.at ...\n\n[altairc] Compilation failed (gcc exit 256).\n  Hint: run  altairc /tmp/altair-benchmark-mmi25qxg/source/altair-1.7.5vB-builder-main/test/paint.at --emit-c | head -100  to inspect the generated C.\n  Common causes: using a variable before declaring it, or type mismatch.\n",
+      "classification": "esperado",
+      "run_status": "no evaluado",
+      "note": "Raylib se incorpora durante el flujo de empaquetado de GitHub; no forma parte del ZIP local."
+    },
+    {
+      "name": "selfhost",
+      "compile_status": "esperado",
+      "compile_time_ms": 2.619,
+      "compile_error": "[ALT0003] Expected TOKEN, got '=' at line 42\n",
+      "classification": "esperado",
+      "run_status": "no evaluado",
+      "note": "La prueba incluida usa la sintaxis anterior de punteros; la sintaxis vigente es diferente."
+    }
+  ]
+}
