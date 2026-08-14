@@ -8,6 +8,7 @@
 <meta name="keywords" content="altair, altair lang, altair language, altairc, altair compiler, lenguaje altair, storage tiers, orbit, prefer, migrate, p#, punteros, token, snapshot, servidor http, raylib, transpilador a C, lexer, parser, AST, runtime, binario nativo, windows linux macos">
 <meta name="author" content="Altair Language">
 <link rel="canonical" href="https://victios7.github.io/Altair/">
+<meta name="robots" content="index, follow">
 <link rel="icon" type="image/png" href="ALTAIR_LOGO.png">
 <link rel="apple-touch-icon" type="image/png" href="ALTAIR_LOGO.png">
 <meta property="og:type" content="website">
@@ -293,6 +294,7 @@
       <a href="#memoria">Memoria</a>
       <a href="#caracteristicas">Características</a>
       <a href="#ejemplo">Ejemplo</a>
+      <a href="#benchmarks">Benchmarks</a>
       <a href="#instalar">Instalar</a>
       <a href="#faq">FAQ</a>
       <a href="guia.html">Guía</a>
@@ -304,7 +306,8 @@
   <section class="hero">
     <div>
       <div class="eyebrow">v1.7.5 · compila a C nativo</div>
-      <h1>La memoria se <span class="accent">declara</span>, no se improvisa.</h1>
+      <h1>Altair Lang: lenguaje compilado a <span class="accent">C nativo</span></h1>
+      <p class="tagline">La memoria se declara, no se improvisa.</p>
       <p class="lede">
         Altair es un lenguaje de nivel medio-bajo: cada valor elige dónde vive
         (<code>ram</code>, <code>disk</code>, <code>cache</code>, <code>temp</code>),
@@ -461,7 +464,43 @@ flags = flags <span class="kw">&amp;</span> 255<br><br>
 <span class="fn">log</span> <span class="str">"v="</span> + v + <span class="str">" flags="</span> + flags + <span class="str">" r="</span> + r
     </div>
   </section>
+  <section id="benchmarks">
+  <div class="section-head">
+    <div class="eyebrow">Benchmarks</div>
+    <h2>Rendimiento medido</h2>
+    <p>
+      Benchmarks reproducibles de Altair con mediciones de compilación,
+      ejecución y memoria, además de comparativas con C y Python.
+    </p>
+  </div>
 
+  <div class="download-panel">
+    <div>
+      <h3>Resultados y comparativas</h3>
+      <p>
+        Consulta los benchmarks completos, el runner y los resultados
+        en formato Markdown y JSON.
+      </p>
+
+      <div class="cta-row" style="margin-top:20px;">
+        <a
+          class="btn btn-primary"
+          href="https://github.com/victios7/Altair/tree/main/benchmark"
+          target="_blank"
+          rel="noopener"
+        >
+          Ver benchmarks
+        </a>
+      </div>
+    </div>
+
+    <div class="file-info">
+      <div><span>Runner</span><span>.py</span></div>
+      <div><span>Resultados</span><span>latest.md · latest.json</span></div>
+      <div><span>Comparativas</span><span>C · Python · Altair</span></div>
+    </div>
+  </div>
+</section>
   <section id="instalar">
     <div class="section-head">
       <div class="eyebrow">Instalación</div>
@@ -504,7 +543,7 @@ flags = flags <span class="kw">&amp;</span> 255<br><br>
       <div class="file-info">
         <div><span>Archivos</span><span>.exe · .deb · .pkg</span></div>
         <div><span>Plataformas</span><span>Windows · Linux · macOS</span></div>
-        <div><span>Versión</span><span>1.7.5 Maths</span></div>
+        <div><span>Versión</span><span>1.7.5vB</span></div>
         <div><span>Licencia</span><span>MIT</span></div>
       </div>
     </div>
