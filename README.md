@@ -9,7 +9,7 @@ Sintaxis clara, almacenamiento configurable y control explícito de memoria.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-e8b34d.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#instalación)
-[![Version](https://img.shields.io/badge/version-1.7vC-ff6a3d.svg)](ALTAIR_GUIDE.md)
+[![Version](https://img.shields.io/badge/version-1.8.5-ff6a3d.svg)](ALTAIR_GUIDE.md)
 
 [**Descargar**](https://github.com/victios7/altair/releases/latest) ·
 [Sitio web](https://victios7.github.io/Altair/) ·
@@ -37,16 +37,11 @@ No utiliza recolección de basura. La memoria puede gestionarse mediante políti
 
 ## Estado del proyecto
 
-**Altair 1.7vC** es la versión estable actual.
+**AltairC 1.8.5** es la versión estable actual.
 
-**Altair 1.7.5vB** es una versión de desarrollo/pre-release que incorpora importantes optimizaciones del compilador y runtime.
+**ABCM** es un compilador en  desarrollo que incorpora compilación nativa
 
-La versión 1.7.5vB se encuentra actualmente en proceso de estabilización y portabilidad. Algunas plataformas todavía presentan problemas de empaquetado o compatibilidad.
-
-Para consultar los benchmarks, el runner y los datos de resultados:
-
-[**Benchmark suite**](https://github.com/victios7/Altair/tree/main/benchmark)
-
+La versión 1.8.5 ha logrado un gran rendimiento de media y un gran rendimiento numérico
 ---
 
 # Características principales
@@ -150,7 +145,7 @@ Altair incluye tipos básicos como:
 - `list`
 - `file`
 
-Cuando se necesita un control más directo sobre memoria, se pueden utilizar bloques contiguos mediante `p#`.
+Cuando se necesita un control más directo sobre memoria, se pueden utilizar bloques contiguos mediante `p#` o resgistros del harware mediante `reg&`
 
 ```altair
 p#node buf = alloc(1024)
@@ -158,6 +153,9 @@ p#write(buf, 0, 42)
 numeric x = p#read(buf, 0)
 log p#bytes(buf)
 p#free(buf)
+reg&64 rax = 1
+reg&read(rax)
+reg&free(rax)
 ```
 
 ---
@@ -303,45 +301,30 @@ La referencia completa está disponible en [ALTAIR_GUIDE.md](ALTAIR_GUIDE.md).
 
 # Rendimiento
 
-Altair 1.7.5vB incluye una serie de optimizaciones del compilador y runtime.
+Altair 1.8.5 incluye una serie de optimizaciones del compilador y runtime que hacen que el rendimiento nativo sea muy bueno, por ejemplo:
+```Altair
+altair.doc;
+    name = "lim280b"
+    version = "1.0"
+create altair.doc
 
-El benchmark utiliza múltiples ejecuciones y reporta medianas de wall-clock. Los valores de RSS representan el pico de memoria residente cuando está disponible.
+numeric n = 280000000000 ram
+numeric i = 0 ram
+numeric sum = 0 ram
+numeric x = 1 ram
 
-## Resultados principales
+while i < n;
+    sum = sum + i
+    x = x + sum
+    i = i + 1
+break
 
-| Carga | Compilación mediana | Ejecución mediana | Ejecución p95 | RSS pico |
-|---|---:|---:|---:|---:|
-| `numeric_loop` | 1540.633 ms | **2.757 ms** | 2.974 ms | 148 KB |
-| `function_calls` | 1642.815 ms | **2.731 ms** | 3.551 ms | 144 KB |
-| `recursion_fib` | 1574.723 ms | 4.029 ms | 12.1 ms | 1636 KB |
-| `list_append_index` | 1544.376 ms | 23.008 ms | 24.753 ms | 15120 KB |
-| `bitwise_loop` | 1501.680 ms | **2.628 ms** | 2.677 ms | 156 KB |
-| `string_concat` | 1494.690 ms | **2.479 ms** | 2.482 ms | 156 KB |
-| `file_io` | 1368.273 ms | **2.478 ms** | 2.483 ms | 144 KB |
-| `numeric_literal_precision` | 1339.361 ms | **2.501 ms** | 2.595 ms | 156 KB |
+log sum
+log x
+```
+comprobado en un sandbox con 2 hilos tardó 109,6 segundos, las proximás versiones(`1.8.5vB` `1.9` tienen mejor rendimiento y capa optimizadora)
 
-**Correctitud: 8/8 cargas pasan.**
 
-## Comparación con C y Python
-
-| Carga | C | Python | Altair 1.7.5vB |
-|---|---:|---:|---:|
-| `numeric_loop` | 2.484 ms | 48.619 ms | **2.757 ms** |
-| `recursion_fib` | 2.638 ms | 70.075 ms | **4.029 ms** |
-
-En `numeric_loop`, Altair queda aproximadamente un **11 % por encima de C** en esta medición y es aproximadamente **17,6× más rápido que Python**.
-
-Estos resultados son benchmarks concretos y no constituyen un ranking universal entre lenguajes.
-
-### Benchmarks completos
-
-Los benchmarks completos, el runner Python y los resultados estructurados están disponibles en:
-
-[**github.com/victios7/Altair/tree/main/benchmark**](https://github.com/victios7/Altair/tree/main/benchmark)
-
-La carpeta contiene el runner `.py` y los archivos `latest.md` / `latest.json` para consultar y comparar los resultados de las distintas ejecuciones, incluyendo las variantes con procesos/agentes y sin ellos.
-
----
 
 # Instalación
 
@@ -362,16 +345,10 @@ altairc --version
 
 El paquete incluye el compilador, terminal y MinGW64.
 
-### Problema conocido en 1.7.5vB
+### Problema conocido en 1.8.5
 
-Durante la instalación puede parecer que el proceso se detiene al llegar al paso relacionado con la eliminación de MinGW64.
-
-Si ocurre:
-
-1. Abre el **Administrador de tareas** con `Ctrl + Shift + Esc`.
-2. Busca el proceso **Altair Set Up**.
-3. Finaliza el proceso.
-4. Altair quedará instalado y podrá utilizarse normalmente.
+Durante la instalación puede ocurrid que la carpeta mingw 64 no se genera por favor si pasa eso descarga el zip mingw64 de releases descomprímela
+y copia la carpeta dentro de la carpeta principal de altair
 
 ---
 
@@ -390,7 +367,6 @@ También puede utilizarse:
 altair-linux-<version>.tar.gz
 ```
 
-> **Nota:** el soporte Linux de Altair 1.7.5vB está temporalmente en proceso de corrección debido a problemas de empaquetado y compatibilidad. Se publicará una actualización cuando estén solucionados.
 
 ---
 
@@ -434,11 +410,6 @@ En Windows:
 .\hola.exe
 ```
 
-Generar la guía:
-
-```bash
-altairc guide
-```
 
 ---
 
@@ -448,7 +419,7 @@ Puedes encontrar ejemplos del lenguaje en:
 
 [**examples/**](examples)
 
-También puedes consultar la referencia completa en:
+También puedes consultar la referencia(próximamente será actualizada) completa en:
 
 [**ALTAIR_GUIDE.md**](ALTAIR_GUIDE.md)
 
