@@ -55,7 +55,7 @@ La versión 1.8.5 original ya ofrecía buen rendimiento medio y numérico.
 
 Cada variable declara un modo de almacenamiento.
 
-```
+
 | Modo     | Uso                                              |
 | -------- | ------------------------------------------------ |
 | `ram`    | Memoria rápida y volátil del proceso             |
@@ -64,7 +64,7 @@ Cada variable declara un modo de almacenamiento.
 | `temp`   | Almacenamiento temporal                          |
 | `orbit`  | Varios estados de almacenamiento seleccionables  |
 | `prefer` | Lista ordenada de preferencias de almacenamiento |
-```
+
 
 Ejemplo:
 
