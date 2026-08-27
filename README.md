@@ -55,6 +55,7 @@ La versión 1.8.5 original ya ofrecía buen rendimiento medio y numérico.
 
 Cada variable declara un modo de almacenamiento.
 
+```
 | Modo     | Uso                                              |
 | -------- | ------------------------------------------------ |
 | `ram`    | Memoria rápida y volátil del proceso             |
@@ -63,6 +64,7 @@ Cada variable declara un modo de almacenamiento.
 | `temp`   | Almacenamiento temporal                          |
 | `orbit`  | Varios estados de almacenamiento seleccionables  |
 | `prefer` | Lista ordenada de preferencias de almacenamiento |
+```
 
 Ejemplo:
 
@@ -283,6 +285,7 @@ gcc -o programa salida.c
 
 Altair incluye funcionalidades adicionales para determinados tipos de aplicaciones.
 
+```
 | Característica               | Descripción                                          |
 | ---------------------------- | ---------------------------------------------------- |
 | **HTTP**                     | `listen` / `route` para servidores y APIs pequeñas   |
@@ -290,6 +293,7 @@ Altair incluye funcionalidades adicionales para determinados tipos de aplicacion
 | **Sesiones y configuración** | TTL y variables de entorno tipadas                   |
 | **Métricas**                 | Endpoints de salud al estilo Prometheus              |
 | **Gráficos**                 | Integración opcional mediante `link graphics raylib` |
+```
 
 ### Servidor HTTP mínimo
 
