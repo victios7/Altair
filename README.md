@@ -9,7 +9,7 @@ Sintaxis clara, almacenamiento configurable y control explícito de memoria.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-e8b34d.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#instalación)
-[![Version](https://img.shields.io/badge/version-1.8.5-ff6a3d.svg)](ALTAIR_GUIDE.md)
+[![Version](https://img.shields.io/badge/version-1.8.5vB-ff6a3d.svg)](ALTAIR_GUIDE.md)
 
 [**Descargar**](https://github.com/victios7/altair/releases/latest) ·
 [Sitio web](https://victios7.github.io/Altair/) ·
@@ -37,11 +37,16 @@ No utiliza recolección de basura. La memoria puede gestionarse mediante políti
 
 ## Estado del proyecto
 
-**AltairC 1.8.5** es la versión estable actual.
+**AltairC 1.8.5vB** es la versión estable actual (rama `reg_opt` + capa de optimización completa).
 
-**ABCM** es un compilador en  desarrollo que incorpora compilación nativa
+- Incluye optimizaciones del compilador y del runtime (capa optimizadora / *opt layer*).
+- Soporte mejorado de registros de hardware (`reg&`) y punteros de bajo nivel (`p#`).
+- Compilación nativa con flags agresivos (`-O3 -flto -fomit-frame-pointer`).
+- **ABCM** sigue en desarrollo como compilador nativo de próxima generación.
 
-La versión 1.8.5 ha logrado un gran rendimiento de media y un gran rendimiento numérico
+La versión 1.8.5 original ya ofrecía buen rendimiento medio y numérico.  
+**1.8.5vB** mejora ese rendimiento de forma notable; las próximas versiones (`1.9` y posteriores) seguirán refinando la capa optimizadora.
+
 ---
 
 # Características principales
@@ -50,13 +55,13 @@ La versión 1.8.5 ha logrado un gran rendimiento de media y un gran rendimiento 
 
 Cada variable declara un modo de almacenamiento.
 
-| Modo | Uso |
-|------|-----|
-| `ram` | Memoria rápida y volátil del proceso |
-| `disk` | Almacenamiento persistente en fichero |
-| `cache` | Almacenamiento persistente con TTL opcional |
-| `temp` | Almacenamiento temporal |
-| `orbit` | Varios estados de almacenamiento seleccionables |
+| Modo     | Uso                                              |
+| -------- | ------------------------------------------------ |
+| `ram`    | Memoria rápida y volátil del proceso             |
+| `disk`   | Almacenamiento persistente en fichero            |
+| `cache`  | Almacenamiento persistente con TTL opcional      |
+| `temp`   | Almacenamiento temporal                          |
+| `orbit`  | Varios estados de almacenamiento seleccionables  |
 | `prefer` | Lista ordenada de preferencias de almacenamiento |
 
 Ejemplo:
@@ -100,9 +105,9 @@ migrate datos as 1
 
 ```altair
 text sesion = "" prefer;
- 1 = ram
- 2 = cache,
- 3 = disk
+1 = ram
+2 = cache,
+3 = disk
 break
 ```
 
@@ -116,18 +121,18 @@ Altair está diseñado para mantener una sintaxis directa para variables, funcio
 
 ```altair
 altair.doc;
-    name = "Hola"
-    version = "1.0"
+name = "Hola"
+version = "1.0"
 create altair.doc
 
 fun saludo text text nombre;
-    return "Hola, " + nombre
+return "Hola, " + nombre
 break
 
 numeric i = 0 ram
 while i < 3;
-    log saludo("mundo") + " #" + i
-    i = i + 1
+log saludo("mundo") + " #" + i
+i = i + 1
 break
 
 release i
@@ -145,7 +150,7 @@ Altair incluye tipos básicos como:
 - `list`
 - `file`
 
-Cuando se necesita un control más directo sobre memoria, se pueden utilizar bloques contiguos mediante `p#` o resgistros del harware mediante `reg&`
+Cuando se necesita un control más directo sobre memoria, se pueden utilizar bloques contiguos mediante `p#` o registros del hardware mediante `reg&`:
 
 ```altair
 p#node buf = alloc(1024)
@@ -153,6 +158,7 @@ p#write(buf, 0, 42)
 numeric x = p#read(buf, 0)
 log p#bytes(buf)
 p#free(buf)
+
 reg&64 rax = 1
 reg&read(rax)
 reg&free(rax)
@@ -166,26 +172,26 @@ Un programa `.at` se transforma en C y posteriormente en un ejecutable nativo.
 
 ```text
 Altair source
-     │
-     ▼
-   Lexer
-     │
-     ▼
-   Parser
-     │
-     ▼
+│
+▼
+Lexer
+│
+▼
+Parser
+│
+▼
 Semantic analysis
-     │
-     ▼
-  Code generation
-     │
-     ▼
- Generated C
-     │
-     ▼
-   C compiler
-     │
-     ▼
+│
+▼
+Code generation (+ opt layer)
+│
+▼
+Generated C
+│
+▼
+C compiler (-O3 -flto …)
+│
+▼
 Native executable
 ```
 
@@ -213,33 +219,33 @@ R0 sirve como demostración de que Altair puede utilizarse para construir herram
 
 ```altair
 fun next_token;
-    skip_ws()
-    if POS >= LEN;
-        set_tok("eof", "")
-        return
-    break
+skip_ws()
+if POS >= LEN;
+set_tok("eof", "")
+return
+break
 
-    text c = peekc()
+text c = peekc()
 
-    if is_digit(c);
-        text n = ""
-        while is_digit(peekc());
-            n = n + advc()
-        break
-        set_tok("num", n)
-        return
-    break
+if is_digit(c);
+text n = ""
+while is_digit(peekc());
+n = n + advc()
+break
+set_tok("num", n)
+return
+break
 
-    if is_alpha(c);
-        text id = ""
-        while is_alnum(peekc());
-            id = id + advc()
-        break
-        set_tok("id", id)
-        return
-    break
+if is_alpha(c);
+text id = ""
+while is_alnum(peekc());
+id = id + advc()
+break
+set_tok("id", id)
+return
+break
 
-    / ... strings, registros, comas, corchetes
+/ ... strings, registros, comas, corchetes
 break
 ```
 
@@ -247,18 +253,18 @@ break
 
 ```altair
 fun emit_binop text mnem, text dst, text src;
-    text d = operand_cexpr(dst, 2)
-    text s = operand_cexpr(src, 2)
+text d = operand_cexpr(dst, 2)
+text s = operand_cexpr(src, 2)
 
-    if mnem == "add";
-        emit(d + "=(" + d + "+" + s + ")&0xffff;\n")
-    elif mnem == "sub";
-        emit(d + "=(" + d + "-" + s + ")&0xffff;\n")
-    elif mnem == "xor";
-        emit(d + "=(" + d + "^" + s + ")&0xffff;\n")
-    break
+if mnem == "add";
+emit(d + "=(" + d + "+" + s + ")&0xffff;\n")
+elif mnem == "sub";
+emit(d + "=(" + d + "-" + s + ")&0xffff;\n")
+elif mnem == "xor";
+emit(d + "=(" + d + "^" + s + ")&0xffff;\n")
+break
 
-    emit("FLAG_Z=((" + d + ")==0);FLAG_N=(((int16_t)(" + d + "))<0);\n")
+emit("FLAG_Z=((" + d + ")==0);FLAG_N=(((int16_t)(" + d + "))<0);\n")
 break
 ```
 
@@ -277,21 +283,21 @@ gcc -o programa salida.c
 
 Altair incluye funcionalidades adicionales para determinados tipos de aplicaciones.
 
-| Característica | Descripción |
-|---|---|
-| **HTTP** | `listen` / `route` para servidores y APIs pequeñas |
-| **Jobs** | Tareas mediante `job … every` |
-| **Sesiones y configuración** | TTL y variables de entorno tipadas |
-| **Métricas** | Endpoints de salud al estilo Prometheus |
-| **Gráficos** | Integración opcional mediante `link graphics raylib` |
+| Característica               | Descripción                                          |
+| ---------------------------- | ---------------------------------------------------- |
+| **HTTP**                     | `listen` / `route` para servidores y APIs pequeñas   |
+| **Jobs**                     | Tareas mediante `job … every`                        |
+| **Sesiones y configuración** | TTL y variables de entorno tipadas                   |
+| **Métricas**                 | Endpoints de salud al estilo Prometheus              |
+| **Gráficos**                 | Integración opcional mediante `link graphics raylib` |
 
 ### Servidor HTTP mínimo
 
 ```altair
 listen 8080;
-    route "GET" "/health";
-        respond.json("ok")
-    break
+route "GET" "/health";
+respond.json("ok")
+break
 break
 ```
 
@@ -301,11 +307,14 @@ La referencia completa está disponible en [ALTAIR_GUIDE.md](ALTAIR_GUIDE.md).
 
 # Rendimiento
 
-Altair 1.8.5 incluye una serie de optimizaciones del compilador y runtime que hacen que el rendimiento nativo sea muy bueno, por ejemplo:
-```Altair
+Altair **1.8.5vB** incorpora una serie de optimizaciones del compilador y del runtime (capa optimizadora / *full opt layer*) que mejoran el rendimiento nativo.
+
+Ejemplo de carga numérica intensiva:
+
+```altair
 altair.doc;
-    name = "lim280b"
-    version = "1.0"
+name = "lim280b"
+version = "1.0"
 create altair.doc
 
 numeric n = 280000000000 ram
@@ -314,17 +323,24 @@ numeric sum = 0 ram
 numeric x = 1 ram
 
 while i < n;
-    sum = sum + i
-    x = x + sum
-    i = i + 1
+sum = sum + i
+x = x + sum
+i = i + 1
 break
 
 log sum
 log x
 ```
-comprobado en un sandbox con 2 hilos tardó 109,6 segundos, las proximás versiones(`1.8.5vB` `1.9` tienen mejor rendimiento y capa optimizadora)
 
+En un sandbox con 2 hilos, la versión 1.8.5 original tardó **109,6 s**.  
+Las builds `1.8.5vB` y posteriores (`1.9`) mejoran este tiempo gracias a:
 
+- Optimizaciones en la generación de código
+- Mejor uso de registros (`reg&`)
+- Flags de compilación agresivos (`-O3 -flto -fomit-frame-pointer`)
+- Capa de optimización adicional en el pipeline
+
+---
 
 # Instalación
 
@@ -345,10 +361,10 @@ altairc --version
 
 El paquete incluye el compilador, terminal y MinGW64.
 
-### Problema conocido en 1.8.5
+### Problema conocido en 1.8.5 / 1.8.5vB
 
-Durante la instalación puede ocurrid que la carpeta mingw 64 no se genera por favor si pasa eso descarga el zip mingw64 de releases descomprímela
-y copia la carpeta dentro de la carpeta principal de altair
+Durante la instalación puede ocurrir que la carpeta `mingw64` no se genere.  
+Si pasa eso, descarga el zip `mingw64` de Releases, descomprímelo y copia la carpeta dentro de la carpeta principal de Altair.
 
 ---
 
@@ -366,7 +382,6 @@ También puede utilizarse:
 ```text
 altair-linux-<version>.tar.gz
 ```
-
 
 ---
 
@@ -410,7 +425,6 @@ En Windows:
 .\hola.exe
 ```
 
-
 ---
 
 # Ejemplos
@@ -419,7 +433,7 @@ Puedes encontrar ejemplos del lenguaje en:
 
 [**examples/**](examples)
 
-También puedes consultar la referencia(próximamente será actualizada) completa en:
+También puedes consultar la referencia completa (próximamente será actualizada) en:
 
 [**ALTAIR_GUIDE.md**](ALTAIR_GUIDE.md)
 
@@ -450,3 +464,4 @@ Usé IA como ayuda puntual para determinadas tareas, como el logo y ocasionalmen
 La IA fue una herramienta de apoyo, no la autora del proyecto.
 
 Si quieres criticar el diseño o el código, mira lo que hace el proyecto y juzga eso.
+```
