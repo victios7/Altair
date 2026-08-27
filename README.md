@@ -55,7 +55,7 @@ La versión 1.8.5 original ya ofrecía buen rendimiento medio y numérico.
 
 Cada variable declara un modo de almacenamiento.
 
-
+```
 | Modo     | Uso                                              |
 | -------- | ------------------------------------------------ |
 | `ram`    | Memoria rápida y volátil del proceso             |
@@ -64,7 +64,7 @@ Cada variable declara un modo de almacenamiento.
 | `temp`   | Almacenamiento temporal                          |
 | `orbit`  | Varios estados de almacenamiento seleccionables  |
 | `prefer` | Lista ordenada de preferencias de almacenamiento |
-
+```
 
 Ejemplo:
 
@@ -152,7 +152,7 @@ Altair incluye tipos básicos como:
 - `list`
 - `file`
 
-Cuando se necesita un control más directo sobre memoria, se pueden utilizar bloques contiguos mediante `p#` o registros del hardware mediante `reg&`:
+Cuando se necesita un control más directo sobre memoria, se pueden utilizar bloques contiguos mediante `p#`, acceso crudo a disco mediante `lba%` o registros del hardware mediante `reg&`:
 
 ```altair
 p#node buf = alloc(1024)
@@ -164,6 +164,39 @@ p#free(buf)
 reg&64 rax = 1
 reg&read(rax)
 reg&free(rax)
+```
+
+### `lba%` — punteros crudos a disco (LBA)
+
+`lba%` es el equivalente en disco de `p#`. Usa el mismo modelo de direccionamiento por slots de 8 bytes, pero el respaldo es un fichero o un dispositivo de bloques en lugar de un buffer en RAM. Las escrituras hechas con `dopen` / `draw` sobreviven entre ejecuciones.
+
+```
+| Función                  | Descripción                                              |
+| ------------------------ | -------------------------------------------------------- |
+| `dalloc(n)`              | Buffer temporal en disco de `n` bytes                    |
+| `dopen(path, n)`         | Fichero persistente de `n` bytes                         |
+| `draw(path, n)`          | Acceso raw a dispositivo de bloques (Linux, `O_DIRECT`)  |
+| `lba%read` / `lba%write` | Lectura / escritura por offset de slot                   |
+| `lba%bytes`              | Tamaño en bytes                                          |
+| `lba%free`               | Liberar el nodo                                          |
+| `lba%null`               | Comprobar si el nodo es inválido o ya liberado           |
+```
+
+Ejemplo:
+
+```altair
+lba%node tmp = dalloc(1024)
+lba%write(tmp, 0, 42)
+numeric v = lba%read(tmp, 0)
+log lba%bytes(tmp)
+lba%free(tmp)
+
+lba%node persist = dopen("datos.bin", 4096)
+lba%write(persist, 10, 3.14)
+lba%free(persist)
+
+# Solo Linux: acceso raw a dispositivo de bloques
+lba%node dev = draw("/dev/sdb", 1048576)
 ```
 
 ---
@@ -285,7 +318,7 @@ gcc -o programa salida.c
 
 Altair incluye funcionalidades adicionales para determinados tipos de aplicaciones.
 
-```
+
 | Característica               | Descripción                                          |
 | ---------------------------- | ---------------------------------------------------- |
 | **HTTP**                     | `listen` / `route` para servidores y APIs pequeñas   |
@@ -293,7 +326,7 @@ Altair incluye funcionalidades adicionales para determinados tipos de aplicacion
 | **Sesiones y configuración** | TTL y variables de entorno tipadas                   |
 | **Métricas**                 | Endpoints de salud al estilo Prometheus              |
 | **Gráficos**                 | Integración opcional mediante `link graphics raylib` |
-```
+
 
 ### Servidor HTTP mínimo
 
@@ -468,4 +501,3 @@ Usé IA como ayuda puntual para determinadas tareas, como el logo y ocasionalmen
 La IA fue una herramienta de apoyo, no la autora del proyecto.
 
 Si quieres criticar el diseño o el código, mira lo que hace el proyecto y juzga eso.
-```
