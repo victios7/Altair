@@ -40,7 +40,7 @@ No utiliza recolección de basura. La memoria puede gestionarse mediante políti
 **AltairC 1.8.5vB** es la versión estable actual (rama `reg_opt` + capa de optimización completa).
 
 - Incluye optimizaciones del compilador y del runtime (capa optimizadora / *opt layer*).
-- Soporte mejorado de registros de hardware (`reg&`) y punteros de bajo nivel (`p#`).
+- Soporte de registros de hardware (`reg&`), bloques (`p#`), LBA (`lba%`) y punteros a variables (`system@point` / `system@unpoint`).
 - Compilación nativa con flags agresivos (`-O3 -flto -fomit-frame-pointer`).
 - **ABCM** sigue en desarrollo como compilador nativo de próxima generación.
 
@@ -152,7 +152,7 @@ Altair incluye tipos básicos como:
 - `list`
 - `file`
 
-Cuando se necesita un control más directo sobre memoria, se pueden utilizar bloques contiguos mediante `p#`, acceso crudo a disco mediante `lba%` o registros del hardware mediante `reg&`:
+Cuando se necesita un control más directo sobre memoria, se pueden utilizar bloques contiguos mediante `p#`, acceso crudo a disco mediante `lba%`, registros del hardware mediante `reg&` o punteros a variables mediante `system@point()` / `system@unpoint()`:
 
 ```altair
 p#node buf = alloc(1024)
@@ -165,6 +165,19 @@ reg&64 rax = 1
 reg&read(rax)
 reg&free(rax)
 ```
+
+### Punteros a variables: `system@point` / `system@unpoint`
+
+`system@point()` obtiene la dirección de una variable Altair como valor numérico.  
+`system@unpoint()` recupera la variable a partir de esa dirección (solo si fue registrada con `point`).
+
+```altair
+numeric valor = 10 ram
+numeric dir = system@point(valor)
+numeric copia = system@unpoint(dir)
+```
+
+Útil cuando se necesita tratar variables como referencias de bajo nivel sin exponer el modelo interno del runtime de forma arbitraria.
 
 ### `lba%` — punteros crudos a disco (LBA)
 
@@ -318,7 +331,7 @@ gcc -o programa salida.c
 
 Altair incluye funcionalidades adicionales para determinados tipos de aplicaciones.
 
-
+```
 | Característica               | Descripción                                          |
 | ---------------------------- | ---------------------------------------------------- |
 | **HTTP**                     | `listen` / `route` para servidores y APIs pequeñas   |
@@ -326,7 +339,7 @@ Altair incluye funcionalidades adicionales para determinados tipos de aplicacion
 | **Sesiones y configuración** | TTL y variables de entorno tipadas                   |
 | **Métricas**                 | Endpoints de salud al estilo Prometheus              |
 | **Gráficos**                 | Integración opcional mediante `link graphics raylib` |
-
+```
 
 ### Servidor HTTP mínimo
 
