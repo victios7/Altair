@@ -55,7 +55,7 @@ La versión 1.8.5 original ya ofrecía buen rendimiento medio y numérico.
 
 Cada variable declara un modo de almacenamiento.
 
-```
+
 | Modo     | Uso                                              |
 | -------- | ------------------------------------------------ |
 | `ram`    | Memoria rápida y volátil del proceso             |
@@ -64,7 +64,7 @@ Cada variable declara un modo de almacenamiento.
 | `temp`   | Almacenamiento temporal                          |
 | `orbit`  | Varios estados de almacenamiento seleccionables  |
 | `prefer` | Lista ordenada de preferencias de almacenamiento |
-```
+
 
 Ejemplo:
 
@@ -170,7 +170,7 @@ reg&free(rax)
 
 `lba%` es el equivalente en disco de `p#`. Usa el mismo modelo de direccionamiento por slots de 8 bytes, pero el respaldo es un fichero o un dispositivo de bloques en lugar de un buffer en RAM. Las escrituras hechas con `dopen` / `draw` sobreviven entre ejecuciones.
 
-```
+
 | Función                  | Descripción                                              |
 | ------------------------ | -------------------------------------------------------- |
 | `dalloc(n)`              | Buffer temporal en disco de `n` bytes                    |
@@ -180,7 +180,7 @@ reg&free(rax)
 | `lba%bytes`              | Tamaño en bytes                                          |
 | `lba%free`               | Liberar el nodo                                          |
 | `lba%null`               | Comprobar si el nodo es inválido o ya liberado           |
-```
+
 
 Ejemplo:
 
