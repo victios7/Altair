@@ -331,7 +331,7 @@ gcc -o programa salida.c
 
 Altair incluye funcionalidades adicionales para determinados tipos de aplicaciones.
 
-```
+
 | Característica               | Descripción                                          |
 | ---------------------------- | ---------------------------------------------------- |
 | **HTTP**                     | `listen` / `route` para servidores y APIs pequeñas   |
@@ -339,7 +339,7 @@ Altair incluye funcionalidades adicionales para determinados tipos de aplicacion
 | **Sesiones y configuración** | TTL y variables de entorno tipadas                   |
 | **Métricas**                 | Endpoints de salud al estilo Prometheus              |
 | **Gráficos**                 | Integración opcional mediante `link graphics raylib` |
-```
+
 
 ### Servidor HTTP mínimo
 
