@@ -382,16 +382,8 @@ log sum
 log x
 ```
 
-En un sandbox con 2 hilos, la versión 1.8.5 original tardó **109,6 s**.  
-Las builds `1.8.5vB` y posteriores (`1.9`) mejoran este tiempo gracias a:
-
-- Optimizaciones en la generación de código
-- Mejor uso de registros (`reg&`)
-- Flags de compilación agresivos (`-O3 -flto -fomit-frame-pointer`)
-- Capa de optimización adicional en el pipeline
-
----
-
+En un sandbox con 2 hilos, la versión `1.8.5` original tardó **109,6 s**.  
+Mientras que la `1.8.5vB` tardo **103s - 96 s**
 # Instalación
 
 Los paquetes disponibles se encuentran en [**Releases**](https://github.com/victios7/altair/releases/latest).
