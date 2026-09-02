@@ -407,6 +407,7 @@ El paquete incluye el compilador, terminal y MinGW64.
 
 Durante la instalación puede ocurrir que la carpeta `mingw64` no se genere.  
 Si pasa eso, descarga el zip `mingw64` de Releases, descomprímelo y copia la carpeta dentro de la carpeta principal de Altair.
+El proceso se puede cortar cuando llega a borrar mingw.zip es por windows defender abre el gestor de tareas y busca altair finalizar proceso
 
 ---
 
